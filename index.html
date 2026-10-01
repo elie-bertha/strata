@@ -11,6 +11,8 @@
 <meta name="theme-color" content="#F2F2F7">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -113,7 +115,14 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 
 /* SEARCH MAP */
 #s-search-map{background:var(--bg);}
-.map-area{height:250px;flex-shrink:0;position:relative;overflow:hidden;background:#E8EDF2;}
+.map-area{height:300px;flex-shrink:0;position:relative;overflow:hidden;background:#E8EDF2;}
+#lmap{position:absolute;inset:0;background:#EEF0F3;}
+.lpin{width:40px;height:40px;border-radius:50%;border:2.5px solid #fff;background:#2C2C2E center/cover;box-shadow:0 2px 8px rgba(0,0,0,.3);position:relative;transition:transform .15s;}
+.lpin.on{transform:scale(1.25);border-color:var(--ink);}
+.lpin span{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--ink);color:#fff;font:600 10px/18px 'DM Sans',sans-serif;text-align:center;}
+.map-list-count{border:none;background:none;font:inherit;font-size:11px;color:var(--muted);padding:0;}
+.map-list-count.link{color:var(--ink);font-weight:600;cursor:pointer;}
+.leaflet-control-attribution{font-size:9px!important;}
 .map-bg{position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px),#DDE4EC;background-size:36px 36px;}
 .map-road-h{position:absolute;left:0;right:0;height:5px;background:white;opacity:.9;}
 .map-road-v{position:absolute;top:0;bottom:0;width:4px;background:white;opacity:.9;}
@@ -204,6 +213,7 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 .id-chip{background:rgba(255,255,255,.18);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.22);border-radius:100px;padding:5px 12px;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:white;}
 .res-title{position:relative;z-index:10;padding:0 20px 14px;}
 .res-name{font-family:'DM Serif Display',serif;font-size:27px;letter-spacing:-.4px;line-height:1.1;color:white;margin-bottom:4px;text-shadow:0 1px 8px rgba(0,0,0,.4);}
+.res-where{margin-top:6px;font-size:12px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:5px;}
 .res-meta{font-size:13px;color:rgba(255,255,255,.6);display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;}
 .mdot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.35);}
 .res-sheet{position:relative;z-index:10;background:var(--bg);border-radius:26px 26px 0 0;padding:10px 0 0;flex-shrink:0;display:flex;flex-direction:column;}
@@ -554,32 +564,14 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 <div class="screen" id="s-search-map">
   <div class="page-header">
     <button class="back-btn" id="btn-map-back"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <span class="page-title">Map of Discoveries</span>
+    <span class="page-title">Where the originals live</span>
   </div>
-  <div class="map-area">
-    <div class="map-bg"></div>
-    <div class="map-road-h" style="top:75px;"></div>
-    <div class="map-road-h" style="top:140px;"></div>
-    <div class="map-road-h" style="top:200px;"></div>
-    <div class="map-road-v" style="left:65px;"></div>
-    <div class="map-road-v" style="left:155px;"></div>
-    <div class="map-road-v" style="left:265px;"></div>
-    <div class="map-pin" style="left:108px;top:88px;" data-city="Paris"><div class="pin-dot" style="background:#3B5BDB;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><div class="pin-stem"></div></div>
-    <div class="map-pin" style="left:198px;top:148px;" data-city="New York"><div class="pin-dot" style="background:#E03030;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div><div class="pin-stem"></div></div>
-    <div class="map-pin" style="left:285px;top:95px;" data-city="Florence"><div class="pin-dot" style="background:#D08020;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg></div><div class="pin-stem"></div></div>
-    <div class="map-pin" style="left:58px;top:182px;" data-city="London"><div class="pin-dot" style="background:#2D7D46;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div><div class="pin-stem"></div></div>
-    <div class="map-pin" style="left:152px;top:68px;" data-city="Amsterdam"><div class="pin-dot" style="background:#7B2DBF;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M5 12C5 7 8 3 12 3c4 0 7 4 7 9"/><path d="M5 12c3 0 5-1 7-3"/><path d="M19 12c-3 0-5-1-7-3"/></svg></div><div class="pin-stem"></div></div>
-  </div>
+  <div class="map-area"><div id="lmap"></div></div>
   <div class="map-list-hd">
-    <div class="map-list-title" id="mapTitle">All locations</div>
-    <div class="map-list-count" id="mapCount">17 discoveries</div>
+    <div class="map-list-title" id="mapTitle">All places</div>
+    <button class="map-list-count" id="mapCount">0 originals</button>
   </div>
-  <div class="map-list">
-    <div class="map-row" id="btn-map-starry"><div class="map-icon" style="background:radial-gradient(ellipse 70% 50% at 50% 30%,#1A4B8C,#0D2E5A);border-radius:10px;"></div><div><div class="map-name">The Starry Night</div><div class="map-loc"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>MoMA, New York</div></div></div>
-    <div class="map-row"><div class="map-icon" style="background:linear-gradient(135deg,#C5CAE9,#3949AB);border-radius:10px;"></div><div><div class="map-name">Sainte-Chapelle</div><div class="map-loc"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Paris, France</div></div></div>
-    <div class="map-row"><div class="map-icon" style="background:linear-gradient(135deg,#A8D5A2,#2E7D32);border-radius:10px;"></div><div><div class="map-name">Sunflowers</div><div class="map-loc"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Van Gogh Museum, Amsterdam</div></div></div>
-    <div class="map-row"><div class="map-icon" style="background:linear-gradient(135deg,#FFCCBC,#BF360C);border-radius:10px;"></div><div><div class="map-name">Colosseum</div><div class="map-loc"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Rome, Italy</div></div></div>
-  </div>
+  <div class="map-list" id="mapList"></div>
 </div>
 
 <!-- SEARCH DATE -->
@@ -657,7 +649,7 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
     <button class="hero-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
   </div>
   <div style="flex:1 0 150px;"></div>
-  <div class="res-title"><div class="res-name" id="resName"></div><div class="res-meta" id="resMeta"></div></div>
+  <div class="res-title"><div class="res-name" id="resName"></div><div class="res-meta" id="resMeta"></div><div class="res-where" id="resWhere" hidden></div></div>
   <div class="res-sheet" style="height:auto;">
     <div class="sheet-handle"></div>
     <div class="car-header">
@@ -809,6 +801,9 @@ function renderArt(key) {
   document.querySelector('#s-result .id-chip').lastChild.textContent = a.live && !a.identified ? 'Best guess' : 'Identified';
   document.getElementById('resName').textContent = a.title;
   document.getElementById('resMeta').innerHTML = a.meta.join(' <div class="mdot"></div> ');
+  var loc = a.raw && a.raw.location, wh = document.getElementById('resWhere');
+  wh.hidden = !(loc && (loc.place || loc.city));
+  if (!wh.hidden) wh.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + (a.raw.category === 'architecture' ? '' : 'Original at ') + esc([loc.place, loc.city].filter(Boolean).join(', '));
   var links = a.links.map(function(l){ return '<a class="lnk-row" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + encodeURIComponent((l[1] + ' ' + l[2]).replace(/&amp;/g,'&')) + '"><div class="lnk-ico" style="background:' + LNK[l[0]][0] + ';">' + LNK[l[0]][1] + '</div><div><div class="lnk-name">' + l[1] + '</div><div class="lnk-url">' + l[2] + '</div></div></a>'; }).join('');
   document.getElementById('carTrack').innerHTML =
     cardHTML('cc-spark', ICO.spark, 'Spark · 15 sec', a.spark[0], '<div class="c-body">' + a.spark[1] + '</div><div class="c-more" style="color:rgba(255,255,255,.4);">' + ICO.arrow + 'Swipe for more</div>') +
@@ -848,6 +843,7 @@ function nextFallback() {
 // ─── NAVIGATION ───────────────────────────────
 function show(id) {
   if (id === 's-camera') startCamera(); else stopCamera();
+  if (id === 's-search-map') setTimeout(function(){ mapPlace = null; renderMap(); backfillLocations(); }, 0);
   document.querySelectorAll('.screen').forEach(s => {
     s.classList.remove('active');
     s.style.display = 'none';
@@ -1028,6 +1024,7 @@ var liveScanCtl = null;     // AbortController for the scan in flight
 var liveScanning = false;
 var chatTurns = [];         // the conversation the page keeps for the current artwork
 
+var LOCATION_RULE = 'For a building or monument, its own site. For an artwork, the museum or collection holding the original. Coordinates of that place, accurate to the city at least. Use null if you are not confident, if the original is lost or private, or if this is a poster, reproduction or mass-produced object with no single original.';
 var SCAN_PROMPT = [
   'You are the narrator of Strata, a personal app that tells the story behind artworks, buildings, sculptures, books and natural wonders.',
   'Voice: a knowledgeable friend who finds everything slightly fascinating and cannot help sharing the strange part. Warm, vivid, precise. Never Wikipedia tone. No markdown.',
@@ -1048,6 +1045,8 @@ var SCAN_PROMPT = [
   '  "artist_short": "short name used in a heading, e.g. Hokusai, Van Gogh",',
   '  "date": "just the date, e.g. c. 1830-32, or empty string if unknown",',
   '  "medium": "max 3 words, e.g. Woodblock print",',
+  '  "location": { "place": "museum, collection or site where the original is today", "city": "...", "country": "...", "lat": 0.0, "lng": 0.0 },',
+  '  (location: ' + LOCATION_RULE + ')',
   '  "spark": { "head": "3-6 words", "body": "the 15-second hook: the most surprising way into this work, 40-55 words" },',
   '  "story": { "head": "3-6 words", "body": "what was happening in the creator\'s life or world when it was made, 80-110 words" },',
   '  "surprise": { "head": "3-6 words", "body": "one unexpected, true fact that ends on delight, 35-60 words" },',
@@ -1543,6 +1542,71 @@ function toast(msg) {
 // Greeting follows the time of day
 (function(){ var h = new Date().getHours(); document.querySelector('.home-greeting').textContent = h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; })();
 loadJournal();
+
+// ─── MAP: where each original lives ─────────────────────────────
+var lmap = null, mapLayer = null, mapPlace = null, locating = false;
+function hasLoc(r) { var l = r.data && r.data.location; return !!(l && isFinite(l.lat) && isFinite(l.lng)); }
+function placeKey(l) { return (l.place || '') + '|' + (l.city || ''); }
+function placeLabel(l) { return [l.place, l.city].filter(Boolean).join(', '); }
+
+function renderMap() {
+  var withLoc = journal.filter(hasLoc), list = document.getElementById('mapList');
+  var shown = mapPlace ? withLoc.filter(function(r){ return placeKey(r.data.location) === mapPlace; }) : withLoc;
+  document.getElementById('mapTitle').textContent = mapPlace ? placeLabel(shown[0].data.location) : 'All places';
+  document.getElementById('mapCount').textContent = mapPlace ? 'Show all' : shown.length + (shown.length === 1 ? ' original' : ' originals');
+  document.getElementById('mapCount').classList.toggle('link', !!mapPlace);
+  var missing = journal.length - withLoc.length;
+  list.innerHTML = shown.map(function(r){
+    var l = r.data.location;
+    return '<div class="map-row" data-scan="' + r.id + '"><div class="map-icon" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;border-radius:10px;"></div><div><div class="map-name">' + esc(r.title) + '</div><div class="map-loc"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + esc(placeLabel(l)) + '</div></div></div>';
+  }).join('') + (!journal.length ? '<div class="j-none">No scans yet. Scan an artwork and its museum or site appears here.</div>'
+    : (!mapPlace && missing ? '<div class="j-none">' + (locating ? 'Finding where your earlier scans live…' : missing + (missing === 1 ? ' scan has' : ' scans have') + ' no known original location (a reproduction, a poster, or a private work).') + '</div>' : ''));
+
+  if (!window.L) { document.getElementById('lmap').innerHTML = '<div class="j-none" style="padding:20px">The map could not load. Check your connection.</div>'; return; }
+  if (!lmap) {
+    lmap = L.map('lmap', { zoomControl: false, attributionControl: true, worldCopyJump: true }).setView([30, 5], 1);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd', attribution: '© OpenStreetMap © CARTO' }).addTo(lmap);
+    mapLayer = L.layerGroup().addTo(lmap);
+    lmap.on('click', function(){ if (mapPlace) { mapPlace = null; renderMap(); } });
+  }
+  setTimeout(function(){ lmap.invalidateSize(); }, 0);
+  mapLayer.clearLayers();
+  var groups = {};
+  withLoc.forEach(function(r){ var k = placeKey(r.data.location); (groups[k] = groups[k] || []).push(r); });
+  var pts = [];
+  Object.keys(groups).forEach(function(k){
+    var g = groups[k], l = g[0].data.location, on = mapPlace === k;
+    var icon = L.divIcon({ className: '', iconSize: [40, 40], iconAnchor: [20, 20],
+      html: '<div class="lpin' + (on ? ' on' : '') + '" style="background-image:url(\'' + g[0].thumb + '\')">' + (g.length > 1 ? '<span>' + g.length + '</span>' : '') + '</div>' });
+    L.marker([l.lat, l.lng], { icon: icon, title: placeLabel(l) }).on('click', function(e){ L.DomEvent.stop(e); mapPlace = on ? null : k; renderMap(); }).addTo(mapLayer);
+    pts.push([l.lat, l.lng]);
+  });
+  if (mapPlace) { var sl = groups[mapPlace][0].data.location; lmap.setView([sl.lat, sl.lng], Math.max(lmap.getZoom(), 12)); }
+  else if (pts.length === 1) lmap.setView(pts[0], 12);
+  else if (pts.length) lmap.fitBounds(pts, { padding: [36, 36], maxZoom: 12 });
+}
+document.getElementById('mapCount').addEventListener('click', function(){ if (mapPlace) { mapPlace = null; renderMap(); } });
+
+// Scans saved before locations existed: ask Claude once per scan, text only
+async function backfillLocations() {
+  if (!live || locating) return;
+  var todo = journal.filter(function(r){ return r.data && !('location' in r.data) && r.identified; });
+  if (!todo.length) return;
+  locating = true; renderMap();
+  for (var i = 0; i < todo.length; i++) {
+    var r = todo[i];
+    try {
+      var text = await callClaude({ max_tokens: 300, messages: [{ role: 'user', content:
+        'Where is the original of "' + r.title + '" by ' + (r.creator || 'an unknown creator') + ' kept or located today? ' + LOCATION_RULE +
+        '\nReply with only JSON: {"location": {"place": "...", "city": "...", "country": "...", "lat": 0, "lng": 0} or null}' }] });
+      var j = parseJSON(text);
+      r.data.location = j && j.location && isFinite(j.location.lat) ? j.location : null;
+    } catch (e) { if (e && (e.code === 'bad_key' || e.code === 'no_credit' || e.code === 'network')) break; r.data.location = null; }
+    await tx('readwrite', function(s){ return s.put(r); }).catch(function(){});
+    renderMap();
+  }
+  locating = false; renderMap();
+}
 
 // ─── INIT ─────────────────────────────────────
 function fitPhone() {
