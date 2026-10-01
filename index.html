@@ -261,7 +261,9 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 @keyframes camflash{0%{filter:brightness(2.2)}100%{filter:none}}
 @media (prefers-reduced-motion:reduce){.cam-flash{animation:none}}
 .j-sub{font-size:10px;font-weight:600;letter-spacing:.9px;text-transform:uppercase;color:var(--muted);}
-.home-body > .j-sub{margin-bottom:-12px;}
+.j-none{font-size:13px;color:var(--muted);line-height:1.5;padding:16px 4px;}
+.ex-tag{position:absolute;top:8px;left:8px;font-size:9px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:#fff;background:rgba(0,0,0,.45);padding:3px 7px;border-radius:100px;}
+#jEmptySlot:empty{display:none;}
 .j-rows{display:flex;flex-direction:column;gap:9px;}
 #jDateRows{gap:6px;}
 .j-empty{flex:1;min-height:150px;border:1.5px dashed var(--s3);border-radius:14px;padding:16px;display:flex;flex-direction:column;justify-content:center;gap:6px;background:var(--surface);}
@@ -424,11 +426,7 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
     </div>
   </div>
   <div class="home-body">
-    <div>
-      <div class="sec-head"><div class="sec-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Your journal<span class="sec-badge" id="jCount" hidden>0</span></div></div>
-      <div class="h-strip" id="jStrip"></div>
-    </div>
-    <div class="j-sub">Examples</div>
+    <div id="jEmptySlot"></div>
     <div>
       <div class="sec-head"><div class="sec-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Paintings<span class="sec-badge">17</span></div><button class="sec-more">See all</button></div>
       <div class="h-strip">
@@ -1044,6 +1042,7 @@ var SCAN_PROMPT = [
   '  "identified": true,',
   '  "confidence": "high" | "medium" | "low",',
   '  "category": "painting" | "print" | "architecture" | "sculpture" | "book" | "plant" | "sky" | "mountain" | "other",',
+  '  "also": ["other categories from the same list that clearly also fit, e.g. a painting of a starry sky is also sky; empty array if none"],',
   '  "title": "the usual English title",',
   '  "creator": "just the name of the artist, architect or author, max 4 words (for a style, the style name)",',
   '  "artist_short": "short name used in a heading, e.g. Hokusai, Van Gogh",',
@@ -1432,14 +1431,57 @@ function openScan(id) {
 function fmtDay(iso) { return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); }
 function sameDay(a, b) { return a.slice(0, 10) === b.slice(0, 10); }
 
+var SECTION_CATS = { 'Paintings': 'painting', 'Architecture': 'arch', 'Music': 'music', 'Books': 'book', 'Sculptures': 'sculpture', 'Plants': 'plants', 'Stars & Sky': 'stars', 'Mountains': 'mountains', 'More discoveries': 'other' };
+var SECTION_ICON = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>';
+var sections = null;
+function initSections() {
+  if (sections) return;
+  sections = {};
+  document.querySelectorAll('#s-home .home-body > div').forEach(function(sec){
+    var t = sec.querySelector('.sec-title'), strip = sec.querySelector('.h-strip');
+    if (!strip) { var l = sec.querySelector('.music-list, .books-list'); if (l) { strip = document.createElement('div'); strip.className = 'h-strip'; l.replaceWith(strip); } }
+    if (!t || !strip) return;
+    var cat = SECTION_CATS[t.textContent.replace(/\d+$/, '').trim()]; if (!cat) return;
+    strip.querySelectorAll('.h-card').forEach(function(c){ c.remove(); });
+    sections[cat] = sec;
+    var more = sec.querySelector('.sec-more');
+    if (more) more.onclick = function(){ var chip = document.querySelector('.cat-chip[data-cat="' + cat + '"]'); if (chip) chip.click(); show('s-search-cat'); };
+  });
+  [['sculpture', 'Sculptures'], ['other', 'More discoveries']].forEach(function(x){
+    if (sections[x[0]]) return;
+    var sec = document.createElement('div');
+    sec.innerHTML = '<div class="sec-head"><div class="sec-title">' + SECTION_ICON + x[1] + '<span class="sec-badge"></span></div></div><div class="h-strip"></div>';
+    sec.hidden = true; sec.dataset.dynamic = '1';
+    document.querySelector('#s-home .home-body').appendChild(sec);
+    sections[x[0]] = sec;
+  });
+}
+function scanCats(r) {
+  var cats = [r.category || 'other'];
+  (Array.isArray(r.data.also) ? r.data.also : []).forEach(function(c){ var m = CAT_MAP[c]; if (m && cats.indexOf(m) < 0) cats.push(m); });
+  return cats;
+}
 function renderJournal() {
-  // Home strip
-  var strip = document.getElementById('jStrip'), n = journal.length;
-  document.getElementById('jCount').textContent = n;
-  document.getElementById('jCount').hidden = !n;
-  strip.innerHTML = n ? journal.slice(0, 20).map(function(r){
-    return '<div class="h-card" data-scan="' + r.id + '" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;"><div class="h-card-scrim"></div><div class="h-card-info"><div class="h-card-name">' + esc(r.title) + '</div><div class="h-card-meta">' + esc(r.artist_short || r.creator) + '</div></div></div>';
-  }).join('') : '<div class="j-empty" id="jEmpty"><div class="j-empty-t">Your journal is empty</div><div class="j-empty-s">Scan a painting, a building or a book cover. It will be saved here.</div><button class="j-empty-b" id="jEmptyBtn">Scan your first artwork</button></div>';
+  initSections();
+  var n = journal.length, body = document.querySelector('#s-home .home-body'), order = [];
+  Object.keys(sections).forEach(function(cat){
+    var sec = sections[cat], strip = sec.querySelector('.h-strip'), badge = sec.querySelector('.sec-badge');
+    strip.querySelectorAll('.h-card[data-scan]').forEach(function(c){ c.remove(); });
+    var mine = journal.filter(function(r){ return scanCats(r).indexOf(cat) >= 0; });
+    strip.insertAdjacentHTML('afterbegin', mine.map(function(r){
+      return '<div class="h-card" data-scan="' + r.id + '" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;"><div class="h-card-scrim"></div><div class="h-card-info"><div class="h-card-name">' + esc(r.title) + '</div><div class="h-card-meta">' + esc(r.artist_short || r.creator) + '</div></div></div>';
+    }).join(''));
+    badge.textContent = mine.length; badge.hidden = !mine.length;
+    sec.hidden = !mine.length;
+    order.push({ sec: sec, n: mine.length, last: mine[0] ? mine[0].created_at : '' });
+  });
+  // categories with real scans first, most recent scan first; the rest keep their original order
+  order.filter(function(o){ return o.n; }).sort(function(a, b){ return a.last < b.last ? 1 : -1; })
+    .concat(order.filter(function(o){ return !o.n; }))
+    .forEach(function(o){ body.appendChild(o.sec); });
+  var slot = document.getElementById('jEmptySlot');
+  slot.innerHTML = n ? '' : '<div class="j-empty" id="jEmpty"><div class="j-empty-t">Your journal is empty</div><div class="j-empty-s">Scan a painting, a building or a book cover. It will appear in its category below.</div><button class="j-empty-b" id="jEmptyBtn">Scan your first artwork</button></div>';
+  body.insertBefore(slot, body.firstChild);
   var eb = document.getElementById('jEmptyBtn'); if (eb) eb.onclick = function(){ show('s-camera'); };
   // Stats
   var c = { art: 0, arch: 0, book: 0 };
@@ -1448,9 +1490,8 @@ function renderJournal() {
   if (st.length === 4) { st[0].textContent = c.art; st[1].textContent = 0; st[2].textContent = c.arch; st[3].textContent = c.book; }
   // Search by category
   document.getElementById('jCatRows').innerHTML = journal.map(function(r){
-    return '<div class="cat-row" data-scan="' + r.id + '" data-cat="' + r.category + '"><div class="cat-thumb" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;"></div><div class="cat-body"><div class="cat-type">' + (CAT_LABEL[r.category] || 'Discovery') + ' · ' + fmtDay(r.created_at) + '</div><div class="cat-name">' + esc(r.title) + '</div><div class="cat-meta">' + esc(r.creator) + '</div><div class="cat-spark">' + esc((r.data.spark && r.data.spark.head) || '') + '</div></div></div>';
+    return '<div class="cat-row" data-scan="' + r.id + '" data-cat="' + scanCats(r).join(' ') + '"><div class="cat-thumb" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;"></div><div class="cat-body"><div class="cat-type">' + (CAT_LABEL[r.category] || 'Discovery') + ' · ' + fmtDay(r.created_at) + '</div><div class="cat-name">' + esc(r.title) + '</div><div class="cat-meta">' + esc(r.creator) + '</div><div class="cat-spark">' + esc((r.data.spark && r.data.spark.head) || '') + '</div></div></div>';
   }).join('');
-  document.getElementById('jCatHead').hidden = !n;
   applyCatFilter();
   // Search by date
   var html = '', last = '';
@@ -1459,14 +1500,21 @@ function renderJournal() {
     html += '<div class="map-row" data-scan="' + r.id + '"><div class="map-icon" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;border-radius:10px;"></div><div><div class="map-name">' + esc(r.title) + '</div><div class="map-loc">' + esc(r.creator) + ' · ' + new Date(r.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + '</div></div></div>';
   });
   document.getElementById('jDateRows').innerHTML = html;
-  document.getElementById('jDateHead').hidden = !n;
+  document.querySelectorAll('.j-none').forEach(function(e){ e.hidden = !!n; });
 }
 
+(function(){
+  document.querySelectorAll('#catList > .cat-row, #catList > .j-sub').forEach(function(e){ if (e.id !== 'jCatHead') e.remove(); });
+  var dr = document.getElementById('jDateRows'); while (dr.nextSibling) dr.parentNode.removeChild(dr.nextSibling);
+  document.getElementById('jCatHead').remove(); document.getElementById('jDateHead').remove();
+  ['jCatRows', 'jDateRows'].forEach(function(id){
+    document.getElementById(id).insertAdjacentHTML('afterend', '<div class="j-none" data-for="' + id + '">No scans yet. Tap Scan Art to add your first discovery.</div>');
+  });
+})();
 var catFilter = 'all';
 function applyCatFilter() {
-  document.querySelectorAll('#jCatRows .cat-row').forEach(function(r){ r.hidden = catFilter !== 'all' && r.getAttribute('data-cat') !== catFilter; });
-  document.querySelectorAll('#catList > .cat-row, #catList > .j-sub.demo').forEach(function(r){ r.hidden = catFilter !== 'all'; });
-}
+  document.querySelectorAll('#jCatRows .cat-row').forEach(function(r){ r.hidden = catFilter !== 'all' && (' ' + r.getAttribute('data-cat') + ' ').indexOf(' ' + catFilter + ' ') < 0; });
+  }
 document.querySelectorAll('.cat-chip').forEach(function(ch){
   ch.addEventListener('click', function(){ catFilter = ch.getAttribute('data-cat') || 'all'; applyCatFilter(); });
 });
