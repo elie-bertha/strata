@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Strata Live</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Strata">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F2F2F7">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -253,6 +260,20 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 .cam-flash{animation:camflash .25s ease-out;}
 @keyframes camflash{0%{filter:brightness(2.2)}100%{filter:none}}
 @media (prefers-reduced-motion:reduce){.cam-flash{animation:none}}
+.j-sub{font-size:10px;font-weight:600;letter-spacing:.9px;text-transform:uppercase;color:var(--muted);}
+.home-body > .j-sub{margin-bottom:-12px;}
+.j-rows{display:flex;flex-direction:column;gap:9px;}
+#jDateRows{gap:6px;}
+.j-empty{flex:1;min-height:150px;border:1.5px dashed var(--s3);border-radius:14px;padding:16px;display:flex;flex-direction:column;justify-content:center;gap:6px;background:var(--surface);}
+.j-empty-t{font-family:'DM Serif Display',serif;font-size:15px;color:var(--ink);}
+.j-empty-s{font-size:12px;line-height:1.5;color:var(--muted);max-width:260px;}
+.j-empty-b{align-self:flex-start;margin-top:4px;font:500 12px 'DM Sans',sans-serif;padding:8px 14px;border-radius:100px;border:none;background:var(--ink);color:#fff;cursor:pointer;}
+.j-remove{margin:4px 20px 28px;padding:12px;border-radius:12px;border:1px solid var(--s3);background:transparent;color:#C0392B;font:500 13px 'DM Sans',sans-serif;cursor:pointer;}
+.j-remove.armed{background:#C0392B;color:#fff;border-color:#C0392B;}
+.toast{position:absolute;left:50%;bottom:calc(104px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:3000;background:rgba(28,28,30,.92);color:#fff;font-size:13px;padding:10px 16px;border-radius:100px;white-space:nowrap;}
+.toast.show{animation:toastIn .25s ease-out;}
+@keyframes toastIn{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+@media (prefers-reduced-motion:reduce){.toast.show{animation:none}}
 /* SAME ARTIST SECTION */
 .same-artist{background:var(--bg);padding:16px 0 28px;flex-shrink:0;}
 .sa-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px 12px;}
@@ -354,6 +375,7 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 <body>
 <div class="wrapper">
 <div class="phone"><div class="notch"></div>
+<div class="toast" id="toast" role="status" hidden></div>
 <div class="key-sheet" id="keySheet" hidden><div class="key-card" role="dialog" aria-labelledby="keyTitle">
   <div class="key-top"><div class="key-title" id="keyTitle">Claude API key</div><button class="key-x" id="keyClose" aria-label="Close">×</button></div>
   <p class="key-p">Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.</p>
@@ -402,6 +424,11 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
     </div>
   </div>
   <div class="home-body">
+    <div>
+      <div class="sec-head"><div class="sec-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Your journal<span class="sec-badge" id="jCount" hidden>0</span></div></div>
+      <div class="h-strip" id="jStrip"></div>
+    </div>
+    <div class="j-sub">Examples</div>
     <div>
       <div class="sec-head"><div class="sec-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Paintings<span class="sec-badge">17</span></div><button class="sec-more">See all</button></div>
       <div class="h-strip">
@@ -511,6 +538,9 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
     </div>
   </div>
   <div class="cat-list" id="catList">
+    <div class="j-sub" id="jCatHead" hidden>Your scans</div>
+    <div class="j-rows" id="jCatRows"></div>
+    <div class="j-sub demo">Examples</div>
     <div class="cat-row" id="btn-cat-starry"><div class="cat-thumb" style="background:radial-gradient(ellipse 70% 50% at 50% 30%,#1A4B8C,#0D2E5A 70%,#1C2E1A);"></div><div class="cat-body"><div class="cat-type"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg> Painting · <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Stars</div><div class="cat-name">The Starry Night</div><div class="cat-meta">Van Gogh · MoMA, New York</div><div class="cat-spark">"Painted from a mental asylum window…"</div></div></div>
     <div class="cat-row"><div class="cat-thumb" style="background:linear-gradient(135deg,#E8C89A,#8B6520);"></div><div class="cat-body"><div class="cat-type"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg> Painting</div><div class="cat-name">Girl with a Pearl Earring</div><div class="cat-meta">Vermeer · Mauritshuis</div><div class="cat-spark">"The girl's identity remains unknown…"</div></div></div>
     <div class="cat-row"><div class="cat-thumb" style="background:linear-gradient(135deg,#A8D5A2,#2E7D32);"></div><div class="cat-body"><div class="cat-type"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg> Painting · <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M5 12C5 7 8 3 12 3c4 0 7 4 7 9"/><path d="M5 12c3 0 5-1 7-3"/><path d="M19 12c-3 0-5-1-7-3"/></svg> Plants</div><div class="cat-name">Sunflowers</div><div class="cat-meta">Van Gogh · 1888</div><div class="cat-spark">"Painted as a symbol of gratitude…"</div></div></div>
@@ -585,6 +615,9 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
     </div>
   </div>
   <div class="date-results">
+    <div class="j-sub" id="jDateHead" hidden>Your scans</div>
+    <div class="j-rows" id="jDateRows"></div>
+    <div class="j-sub">Examples</div>
     <div class="date-lbl" id="dateLbl">May 25, 2026</div>
     <div class="map-row" id="btn-date-starry"><div class="map-icon" style="background:radial-gradient(ellipse 70% 50% at 50% 30%,#1A4B8C,#0D2E5A);border-radius:10px;"></div><div><div class="map-name">The Starry Night</div><div class="map-loc"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#8E8E93" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>MoMA, New York · 11:24 am</div></div></div>
     <div class="date-lbl">May 20, 2026</div>
@@ -645,6 +678,7 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
       <div class="sa-scroll" id="saScroll">
       </div>
     </div>
+    <button class="j-remove" id="btnRemove" hidden>Remove from journal</button>
   </div>
 </div>
 
@@ -788,6 +822,7 @@ function renderArt(key) {
     return '<div class="sa-card"><div class="sa-thumb" style="' + m[3] + '"' + (m[4] ? ' data-wiki="' + m[4] + '"' : '') + '></div><div class="sa-name">' + m[0] + '</div><div class="sa-year">' + m[1] + '</div><div class="sa-spark">' + m[2] + '</div></div>';
   }).join('');
   document.getElementById('saScroll').scrollLeft = 0;
+  var rb = document.getElementById('btnRemove'); rb.hidden = !a.journalId; rb.classList.remove('armed'); rb.textContent = 'Remove from journal';
   loadThumbs();
 }
 
@@ -1099,6 +1134,8 @@ async function runLiveScan(file) {
     var d = await live.json(SCAN_PROMPT, { images: [file], signal: liveScanCtl.signal });
     if (!d || typeof d !== 'object' || !d.title) throw { code: 'invalid_json' };
     ARTS.live = toArt(d, url);
+    saveScan(d, file).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; loadJournal(); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast('Saved to your journal'); })
+      .catch(function(){ toast('Could not save this scan on this device'); });
     currentArt = 'live';
     renderedChat = null;
     liveScanning = false;
@@ -1312,6 +1349,152 @@ document.getElementById('keyClose').addEventListener('click', closeKeySheet);
 document.querySelectorAll('.mode-pill').forEach(function(p){ p.addEventListener('click', openKeySheet); });
 var prefs = document.getElementById('btn-prefs'); if (prefs) prefs.addEventListener('click', openKeySheet);
 setMode(!!getKey());
+
+// ─── JOURNAL (scans saved on this device, IndexedDB) ─────────────
+// Record shape mirrors the future Supabase table: id, created_at, title, creator, category, identified, data (Claude JSON), photo, thumb
+var DB_NAME = 'strata', DB_STORE = 'scans', dbp = null, journal = [], photoURLs = {};
+var CAT_MAP = { painting: 'painting', print: 'painting', architecture: 'arch', sculpture: 'sculpture', book: 'book', plant: 'plants', sky: 'stars', mountain: 'mountains' };
+var CAT_LABEL = { painting: 'Painting', arch: 'Architecture', sculpture: 'Sculpture', book: 'Book', plants: 'Plant', stars: 'Sky', mountains: 'Mountain' };
+
+function openDB() {
+  if (dbp) return dbp;
+  dbp = new Promise(function(ok, ko){
+    if (!window.indexedDB) { ko('no-idb'); return; }
+    var r = indexedDB.open(DB_NAME, 1);
+    r.onupgradeneeded = function(){ var s = r.result.createObjectStore(DB_STORE, { keyPath: 'id' }); s.createIndex('created_at', 'created_at'); };
+    r.onsuccess = function(){ ok(r.result); };
+    r.onerror = function(){ ko(r.error); };
+  });
+  return dbp;
+}
+function tx(mode, fn) {
+  return openDB().then(function(db){ return new Promise(function(ok, ko){
+    var t = db.transaction(DB_STORE, mode), s = t.objectStore(DB_STORE), out = fn(s);
+    t.oncomplete = function(){ ok(out && out.result !== undefined ? out.result : out); };
+    t.onerror = function(){ ko(t.error); };
+  }); });
+}
+function resizeBlob(blob, max, quality, asDataURL) {
+  return new Promise(function(ok, ko){
+    var url = URL.createObjectURL(blob), img = new Image();
+    img.onload = function(){
+      var s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+      var c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      if (asDataURL) ok(c.toDataURL('image/jpeg', quality)); else c.toBlob(ok, 'image/jpeg', quality);
+    };
+    img.onerror = function(){ URL.revokeObjectURL(url); ko('decode'); };
+    img.src = url;
+  });
+}
+
+async function saveScan(d, file) {
+  var rec = {
+    id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+    created_at: new Date().toISOString(),
+    title: String(d.title || 'Untitled'), creator: String(d.creator || ''), artist_short: String(d.artist_short || ''),
+    category: CAT_MAP[d.category] || 'other', identified: d.identified !== false,
+    data: d,
+    photo: await resizeBlob(file, 1280, 0.82, false),
+    thumb: await resizeBlob(file, 360, 0.75, true)
+  };
+  await tx('readwrite', function(s){ return s.put(rec); });
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function(){});
+  return rec.id;
+}
+function loadJournal() {
+  return tx('readonly', function(s){ return s.getAll(); }).then(function(all){
+    journal = (all || []).sort(function(a, b){ return a.created_at < b.created_at ? 1 : -1; });
+    renderJournal();
+  }).catch(function(){ journal = []; renderJournal(); });
+}
+function deleteScan(id) {
+  return tx('readwrite', function(s){ return s.delete(id); }).then(function(){
+    if (photoURLs[id]) { URL.revokeObjectURL(photoURLs[id]); delete photoURLs[id]; }
+    delete ARTS['j_' + id];
+    return loadJournal();
+  });
+}
+
+function openScan(id) {
+  var rec = journal.find(function(r){ return r.id === id; }); if (!rec) return;
+  var key = 'j_' + id;
+  if (!ARTS[key]) {
+    photoURLs[id] = photoURLs[id] || URL.createObjectURL(rec.photo);
+    ARTS[key] = toArt(rec.data, photoURLs[id]);
+    ARTS[key].journalId = id;
+  }
+  currentArt = key; renderedChat = null;
+  show('s-result');
+}
+
+function fmtDay(iso) { return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); }
+function sameDay(a, b) { return a.slice(0, 10) === b.slice(0, 10); }
+
+function renderJournal() {
+  // Home strip
+  var strip = document.getElementById('jStrip'), n = journal.length;
+  document.getElementById('jCount').textContent = n;
+  document.getElementById('jCount').hidden = !n;
+  strip.innerHTML = n ? journal.slice(0, 20).map(function(r){
+    return '<div class="h-card" data-scan="' + r.id + '" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;"><div class="h-card-scrim"></div><div class="h-card-info"><div class="h-card-name">' + esc(r.title) + '</div><div class="h-card-meta">' + esc(r.artist_short || r.creator) + '</div></div></div>';
+  }).join('') : '<div class="j-empty" id="jEmpty"><div class="j-empty-t">Your journal is empty</div><div class="j-empty-s">Scan a painting, a building or a book cover. It will be saved here.</div><button class="j-empty-b" id="jEmptyBtn">Scan your first artwork</button></div>';
+  var eb = document.getElementById('jEmptyBtn'); if (eb) eb.onclick = function(){ show('s-camera'); };
+  // Stats
+  var c = { art: 0, arch: 0, book: 0 };
+  journal.forEach(function(r){ if (r.category === 'arch') c.arch++; else if (r.category === 'book') c.book++; else c.art++; });
+  var st = document.querySelectorAll('.home-stats .stat-num');
+  if (st.length === 4) { st[0].textContent = c.art; st[1].textContent = 0; st[2].textContent = c.arch; st[3].textContent = c.book; }
+  // Search by category
+  document.getElementById('jCatRows').innerHTML = journal.map(function(r){
+    return '<div class="cat-row" data-scan="' + r.id + '" data-cat="' + r.category + '"><div class="cat-thumb" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;"></div><div class="cat-body"><div class="cat-type">' + (CAT_LABEL[r.category] || 'Discovery') + ' · ' + fmtDay(r.created_at) + '</div><div class="cat-name">' + esc(r.title) + '</div><div class="cat-meta">' + esc(r.creator) + '</div><div class="cat-spark">' + esc((r.data.spark && r.data.spark.head) || '') + '</div></div></div>';
+  }).join('');
+  document.getElementById('jCatHead').hidden = !n;
+  applyCatFilter();
+  // Search by date
+  var html = '', last = '';
+  journal.forEach(function(r){
+    if (!sameDay(r.created_at, last)) { html += '<div class="date-lbl">' + fmtDay(r.created_at) + '</div>'; last = r.created_at; }
+    html += '<div class="map-row" data-scan="' + r.id + '"><div class="map-icon" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;border-radius:10px;"></div><div><div class="map-name">' + esc(r.title) + '</div><div class="map-loc">' + esc(r.creator) + ' · ' + new Date(r.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + '</div></div></div>';
+  });
+  document.getElementById('jDateRows').innerHTML = html;
+  document.getElementById('jDateHead').hidden = !n;
+}
+
+var catFilter = 'all';
+function applyCatFilter() {
+  document.querySelectorAll('#jCatRows .cat-row').forEach(function(r){ r.hidden = catFilter !== 'all' && r.getAttribute('data-cat') !== catFilter; });
+  document.querySelectorAll('#catList > .cat-row, #catList > .j-sub.demo').forEach(function(r){ r.hidden = catFilter !== 'all'; });
+}
+document.querySelectorAll('.cat-chip').forEach(function(ch){
+  ch.addEventListener('click', function(){ catFilter = ch.getAttribute('data-cat') || 'all'; applyCatFilter(); });
+});
+document.addEventListener('click', function(e){
+  var el = e.target.closest('[data-scan]'); if (el) openScan(el.getAttribute('data-scan'));
+});
+
+// Remove a saved scan: two taps, so a stray tap never deletes
+var rmBtn = document.getElementById('btnRemove'), rmTimer = null;
+rmBtn.addEventListener('click', function(){
+  var a = ARTS[currentArt]; if (!a || !a.journalId) return;
+  if (!rmBtn.classList.contains('armed')) {
+    rmBtn.classList.add('armed'); rmBtn.textContent = 'Tap again to remove';
+    clearTimeout(rmTimer); rmTimer = setTimeout(function(){ rmBtn.classList.remove('armed'); rmBtn.textContent = 'Remove from journal'; }, 3000);
+    return;
+  }
+  deleteScan(a.journalId).then(function(){ show('s-home'); });
+});
+
+function toast(msg) {
+  var t = document.getElementById('toast'); t.textContent = msg; t.hidden = false;
+  t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
+  clearTimeout(t._h); t._h = setTimeout(function(){ t.hidden = true; }, 2600);
+}
+
+// Greeting follows the time of day
+(function(){ var h = new Date().getHours(); document.querySelector('.home-greeting').textContent = h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; })();
+loadJournal();
 
 // ─── INIT ─────────────────────────────────────
 function fitPhone() {
