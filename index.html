@@ -197,7 +197,7 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 .id-chip{background:rgba(255,255,255,.18);backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.22);border-radius:100px;padding:5px 12px;display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:white;}
 .res-title{position:relative;z-index:10;padding:0 20px 14px;}
 .res-name{font-family:'DM Serif Display',serif;font-size:27px;letter-spacing:-.4px;line-height:1.1;color:white;margin-bottom:4px;text-shadow:0 1px 8px rgba(0,0,0,.4);}
-.res-meta{font-size:13px;color:rgba(255,255,255,.6);display:flex;align-items:center;gap:6px;}
+.res-meta{font-size:13px;color:rgba(255,255,255,.6);display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;}
 .mdot{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.35);}
 .res-sheet{position:relative;z-index:10;background:var(--bg);border-radius:26px 26px 0 0;padding:10px 0 0;flex-shrink:0;display:flex;flex-direction:column;}
 .art-bg.photo{background-size:auto 330px;background-repeat:no-repeat;background-position:60% 0;background-color:#1C1C1E;}
@@ -209,7 +209,9 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 .scan-bg{position:absolute;inset:-20px;background-size:cover;background-position:center;filter:blur(18px) brightness(.35);}
 .scan-wrap{position:relative;z-index:1;}
 .chat-art-badge{background-size:cover;background-position:center;}
-#s-result{background:#1C1C1E;}
+#s-result{background:#1C1C1E;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+#s-result > *{flex-shrink:0;}
+#s-result .res-sheet{padding-bottom:env(safe-area-inset-bottom,0px);}
 .art-bg.photo.live{bottom:auto;height:380px;background-size:cover;background-position:center;}
 .art-bg.photo.live::after{background:linear-gradient(to bottom,rgba(0,0,0,.3) 0%,rgba(0,0,0,0) 22%,rgba(0,0,0,.55) 62%,#1C1C1E 100%);}
 .mode-pill{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:rgba(255,255,255,.75);background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);backdrop-filter:blur(12px);padding:5px 10px;border-radius:100px;}
@@ -246,6 +248,11 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 .key-btn{font:500 14px 'DM Sans',sans-serif;padding:12px;border-radius:12px;border:1px solid var(--s3);background:var(--surface);color:var(--ink);cursor:pointer;}
 .key-btn.pri{background:var(--ink);color:#fff;border-color:var(--ink);}
 .mode-pill{cursor:pointer;}
+.cam-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
+.cam-vf .finder-frame,.cam-vf .cam-hint,.cam-vf .cam-status{z-index:1;}
+.cam-flash{animation:camflash .25s ease-out;}
+@keyframes camflash{0%{filter:brightness(2.2)}100%{filter:none}}
+@media (prefers-reduced-motion:reduce){.cam-flash{animation:none}}
 /* SAME ARTIST SECTION */
 .same-artist{background:var(--bg);padding:16px 0 28px;flex-shrink:0;}
 .sa-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px 12px;}
@@ -589,7 +596,7 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 
 <!-- CAMERA -->
 <div class="screen" id="s-camera">
-  <div class="cam-vf photo" id="camVf"><div class="finder-frame"><div class="ff2"></div></div><div class="cam-hint" id="camHint">Point at any art</div><div class="cam-status" id="camStatus"></div></div>
+  <div class="cam-vf photo" id="camVf"><video id="camVideo" class="cam-video" playsinline muted autoplay hidden></video><div class="finder-frame"><div class="ff2"></div></div><div class="cam-hint" id="camHint">Point at any art</div><div class="cam-status" id="camStatus"></div></div>
   <div class="cam-topbar"><span class="cam-wordmark">Strata</span><span class="mode-pill">Connecting…</span><div class="icon-btn" id="btn-cam-home"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div></div>
   <div class="cam-bottom">
     <div class="mode-tabs">
@@ -618,7 +625,7 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
     <div class="id-chip"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Identified</div>
     <button class="hero-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
   </div>
-  <div style="flex:1;min-height:0;"></div>
+  <div style="flex:1 0 150px;"></div>
   <div class="res-title"><div class="res-name" id="resName"></div><div class="res-meta" id="resMeta"></div></div>
   <div class="res-sheet" style="height:auto;">
     <div class="sheet-handle"></div>
@@ -807,6 +814,7 @@ function nextFallback() {
 
 // ─── NAVIGATION ───────────────────────────────
 function show(id) {
+  if (id === 's-camera') startCamera(); else stopCamera();
   document.querySelectorAll('.screen').forEach(s => {
     s.classList.remove('active');
     s.style.display = 'none';
@@ -815,7 +823,7 @@ function show(id) {
   if (t) { t.style.display = 'flex'; t.classList.add('active'); }
   if (id === 's-scanning' && !liveScanning) { scanStatus('Identifying artwork…', 'Demo mode · Hokusai'); setTimeout(function(){ if (!liveScanning) show('s-result'); }, 2200); }
   if (id === 's-chat' && renderedChat !== currentArt) { chatTurns = []; }
-  if (id === 's-result') { renderArt(currentArt); currentCard = 0; updateCarousel(false); }
+  if (id === 's-result') { t.scrollTop = 0; renderArt(currentArt); currentCard = 0; updateCarousel(false); }
   if (id === 's-chat') { renderChat(currentArt); }
 }
 
@@ -1002,10 +1010,10 @@ var SCAN_PROMPT = [
   '  "confidence": "high" | "medium" | "low",',
   '  "category": "painting" | "print" | "architecture" | "sculpture" | "book" | "plant" | "sky" | "mountain" | "other",',
   '  "title": "the usual English title",',
-  '  "creator": "full name of the artist, architect or author",',
+  '  "creator": "just the name of the artist, architect or author, max 4 words (for a style, the style name)",',
   '  "artist_short": "short name used in a heading, e.g. Hokusai, Van Gogh",',
-  '  "date": "e.g. c. 1830-32",',
-  '  "medium": "e.g. Woodblock print",',
+  '  "date": "just the date, e.g. c. 1830-32, or empty string if unknown",',
+  '  "medium": "max 3 words, e.g. Woodblock print",',
   '  "spark": { "head": "3-6 words", "body": "the 15-second hook: the most surprising way into this work, 40-55 words" },',
   '  "story": { "head": "3-6 words", "body": "what was happening in the creator\'s life or world when it was made, 80-110 words" },',
   '  "surprise": { "head": "3-6 words", "body": "one unexpected, true fact that ends on delight, 35-60 words" },',
@@ -1030,7 +1038,7 @@ function toArt(d, imgURL) {
   return {
     live: true,
     identified: d.identified !== false,
-    title: esc(d.title || 'Untitled'),
+    title: String(d.title || 'Untitled'),
     meta: [d.creator, d.date, d.medium].filter(Boolean).map(esc),
     photo: true, img: imgURL, badge: 'url(' + imgURL + ')',
     spark: [esc(d.spark && d.spark.head), esc(d.spark && d.spark.body)],
@@ -1048,7 +1056,7 @@ function toArt(d, imgURL) {
       return [esc(w.title), esc(w.year), esc(w.hook), bg, esc(w.wiki || '')];
     }),
     chat: {
-      sub: [d.artist_short || d.creator, d.date].filter(Boolean).map(esc).join(' · ') + ' · Ask anything',
+      sub: [d.artist_short || d.creator, d.date].filter(Boolean).join(' · ') + ' · Ask anything',
       intro: esc(d.chat_intro || 'What would you like to know about this one?'),
       chips: (Array.isArray(d.questions) ? d.questions.slice(0, 3) : []).map(esc),
       answers: {}, fallback: []
@@ -1104,6 +1112,7 @@ async function runLiveScan(file) {
 
 function pickPhoto(withCamera, e) {
   if (!live) { if (e) e.preventDefault(); openKeySheet(); return; }
+  if (withCamera && camReady()) { if (e) e.preventDefault(); captureFrame(); return; }
   document.getElementById(withCamera ? 'camInput' : 'libInput').value = '';   // the label opens the picker
 }
 
@@ -1244,6 +1253,38 @@ function loadThumbs() {
   });
 }
 
+var camStream = null, camWanted = false;
+function camReady() { var v = document.getElementById('camVideo'); return !!(camStream && v.videoWidth); }
+async function startCamera() {
+  camWanted = true;
+  if (!live || camStream || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+  var hint = document.getElementById('camHint');
+  try {
+    var s = await navigator.mediaDevices.getUserMedia({ audio: false, video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1440 } } });
+    if (!camWanted) { s.getTracks().forEach(function(t){ t.stop(); }); return; }
+    camStream = s;
+    var v = document.getElementById('camVideo');
+    v.srcObject = s; v.hidden = false;
+    await v.play().catch(function(){});
+    hint.textContent = 'Point at any art';
+  } catch (e) {
+    camStream = null;
+    hint.textContent = 'Camera blocked · tap the shutter to take a photo';
+  }
+}
+function stopCamera() {
+  camWanted = false;
+  if (camStream) { camStream.getTracks().forEach(function(t){ t.stop(); }); camStream = null; }
+  var v = document.getElementById('camVideo'); if (v) { v.srcObject = null; v.hidden = true; }
+}
+function captureFrame() {
+  var v = document.getElementById('camVideo');
+  var c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight;
+  c.getContext('2d').drawImage(v, 0, 0);
+  var vf = document.getElementById('camVf'); vf.classList.remove('cam-flash'); void vf.offsetWidth; vf.classList.add('cam-flash');
+  c.toBlob(function(b){ if (b) { window._lastPhoto = b; runLiveScan(b); } }, 'image/jpeg', 0.9);
+}
+
 function setMode(isLive) {
   live = isLive ? makeLive() : null;
   document.querySelectorAll('.mode-pill').forEach(function(p){ p.textContent = isLive ? 'Live · Claude' : 'Add API key'; p.classList.toggle('on', isLive); });
@@ -1263,6 +1304,7 @@ document.getElementById('keySave').addEventListener('click', function(){
   var k = document.getElementById('keyInput').value.trim();
   if (!/^sk-ant-/.test(k)) { document.getElementById('keyMsg').textContent = 'A Claude API key starts with sk-ant-. Check that you copied all of it.'; return; }
   setKey(k); setMode(true); closeKeySheet();
+  if (document.getElementById('s-camera').classList.contains('active')) startCamera();
 });
 document.getElementById('keyRemove').addEventListener('click', function(){ setKey(''); setMode(false); closeKeySheet(); });
 document.getElementById('keyDemo').addEventListener('click', function(){ closeKeySheet(); currentArt = 'hokusai'; show('s-scanning'); });
@@ -1279,7 +1321,7 @@ function fitPhone() {
   ph.style.transform = s < 1 ? 'scale(' + s + ')' : '';
 }
 window.addEventListener('resize', fitPhone); fitPhone();
-document.getElementById('camVf').style.backgroundImage = 'linear-gradient(to bottom,rgba(0,0,0,.35) 0%,transparent 30%,transparent 65%,rgba(0,0,0,.55) 100%),url(' + IMG_CAM + ')';
+if (!live) document.getElementById('camVf').style.backgroundImage = 'linear-gradient(to bottom,rgba(0,0,0,.35) 0%,transparent 30%,transparent 65%,rgba(0,0,0,.55) 100%),url(' + IMG_CAM + ')';
 document.getElementById('scanBg').style.backgroundImage = 'url(' + IMG_CAM + ')';
 document.querySelectorAll('.screen').forEach(function(s, i) {
   s.style.display = i === 0 ? 'flex' : 'none';
