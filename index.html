@@ -286,6 +286,8 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 .toast.show{animation:toastIn .25s ease-out;}
 @keyframes toastIn{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
 @media (prefers-reduced-motion:reduce){.toast.show{animation:none}}
+.cam-close{border:none;cursor:pointer;width:40px;height:40px;}
+.cam-topbar .cam-wordmark{position:absolute;left:50%;transform:translateX(-50%);}
 /* SAME ARTIST SECTION */
 .same-artist{background:var(--bg);padding:16px 0 28px;flex-shrink:0;}
 .sa-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px 12px;}
@@ -620,7 +622,7 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 <!-- CAMERA -->
 <div class="screen" id="s-camera">
   <div class="cam-vf photo" id="camVf"><video id="camVideo" class="cam-video" playsinline muted autoplay hidden></video><div class="finder-frame"><div class="ff2"></div></div><div class="cam-hint" id="camHint">Point at any art</div><div class="cam-status" id="camStatus"></div></div>
-  <div class="cam-topbar"><span class="cam-wordmark">Strata</span><span class="mode-pill">Connecting…</span><div class="icon-btn" id="btn-cam-home"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div></div>
+  <div class="cam-topbar"><button class="icon-btn cam-close" id="btn-cam-home" aria-label="Back to home"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><span class="cam-wordmark">Strata</span><span class="mode-pill">Connecting…</span></div>
   <div class="cam-bottom">
     <div class="mode-tabs">
       <button class="mode-tab active"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>Visual</button>
