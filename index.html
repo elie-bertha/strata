@@ -983,7 +983,7 @@ function renderArt(key) {
     cardHTML('cc-story', ICO.story, t('Story · 2 min'), a.story[0], '<div class="c-body">' + a.story[1] + '</div>') +
     cardHTML('cc-surp',  ICO.surp,  t('Surprise · Unexpected'), a.surp[0], '<div class="c-body">' + a.surp[1] + '</div>') +
     cardHTML('cc-dive',  ICO.dive,  t('Deep Dive · Go further'), t('Explore more'), '<div class="lnk-list">' + links + '</div>');
-  document.getElementById('saTitle').innerHTML = (a.live && !a.identified) ? t('More like this') : t('More by {a}', { a: a.artist });
+  document.getElementById('saTitle').innerHTML = (a.live && !a.identified) ? t('More like this') : a.nature ? t('Also in {a}', { a: a.artist }) : t('More by {a}', { a: a.artist });
   document.getElementById('saScroll').innerHTML = a.more.map(function(m){
     return '<div class="sa-card"><div class="sa-thumb" style="' + m[3] + '"' + (m[4] ? ' data-wiki="' + m[4] + '"' : '') + '></div><div class="sa-name">' + m[0] + '</div><div class="sa-year">' + m[1] + '</div><div class="sa-spark">' + m[2] + '</div></div>';
   }).join('');
@@ -1191,6 +1191,7 @@ var SCAN_PROMPT = [
   'The image is a photo the user just took with their phone. The subject may be on a screen, in a book, on a wall, or outdoors.',
   'Identify it. Read any visible text first: titles, author names, signatures, inscriptions, museum wall labels. Text is the strongest evidence.',
   'Books: a book cover is a book. Identify the book from its title and author on the cover (any language, including recent books), and write the cards about the book and its author. The cover image may reproduce a famous artwork: mention it, but the subject is the book. For books, location is null and more_by lists other books by the same author.',
+  'Nature (plants, sky, mountains): the subject is the living thing or the place itself. Plant: the species, with its common English name as title, the scientific name as creator, and as artist_short its family or genus written as a phrase, e.g. "the arum family". Sky: the constellation, planet or phenomenon, artist_short e.g. "Orion" or "the night sky". Mountain: the peak, creator its range, artist_short e.g. "the Pyrenees". The cards tell its story: origin, how people have used, named, feared or painted it, and one surprising fact. For a plant, location is null unless it is a famous individual tree. For a mountain, location is the summit. more_by lists 4 related species, objects or peaks of the same family, sky or range, with their wiki titles. A plant in a painting is a painting.',
   'Paintings in a museum or gallery: consider the setting and the city when it helps (for example a gilded frame in Barcelona may hang in the Museu Picasso or MNAC).',
   'Use the web_search tool when you are not certain of the exact work: search with what you see (artist style, subject, landmarks, any visible text, likely museum). Confirm the identification before answering. Also use search results for the deep_dive links.',
   'Answer with "identified": true whenever the visible text or a confirmed search identifies the work, even if it is little known.',
@@ -1245,6 +1246,7 @@ function toArt(d, imgURL) {
       return [k, esc(l.title), esc(l.source), /^https:\/\/[^\s"'<>]+$/.test(String(l.url || '')) ? esc(l.url) : ''];
     }),
     artist: esc(short),
+    nature: ['plant', 'sky', 'mountain'].indexOf(d.category) >= 0,
     moreLabel: d.identified === false ? 'More like this' : 'More by ' + esc(short),
     more: mb.map(function(w){
       var c = Array.isArray(w.colors) ? w.colors : [];
@@ -2593,7 +2595,7 @@ fr: {
   "Identified": "Identifiée", "Best guess": "Hypothèse", "Remove from journal": "Retirer du journal", "Tap again to remove": "Touchez encore pour retirer",
   "Listening…": "Écoute…", "Hold near the music source": "Approchez-vous de la source musicale",
   "Spark · 15 sec": "Étincelle · 15 s", "Story · 2 min": "Récit · 2 min", "Surprise · Unexpected": "Surprise · Inattendu", "Deep Dive · Go further": "Pour aller plus loin", "Explore more": "Explorer", "Swipe for more": "Glissez pour la suite",
-  "More by {a}": "Autres œuvres de {a}", "More like this": "Dans le même esprit", "Original at {p}": "Original : {p}",
+  "More by {a}": "Autres œuvres de {a}", "Also in {a}": "Aussi dans {a}", "More like this": "Dans le même esprit", "Original at {p}": "Original : {p}",
   "Thinking…": "Réflexion…", "Ask anything…": "Posez une question…", "Ask anything": "Posez vos questions",
   "What would you like to know about this one?": "Que voulez-vous savoir sur cette œuvre ?", "(No answer this time. Try again.)": "(Pas de réponse cette fois. Réessayez.)",
   "Saved to your journal": "Enregistré dans votre journal", "Could not save this scan on this device": "Impossible d'enregistrer ce scan sur cet appareil", "Could not save this change": "Impossible d'enregistrer ce changement",
@@ -2655,7 +2657,7 @@ es: {
   "Identified": "Identificada", "Best guess": "Suposición", "Remove from journal": "Quitar del diario", "Tap again to remove": "Toca otra vez para quitar",
   "Listening…": "Escuchando…", "Hold near the music source": "Acércate a la fuente de la música",
   "Spark · 15 sec": "Chispa · 15 s", "Story · 2 min": "Historia · 2 min", "Surprise · Unexpected": "Sorpresa · Inesperado", "Deep Dive · Go further": "Para saber más", "Explore more": "Explorar", "Swipe for more": "Desliza para seguir",
-  "More by {a}": "Más obras de {a}", "More like this": "En la misma línea", "Original at {p}": "Original en {p}",
+  "More by {a}": "Más obras de {a}", "Also in {a}": "También en {a}", "More like this": "En la misma línea", "Original at {p}": "Original en {p}",
   "Thinking…": "Pensando…", "Ask anything…": "Pregunta lo que quieras…", "Ask anything": "Pregunta lo que quieras",
   "What would you like to know about this one?": "¿Qué te gustaría saber de esta obra?", "(No answer this time. Try again.)": "(Esta vez no hay respuesta. Inténtalo de nuevo.)",
   "Saved to your journal": "Guardado en tu diario", "Could not save this scan on this device": "No se ha podido guardar este escaneo en este dispositivo", "Could not save this change": "No se ha podido guardar este cambio",
