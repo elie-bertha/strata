@@ -340,6 +340,7 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
 .seg{display:flex;background:var(--s2);border-radius:12px;padding:3px;gap:3px;}
 .seg-b{flex:1;font:500 14px 'DM Sans',sans-serif;padding:10px 6px;border:none;border-radius:9px;background:transparent;color:var(--ink2);cursor:pointer;}
 .seg-b.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12);}
+label.menu-item{cursor:pointer;}
 .m-val{margin-left:auto;margin-right:6px;font-size:13px;color:var(--muted);}
 .menu-item .m-lbl{flex:1;}
 /* SAME ARTIST SECTION */
@@ -446,6 +447,7 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
 <body>
 <div class="wrapper">
 <div class="phone"><div class="notch"></div>
+<input type="file" id="importInput" class="file-vh" accept="application/json,.json" tabindex="-1">
 <input type="file" id="camInput" class="file-vh" accept="image/*" capture="environment" tabindex="-1"><input type="file" id="libInput" class="file-vh" accept="image/*" tabindex="-1">
 <div class="key-sheet" id="langSheet" hidden><div class="key-card" role="dialog" aria-labelledby="langTitle">
   <div class="key-top"><div class="key-title" id="langTitle">Language</div><button class="key-x" id="langClose" aria-label="Close">×</button></div>
@@ -617,6 +619,8 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
       <div class="menu-item" id="btn-lang"><div class="m-ico" style="background:#F3F0FF;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6741D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><span class="m-lbl">Language</span><span class="m-val" id="langVal">English</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item"><div class="m-ico" style="background:#F0FFF4;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2D7D46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span class="m-lbl">Share with friends</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item" id="btn-prefs"><div class="m-ico" style="background:#FFFBF0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div><span class="m-lbl">Settings</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="menu-item" id="btn-export"><div class="m-ico" style="background:#EEF2FA;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><span class="m-lbl">Export journal</span><span class="m-val" id="exportVal"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <label class="menu-item" id="btn-import" for="importInput"><div class="m-ico" style="background:#EEF2FA;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div><span class="m-lbl">Import journal</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></label>
       <div class="menu-item"><div class="m-ico" style="background:#F5F5F5;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div><span class="m-lbl">About Strata</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
     </div>
     <div class="menu-signout">Sign out</div>
@@ -1911,6 +1915,70 @@ document.getElementById('btn-library').addEventListener('click', function(e){
   document.getElementById('libInput').value = '';
 });
 
+// ─── EXPORT / IMPORT ───────────────────────────
+// One JSON file holds every scan with its photo, so the journal can be restored on any device (or moved to the shared database later)
+function blobToDataURL(b) { return new Promise(function(ok, ko){ var r = new FileReader(); r.onload = function(){ ok(r.result); }; r.onerror = ko; r.readAsDataURL(b); }); }
+function dataURLToBlob(u) {
+  var m = /^data:([^;,]+)?(;base64)?,(.*)$/.exec(u || ''); if (!m) return null;
+  var bin = m[2] ? atob(m[3]) : decodeURIComponent(m[3]), a = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) a[i] = bin.charCodeAt(i);
+  return new Blob([a], { type: m[1] || 'image/jpeg' });
+}
+async function exportJournal() {
+  if (!journal.length) { toast(t('Your journal is empty')); return; }
+  toast(t('Preparing your export…'));
+  var scans = [];
+  for (var i = 0; i < journal.length; i++) {
+    var r = Object.assign({}, journal[i]);
+    r.photo = r.photo instanceof Blob ? await blobToDataURL(r.photo) : null;
+    scans.push(r);
+  }
+  var day = new Date().toISOString().slice(0, 10);
+  var name = 'strata-journal-' + day + '.json';
+  var file = new File([JSON.stringify({ app: 'strata', version: 1, exported_at: new Date().toISOString(), count: scans.length, scans: scans })], name, { type: 'application/json' });
+  // iPhone and Android: the share sheet ("Save to Files", AirDrop, mail). Elsewhere: a normal download.
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: name });
+      markExported(); return;
+    }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  var a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 4000);
+  markExported();
+}
+function markExported() {
+  try { localStorage.setItem('strata.lastExport', new Date().toISOString()); } catch (e) {}
+  renderExportVal(); toast(t('Journal exported'));
+}
+function renderExportVal() {
+  var el = document.getElementById('exportVal'); if (!el) return;
+  var last = null; try { last = localStorage.getItem('strata.lastExport'); } catch (e) {}
+  el.textContent = last ? fmtDay(last) : '';
+}
+async function importJournal(file) {
+  var data;
+  try { data = JSON.parse(await file.text()); } catch (e) { toast(t('This file is not a Strata export.')); return; }
+  if (!data || data.app !== 'strata' || !Array.isArray(data.scans)) { toast(t('This file is not a Strata export.')); return; }
+  var added = 0, skipped = 0;
+  for (var i = 0; i < data.scans.length; i++) {
+    var r = data.scans[i];
+    if (!r || !r.id || !r.data) { skipped++; continue; }
+    if (journal.some(function(x){ return x.id === r.id; }) || findDuplicate(r.data)) { skipped++; continue; }
+    r.photo = dataURLToBlob(r.photo) || dataURLToBlob(r.thumb) || new Blob([], { type: 'image/jpeg' });
+    await tx('readwrite', function(s){ return s.put(r); });
+    journal.push(r); added++;
+  }
+  await loadJournal();
+  toast(t('{a} imported · {s} already in your journal', { a: added, s: skipped }));
+}
+document.getElementById('btn-export').addEventListener('click', exportJournal);
+document.getElementById('importInput').addEventListener('change', function(e){
+  var f = e.target.files && e.target.files[0]; e.target.value = '';
+  if (f) importJournal(f);
+});
+
 // ─── MUSIC: record a clip → AudD identifies → Claude tells the story ─
 var AUDD_STORE = 'strata.auddKey', musicRec = null, musicStream = null, musicCtl = null, musicBusy = false, musicTimer = null;
 function getAudd() { try { return localStorage.getItem(AUDD_STORE) || ''; } catch (e) { return window._memAudd || ''; } }
@@ -2098,7 +2166,7 @@ fr: {
   "{n} scan has no known original location (a reproduction, a poster, or a private work).": "{n} scan n'a pas de lieu d'original connu (reproduction, poster ou œuvre privée).",
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
-  "Browse by Date": "Parcourir par date", "Camera": "Appareil photo", "Phone camera": "Appareil du téléphone", "Strata viewfinder": "Viseur Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "L'appareil du téléphone offre le zoom, les objectifs et la mise au point. Le viseur Strata vous garde dans l'app.",  "Music recognition key (AudD)": "Clé de reconnaissance musicale (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Écouter identifie les morceaux avec AudD, puis Claude raconte leur histoire.", "AudD API token": "Jeton API AudD", "Save music key": "Enregistrer la clé musique", "Remove": "Supprimer", "Create one at dashboard.audd.io.": "Créez-en une sur dashboard.audd.io.", "Back": "Retour", "Identifying the music…": "Identification de la musique…", "Usually a few seconds": "Quelques secondes en général", "Writing the story…": "Écriture du récit…", "No match": "Aucun résultat", "No match. Get closer to the music and try again.": "Aucun résultat. Rapprochez-vous de la musique et réessayez.", "Microphone access was refused. Allow it in Safari settings and try again.": "L'accès au micro a été refusé. Autorisez-le dans les réglages de Safari et réessayez.", "This browser cannot record audio.": "Ce navigateur ne peut pas enregistrer de son.", "Your AudD key was refused. Check it in Settings.": "Votre clé AudD a été refusée. Vérifiez-la dans les Réglages.", "Your AudD plan has no requests left.": "Votre forfait AudD n'a plus de requêtes.", "Could not reach AudD. Check your internet and try again.": "Impossible de joindre AudD. Vérifiez votre connexion et réessayez.", "Something went wrong. Try again.": "Un problème est survenu. Réessayez.", "Add your AudD key to recognise music.": "Ajoutez votre clé AudD pour reconnaître la musique.", "Paste the full AudD API token.": "Collez le jeton API AudD en entier.", "Music key saved": "Clé musique enregistrée", "Music key removed": "Clé musique supprimée", "Listen to this track": "Écouter ce morceau", "Song": "Morceau",  "No scans in this period.": "Aucun scan sur cette période.", "Previous": "Précédent", "Next": "Suivant", "Day": "Jour", "Week": "Semaine", "Month": "Mois", "Year": "Année",
+  "Browse by Date": "Parcourir par date", "Export journal": "Exporter le journal", "Import journal": "Importer un journal", "Preparing your export…": "Préparation de l'export…", "Journal exported": "Journal exporté", "This file is not a Strata export.": "Ce fichier n'est pas un export Strata.", "{a} imported · {s} already in your journal": "{a} importés · {s} déjà dans votre journal",  "Camera": "Appareil photo", "Phone camera": "Appareil du téléphone", "Strata viewfinder": "Viseur Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "L'appareil du téléphone offre le zoom, les objectifs et la mise au point. Le viseur Strata vous garde dans l'app.",  "Music recognition key (AudD)": "Clé de reconnaissance musicale (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Écouter identifie les morceaux avec AudD, puis Claude raconte leur histoire.", "AudD API token": "Jeton API AudD", "Save music key": "Enregistrer la clé musique", "Remove": "Supprimer", "Create one at dashboard.audd.io.": "Créez-en une sur dashboard.audd.io.", "Back": "Retour", "Identifying the music…": "Identification de la musique…", "Usually a few seconds": "Quelques secondes en général", "Writing the story…": "Écriture du récit…", "No match": "Aucun résultat", "No match. Get closer to the music and try again.": "Aucun résultat. Rapprochez-vous de la musique et réessayez.", "Microphone access was refused. Allow it in Safari settings and try again.": "L'accès au micro a été refusé. Autorisez-le dans les réglages de Safari et réessayez.", "This browser cannot record audio.": "Ce navigateur ne peut pas enregistrer de son.", "Your AudD key was refused. Check it in Settings.": "Votre clé AudD a été refusée. Vérifiez-la dans les Réglages.", "Your AudD plan has no requests left.": "Votre forfait AudD n'a plus de requêtes.", "Could not reach AudD. Check your internet and try again.": "Impossible de joindre AudD. Vérifiez votre connexion et réessayez.", "Something went wrong. Try again.": "Un problème est survenu. Réessayez.", "Add your AudD key to recognise music.": "Ajoutez votre clé AudD pour reconnaître la musique.", "Paste the full AudD API token.": "Collez le jeton API AudD en entier.", "Music key saved": "Clé musique enregistrée", "Music key removed": "Clé musique supprimée", "Listen to this track": "Écouter ce morceau", "Song": "Morceau",  "No scans in this period.": "Aucun scan sur cette période.", "Previous": "Précédent", "Next": "Suivant", "Day": "Jour", "Week": "Semaine", "Month": "Mois", "Year": "Année",
   "Point at any art": "Visez une œuvre", "Tap the shutter to take a photo": "Touchez le déclencheur pour prendre une photo",
   "Camera blocked · tap the shutter to take a photo": "Caméra bloquée · touchez le déclencheur pour prendre une photo",
   "Add your Claude API key to scan for real. Tap the shutter.": "Ajoutez votre clé API Claude pour scanner pour de vrai. Touchez le déclencheur.",
@@ -2160,7 +2228,7 @@ es: {
   "{n} scan has no known original location (a reproduction, a poster, or a private work).": "{n} escaneo no tiene un lugar de original conocido (reproducción, póster u obra privada).",
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
-  "Browse by Date": "Explorar por fecha", "Camera": "Cámara", "Phone camera": "Cámara del teléfono", "Strata viewfinder": "Visor de Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "La cámara del teléfono tiene zoom, objetivos y enfoque. El visor de Strata te mantiene dentro de la app.",  "Music recognition key (AudD)": "Clave de reconocimiento musical (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Escuchar identifica canciones con AudD y luego Claude cuenta su historia.", "AudD API token": "Token API de AudD", "Save music key": "Guardar clave de música", "Remove": "Eliminar", "Create one at dashboard.audd.io.": "Crea uno en dashboard.audd.io.", "Back": "Volver", "Identifying the music…": "Identificando la música…", "Usually a few seconds": "Normalmente unos segundos", "Writing the story…": "Escribiendo la historia…", "No match": "Sin resultado", "No match. Get closer to the music and try again.": "Sin resultado. Acércate a la música e inténtalo de nuevo.", "Microphone access was refused. Allow it in Safari settings and try again.": "Se ha denegado el acceso al micrófono. Permítelo en los ajustes de Safari e inténtalo de nuevo.", "This browser cannot record audio.": "Este navegador no puede grabar audio.", "Your AudD key was refused. Check it in Settings.": "Tu clave de AudD ha sido rechazada. Revísala en Ajustes.", "Your AudD plan has no requests left.": "A tu plan de AudD no le quedan solicitudes.", "Could not reach AudD. Check your internet and try again.": "No se ha podido conectar con AudD. Revisa tu internet e inténtalo de nuevo.", "Something went wrong. Try again.": "Algo ha fallado. Inténtalo de nuevo.", "Add your AudD key to recognise music.": "Añade tu clave de AudD para reconocer música.", "Paste the full AudD API token.": "Pega el token API de AudD completo.", "Music key saved": "Clave de música guardada", "Music key removed": "Clave de música eliminada", "Listen to this track": "Escuchar esta pista", "Song": "Canción",  "No scans in this period.": "No hay escaneos en este periodo.", "Previous": "Anterior", "Next": "Siguiente", "Day": "Día", "Week": "Semana", "Month": "Mes", "Year": "Año",
+  "Browse by Date": "Explorar por fecha", "Export journal": "Exportar el diario", "Import journal": "Importar un diario", "Preparing your export…": "Preparando la exportación…", "Journal exported": "Diario exportado", "This file is not a Strata export.": "Este archivo no es una exportación de Strata.", "{a} imported · {s} already in your journal": "{a} importados · {s} ya estaban en tu diario",  "Camera": "Cámara", "Phone camera": "Cámara del teléfono", "Strata viewfinder": "Visor de Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "La cámara del teléfono tiene zoom, objetivos y enfoque. El visor de Strata te mantiene dentro de la app.",  "Music recognition key (AudD)": "Clave de reconocimiento musical (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Escuchar identifica canciones con AudD y luego Claude cuenta su historia.", "AudD API token": "Token API de AudD", "Save music key": "Guardar clave de música", "Remove": "Eliminar", "Create one at dashboard.audd.io.": "Crea uno en dashboard.audd.io.", "Back": "Volver", "Identifying the music…": "Identificando la música…", "Usually a few seconds": "Normalmente unos segundos", "Writing the story…": "Escribiendo la historia…", "No match": "Sin resultado", "No match. Get closer to the music and try again.": "Sin resultado. Acércate a la música e inténtalo de nuevo.", "Microphone access was refused. Allow it in Safari settings and try again.": "Se ha denegado el acceso al micrófono. Permítelo en los ajustes de Safari e inténtalo de nuevo.", "This browser cannot record audio.": "Este navegador no puede grabar audio.", "Your AudD key was refused. Check it in Settings.": "Tu clave de AudD ha sido rechazada. Revísala en Ajustes.", "Your AudD plan has no requests left.": "A tu plan de AudD no le quedan solicitudes.", "Could not reach AudD. Check your internet and try again.": "No se ha podido conectar con AudD. Revisa tu internet e inténtalo de nuevo.", "Something went wrong. Try again.": "Algo ha fallado. Inténtalo de nuevo.", "Add your AudD key to recognise music.": "Añade tu clave de AudD para reconocer música.", "Paste the full AudD API token.": "Pega el token API de AudD completo.", "Music key saved": "Clave de música guardada", "Music key removed": "Clave de música eliminada", "Listen to this track": "Escuchar esta pista", "Song": "Canción",  "No scans in this period.": "No hay escaneos en este periodo.", "Previous": "Anterior", "Next": "Siguiente", "Day": "Día", "Week": "Semana", "Month": "Mes", "Year": "Año",
   "Point at any art": "Apunta a una obra", "Tap the shutter to take a photo": "Toca el disparador para hacer una foto",
   "Camera blocked · tap the shutter to take a photo": "Cámara bloqueada · toca el disparador para hacer una foto",
   "Add your Claude API key to scan for real. Tap the shutter.": "Añade tu clave API de Claude para escanear de verdad. Toca el disparador.",
@@ -2224,6 +2292,7 @@ function applyLang() {
   document.querySelectorAll('[data-i18n]').forEach(function(e){ e.textContent = t(e.getAttribute('data-i18n')); });
   var lv = document.getElementById('langVal'); if (lv) lv.textContent = { en: 'English', fr: 'Français', es: 'Español' }[l];
   setGreeting();
+  renderExportVal();
   setMode(!!live);
   if (typeof renderJournal === 'function' && sections) renderJournal();
   var ma = document.getElementById('s-search-map'); if (ma && ma.classList.contains('active')) renderMap();
