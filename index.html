@@ -263,7 +263,8 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
   .screen{border-radius:0;}
 }
 .key-sheet{position:absolute;inset:0;z-index:2000;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;}
-.key-card{width:100%;background:var(--surface);border-radius:24px 24px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;}
+.key-card{width:100%;max-height:92%;overflow-y:auto;background:var(--surface);border-radius:24px 24px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;}
+.key-sep{height:1px;background:var(--s3);margin:10px 0 4px;}
 .key-top{display:flex;align-items:center;justify-content:space-between;}
 .key-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--ink);}
 .key-x{width:30px;height:30px;border-radius:50%;border:none;background:var(--s2);font-size:18px;color:var(--ink2);cursor:pointer;}
@@ -432,7 +433,8 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
 .bar:nth-child(1){height:10px;}.bar:nth-child(2){height:22px;animation-delay:.1s;}.bar:nth-child(3){height:14px;animation-delay:.2s;}.bar:nth-child(4){height:26px;animation-delay:.05s;}.bar:nth-child(5){height:16px;animation-delay:.15s;}.bar:nth-child(6){height:20px;animation-delay:.25s;}
 @keyframes bw{from{transform:scaleY(.5);}to{transform:scaleY(1.2);}}
 .music-lbl{color:white;font-size:17px;font-weight:500;}
-.music-sub{color:rgba(255,255,255,.32);font-size:13px;}
+.music-sub{color:rgba(255,255,255,.55);font-size:13px;max-width:280px;line-height:1.5;}
+#s-music.stopped .mic-pulse,#s-music.stopped .bar{animation:none;opacity:.3;}
 .music-cancel{position:absolute;top:52px;left:18px;width:34px;height:34px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;}
 </style>
 </head>
@@ -473,6 +475,13 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
   <button class="key-btn pri" id="keySave">Save key</button>
   <div class="key-row"><button class="key-btn" id="keyDemo">Try the demo</button><button class="key-btn" id="keyRemove">Remove key</button></div>
   <p class="key-note">Create one at platform.claude.com → Settings → API Keys. Set a spend limit in Billing.</p>
+  <div class="key-sep"></div>
+  <label class="key-lbl" for="auddInput">Music recognition key (AudD)</label>
+  <p class="key-p">Listen identifies songs with AudD, then Claude tells their story.</p>
+  <input class="key-in" id="auddInput" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="AudD API token">
+  <div class="key-msg" id="auddMsg"></div>
+  <div class="key-row"><button class="key-btn pri" id="auddSave">Save music key</button><button class="key-btn" id="auddRemove">Remove</button></div>
+  <p class="key-note">Create one at dashboard.audd.io.</p>
 </div></div>
 
 <!-- HOME -->
@@ -762,7 +771,8 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
   <div class="music-inner">
     <div class="mic-wrap"><div class="mic-pulse mp1"></div><div class="mic-pulse mp2"></div><div class="mic-pulse mp3"></div><div class="mic-core"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></div></div>
     <div class="bars"><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div></div>
-    <div class="music-lbl">Listening…</div><div class="music-sub">Hold near the music source</div>
+    <div class="music-lbl" id="musicLbl">Listening…</div><div class="music-sub" id="musicSub">Hold near the music source</div>
+    <div class="scan-actions" id="musicErr" hidden><button class="scan-btn" id="musicBack">Back</button><button class="scan-btn pri" id="musicRetry">Try again</button></div>
   </div>
 </div>
 
@@ -912,6 +922,7 @@ function nextFallback() {
 // ─── NAVIGATION ───────────────────────────────
 function show(id) {
   if (id === 's-camera') startCamera(); else stopCamera();
+  if (id !== 's-music' && typeof stopMusic === 'function' && musicBusy) stopMusic();
   var cz = document.getElementById('cardZoom'); if (cz) cz.hidden = true;
   var tsh = document.getElementById('tagSheet'); if (tsh) tsh.hidden = true;
   if (id === 's-search-date') renderCal();
@@ -947,16 +958,13 @@ wire('btn-qs-date',     's-search-date');
 wire('btn-cat-back',    's-home');
 wire('btn-map-back',    's-home');
 wire('btn-date-back',   's-home');
-wire('btn-listen',      's-music');
 wire('btn-scan',        's-camera');
 wireArt('btn-starry', 'starry');
 wireArt('btn-starry2', 'starry');
 wire('btn-cam-home',    's-home');
-wire('btn-cam-music',   's-music');
 wire('btn-res-back',    's-home');
 wire('btn-chat-ico',    's-chat');
 wire('btn-chat-back',   's-result');
-wire('btn-music-cancel','s-home');
 wireArt('btn-cat-starry', 'starry');
 wireArt('btn-map-starry', 'starry');
 wireArt('btn-date-starry', 'starry');
@@ -1127,7 +1135,7 @@ function hex(c, d) { return /^#[0-9a-f]{3,8}$/i.test(String(c)) ? c : d; }
 // Turn Claude's JSON into the same shape the demo artworks use
 function toArt(d, imgURL) {
   var mb = Array.isArray(d.more_by) ? d.more_by.slice(0, 4) : [];
-  var dd = Array.isArray(d.deep_dive) ? d.deep_dive.slice(0, 4) : [];
+  var dd = Array.isArray(d.deep_dive) ? d.deep_dive.slice(0, 3) : [];
   var short = d.artist_short || d.creator || 'this artist';
   return {
     live: true,
@@ -1138,7 +1146,7 @@ function toArt(d, imgURL) {
     spark: [esc(d.spark && d.spark.head), esc(d.spark && d.spark.body)],
     story: [esc(d.story && d.story.head), esc(d.story && d.story.body)],
     surp:  [esc(d.surprise && d.surprise.head), esc(d.surprise && d.surprise.body)],
-    links: dd.map(function(l){
+    links: (d.song_link ? [{ title: t('Listen to this track'), source: 'lis.tn', url: d.song_link, kind: 'video' }] : []).concat(dd).map(function(l){
       var k = ['museum','video','read'].indexOf(l.kind) >= 0 ? l.kind : 'read';
       return [k, esc(l.title), esc(l.source), /^https:\/\/[^\s"'<>]+$/.test(String(l.url || '')) ? esc(l.url) : ''];
     }),
@@ -1357,11 +1365,12 @@ function makeLive() {
     return { text: text, truncated: false };
   };
   f.json = async function(prompt, opts) {
-    var b64 = await photoToBase64(opts.images[0]);
-    var body = { max_tokens: 4000, messages: [{ role: 'user', content: [
-      { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } },
-      { type: 'text', text: prompt }
-    ] }] };
+    var content = prompt;
+    if (opts.images && opts.images[0]) {
+      var b64 = await photoToBase64(opts.images[0]);
+      content = [{ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } }, { type: 'text', text: prompt }];
+    }
+    var body = { max_tokens: 4000, messages: [{ role: 'user', content: content }] };
     var withSearch = !searchOff;
     // up to two attempts: an incomplete or failed answer is retried once; web search is dropped if the account has it turned off
     for (var attempt = 0; attempt < 2; attempt++) {
@@ -1434,6 +1443,7 @@ function setMode(isLive) {
 }
 
 function openKeySheet() {
+  document.getElementById('auddInput').value = getAudd(); document.getElementById('auddMsg').textContent = '';
   document.getElementById('keyInput').value = getKey();
   document.getElementById('keyMsg').textContent = '';
   document.getElementById('keySheet').hidden = false;
@@ -1459,8 +1469,8 @@ setMode(!!getKey());
 // ─── JOURNAL (scans saved on this device, IndexedDB) ─────────────
 // Record shape mirrors the future Supabase table: id, created_at, title, creator, category, identified, data (Claude JSON), photo, thumb
 var DB_NAME = 'strata', DB_STORE = 'scans', dbp = null, journal = [], photoURLs = {};
-var CAT_MAP = { painting: 'painting', print: 'painting', architecture: 'arch', sculpture: 'sculpture', book: 'book', plant: 'plants', sky: 'stars', mountain: 'mountains' };
-var CAT_LABEL = { painting: 'Painting', arch: 'Architecture', sculpture: 'Sculpture', book: 'Book', plants: 'Plant', stars: 'Sky', mountains: 'Mountain' };
+var CAT_MAP = { music: 'music', painting: 'painting', print: 'painting', architecture: 'arch', sculpture: 'sculpture', book: 'book', plant: 'plants', sky: 'stars', mountain: 'mountains' };
+var CAT_LABEL = { music: 'Song', painting: 'Painting', arch: 'Architecture', sculpture: 'Sculpture', book: 'Book', plants: 'Plant', stars: 'Sky', mountains: 'Mountain' };
 
 function openDB() {
   if (dbp) return dbp;
@@ -1614,10 +1624,10 @@ function renderJournal() {
   body.insertBefore(slot, body.firstChild);
   var eb = document.getElementById('jEmptyBtn'); if (eb) eb.onclick = function(){ show('s-camera'); };
   // Stats
-  var c = { art: 0, arch: 0, book: 0 };
-  journal.forEach(function(r){ var pc = scanCats(r)[0]; if (pc === 'arch') c.arch++; else if (pc === 'book') c.book++; else c.art++; });
+  var c = { art: 0, arch: 0, book: 0, music: 0 };
+  journal.forEach(function(r){ var pc = scanCats(r)[0]; if (pc === 'arch') c.arch++; else if (pc === 'book') c.book++; else if (pc === 'music') c.music++; else c.art++; });
   var st = document.querySelectorAll('.home-stats .stat-num');
-  if (st.length === 4) { st[0].textContent = c.art; st[1].textContent = 0; st[2].textContent = c.arch; st[3].textContent = c.book; }
+  if (st.length === 4) { st[0].textContent = c.art; st[1].textContent = c.music; st[2].textContent = c.arch; st[3].textContent = c.book; }
   // Search by category
   document.getElementById('jCatRows').innerHTML = journal.map(function(r){
     return '<div class="cat-row" data-scan="' + r.id + '" data-cat="' + scanCats(r).join(' ') + '"><div class="cat-thumb" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;"></div><div class="cat-body"><div class="cat-type">' + t(CAT_LABEL[scanCats(r)[0]] || 'Discovery') + ' · ' + fmtDay(r.created_at) + '</div><div class="cat-name">' + esc(r.title) + '</div><div class="cat-meta">' + esc(r.creator) + '</div><div class="cat-spark">' + esc((r.data.spark && r.data.spark.head) || '') + '</div></div></div>';
@@ -1866,6 +1876,129 @@ function calStep(dir) {
 document.getElementById('calPrev').addEventListener('click', function(){ calStep(-1); });
 document.getElementById('calNext').addEventListener('click', function(){ calStep(1); });
 
+// ─── MUSIC: record a clip → AudD identifies → Claude tells the story ─
+var AUDD_STORE = 'strata.auddKey', musicRec = null, musicStream = null, musicCtl = null, musicBusy = false, musicTimer = null;
+function getAudd() { try { return localStorage.getItem(AUDD_STORE) || ''; } catch (e) { return window._memAudd || ''; } }
+function setAudd(k) { window._memAudd = k; try { if (k) localStorage.setItem(AUDD_STORE, k); else localStorage.removeItem(AUDD_STORE); } catch (e) {} }
+function musicStatus(lbl, sub, isError) {
+  document.getElementById('musicLbl').textContent = lbl;
+  document.getElementById('musicSub').textContent = sub || '';
+  document.getElementById('musicErr').hidden = !isError;
+  document.getElementById('s-music').classList.toggle('stopped', !!isError);
+}
+var MUSIC_ERR = {
+  no_match: 'No match. Get closer to the music and try again.', mic_denied: 'Microphone access was refused. Allow it in Safari settings and try again.',
+  no_mic: 'This browser cannot record audio.', audd_key: 'Your AudD key was refused. Check it in Settings.', audd_limit: 'Your AudD plan has no requests left.',
+  audd_network: 'Could not reach AudD. Check your internet and try again.'
+};
+function stopMusic() {
+  musicBusy = false; clearTimeout(musicTimer);
+  if (musicRec && musicRec.state !== 'inactive') { musicRec.onstop = null; try { musicRec.stop(); } catch (e) {} }
+  if (musicStream) { musicStream.getTracks().forEach(function(tr){ tr.stop(); }); musicStream = null; }
+  if (musicCtl) musicCtl.abort();
+}
+function recordClip(ms) {
+  return new Promise(async function(ok, ko){
+    if (!navigator.mediaDevices || !window.MediaRecorder) return ko({ code: 'no_mic' });
+    try { musicStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } }); }
+    catch (e) { return ko({ code: 'mic_denied' }); }
+    var type = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm'].find(function(m){ return MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m); }) || '';
+    var chunks = [];
+    musicRec = new MediaRecorder(musicStream, type ? { mimeType: type } : undefined);
+    musicRec.ondataavailable = function(e){ if (e.data && e.data.size) chunks.push(e.data); };
+    musicRec.onstop = function(){
+      if (musicStream) { musicStream.getTracks().forEach(function(tr){ tr.stop(); }); musicStream = null; }
+      ok(new Blob(chunks, { type: musicRec.mimeType || type || 'audio/mp4' }));
+    };
+    musicRec.start();
+    musicTimer = setTimeout(function(){ if (musicRec.state !== 'inactive') musicRec.stop(); }, ms);
+  });
+}
+async function identifySong(blob) {
+  var fd = new FormData();
+  fd.append('api_token', getAudd());
+  fd.append('return', 'apple_music,spotify');
+  fd.append('file', blob, /webm/.test(blob.type) ? 'clip.webm' : 'clip.m4a');
+  var res;
+  musicCtl = new AbortController();
+  try { res = await fetch('https://api.audd.io/', { method: 'POST', body: fd, signal: musicCtl.signal }); }
+  catch (e) { throw { code: e && e.name === 'AbortError' ? 'cancelled' : 'audd_network' }; }
+  var j = await res.json().catch(function(){ return {}; });
+  if (j.status === 'error') {
+    var c = j.error && j.error.error_code;
+    throw { code: c === 900 || c === 901 ? 'audd_key' : c === 902 ? 'audd_limit' : 'audd_error', message: j.error && j.error.error_message };
+  }
+  if (!j.result) throw { code: 'no_match' };
+  return j.result;
+}
+function songArtwork(r) {
+  var am = r.apple_music && r.apple_music.artwork && r.apple_music.artwork.url;
+  if (am) return am.replace('{w}', '800').replace('{h}', '800');
+  var sp = r.spotify && r.spotify.album && r.spotify.album.images && r.spotify.album.images[0];
+  return sp ? sp.url : '';
+}
+// Album art as an image for the journal; a drawn cover when the artwork cannot be downloaded
+async function artworkBlob(url, title, artist) {
+  if (url) { try { var r = await fetch(url); if (r.ok) { var b = await r.blob(); if (/^image\//.test(b.type)) return b; } } catch (e) {} }
+  var c = document.createElement('canvas'); c.width = c.height = 800; var x = c.getContext('2d');
+  var g = x.createLinearGradient(0, 0, 800, 800); g.addColorStop(0, '#2C2C2E'); g.addColorStop(1, '#0E0E10'); x.fillStyle = g; x.fillRect(0, 0, 800, 800);
+  x.fillStyle = '#F2F2F7'; x.font = '56px Georgia, serif'; x.fillText(String(title).slice(0, 22), 60, 640);
+  x.fillStyle = '#8E8E93'; x.font = '36px Helvetica, Arial, sans-serif'; x.fillText(String(artist).slice(0, 30), 60, 700);
+  return await new Promise(function(ok){ c.toBlob(ok, 'image/jpeg', 0.85); });
+}
+function musicPrompt(r) {
+  var facts = { title: r.title, artist: r.artist, album: r.album, release_date: r.release_date, label: r.label,
+    genres: r.apple_music && r.apple_music.genreNames, composer: r.apple_music && r.apple_music.composerName };
+  return SCAN_PROMPT.replace("The image is a photo the user just took with their phone. The subject may be on a screen, in a book, on a wall, or outdoors.",
+    'The user just heard a piece of music; an audio recognition service identified it as: ' + JSON.stringify(facts) + '. Trust this identification. Write the cards about this recording and its song or piece: the artist, how it was made, what it meant.') +
+    '\nFor music: category is "music"; creator is the performing artist (for classical music, the composer, and name the performer in the story); medium is the genre or album (max 3 words); location is the recording studio or the place most associated with its creation if well known, otherwise null; more_by lists other well-known songs or pieces by the same artist (wiki: the Wikipedia article of that song or of its album).' + langRule();
+}
+async function runMusic() {
+  if (!live) { show('s-home'); openKeySheet(); return; }
+  if (!getAudd()) { show('s-home'); openKeySheet(); document.getElementById('auddMsg').textContent = t('Add your AudD key to recognise music.'); setTimeout(function(){ document.getElementById('auddInput').scrollIntoView({ block: 'center' }); }, 50); return; }
+  musicBusy = true;
+  musicStatus(t('Listening…'), t('Hold near the music source'));
+  try {
+    var clip = await recordClip(9000);
+    if (!musicBusy) return;
+    musicStatus(t('Identifying the music…'), t('Usually a few seconds'));
+    var song = await identifySong(clip);
+    if (!musicBusy) return;
+    musicStatus(song.title, song.artist + ' · ' + t('Writing the story…'));
+    musicCtl = new AbortController();
+    var d = await live.json(musicPrompt(song), { signal: musicCtl.signal });
+    if (!musicBusy) return;
+    d.category = 'music'; d.song_link = song.song_link || '';
+    if (!d.title) d.title = song.title;
+    if (!d.creator) d.creator = song.artist;
+    if (!d.artist_short) d.artist_short = song.artist;
+    var art = songArtwork(song), img = await artworkBlob(art, d.title, d.creator), url = URL.createObjectURL(img);
+    musicBusy = false;
+    var dup = findDuplicate(d);
+    if (dup) { URL.revokeObjectURL(url); markSeen(dup); openScan(dup.id); toast(t('Already in your journal · first scanned {d}', { d: fmtDay(dup.created_at) })); return; }
+    ARTS.live = toArt(d, url);
+    saveScan(d, img).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; loadJournal().then(function(){ if (currentArt === 'live') renderTags(); }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
+      .catch(function(){ toast(t('Could not save this scan on this device')); });
+    currentArt = 'live'; renderedChat = null;
+    show('s-result');
+  } catch (e) {
+    var wasBusy = musicBusy; stopMusic();
+    if (!wasBusy || (e && e.code === 'cancelled')) return;
+    var msg = MUSIC_ERR[e && e.code] || SCAN_ERR[e && e.code] || 'Something went wrong. Try again.';
+    musicStatus(e && e.code === 'no_match' ? t('No match') : t('Could not identify this one'), t(msg) + (e && e.code !== 'no_match' ? ' [' + ((e && e.code) || 'unknown') + ']' : ''), true);
+  }
+}
+['btn-listen', 'btn-cam-music'].forEach(function(id){ document.getElementById(id).addEventListener('click', function(){ show('s-music'); runMusic(); }); });
+document.getElementById('musicRetry').addEventListener('click', runMusic);
+document.getElementById('musicBack').addEventListener('click', function(){ show('s-home'); });
+document.getElementById('btn-music-cancel').addEventListener('click', function(){ stopMusic(); show('s-home'); });
+document.getElementById('auddSave').addEventListener('click', function(){
+  var k = document.getElementById('auddInput').value.trim();
+  if (k.length < 10) { document.getElementById('auddMsg').textContent = t('Paste the full AudD API token.'); return; }
+  setAudd(k); document.getElementById('auddMsg').textContent = ''; closeKeySheet(); toast(t('Music key saved'));
+});
+document.getElementById('auddRemove').addEventListener('click', function(){ setAudd(''); document.getElementById('auddInput').value = ''; toast(t('Music key removed')); });
+
 // ─── CARD ZOOM ─────────────────────────────────
 var zoomIdx = 0;
 function openZoom(i) {
@@ -1930,7 +2063,7 @@ fr: {
   "{n} scan has no known original location (a reproduction, a poster, or a private work).": "{n} scan n'a pas de lieu d'original connu (reproduction, poster ou œuvre privée).",
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
-  "Browse by Date": "Parcourir par date", "No scans in this period.": "Aucun scan sur cette période.", "Previous": "Précédent", "Next": "Suivant", "Day": "Jour", "Week": "Semaine", "Month": "Mois", "Year": "Année",
+  "Browse by Date": "Parcourir par date", "Music recognition key (AudD)": "Clé de reconnaissance musicale (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Écouter identifie les morceaux avec AudD, puis Claude raconte leur histoire.", "AudD API token": "Jeton API AudD", "Save music key": "Enregistrer la clé musique", "Remove": "Supprimer", "Create one at dashboard.audd.io.": "Créez-en une sur dashboard.audd.io.", "Back": "Retour", "Identifying the music…": "Identification de la musique…", "Usually a few seconds": "Quelques secondes en général", "Writing the story…": "Écriture du récit…", "No match": "Aucun résultat", "No match. Get closer to the music and try again.": "Aucun résultat. Rapprochez-vous de la musique et réessayez.", "Microphone access was refused. Allow it in Safari settings and try again.": "L'accès au micro a été refusé. Autorisez-le dans les réglages de Safari et réessayez.", "This browser cannot record audio.": "Ce navigateur ne peut pas enregistrer de son.", "Your AudD key was refused. Check it in Settings.": "Votre clé AudD a été refusée. Vérifiez-la dans les Réglages.", "Your AudD plan has no requests left.": "Votre forfait AudD n'a plus de requêtes.", "Could not reach AudD. Check your internet and try again.": "Impossible de joindre AudD. Vérifiez votre connexion et réessayez.", "Something went wrong. Try again.": "Un problème est survenu. Réessayez.", "Add your AudD key to recognise music.": "Ajoutez votre clé AudD pour reconnaître la musique.", "Paste the full AudD API token.": "Collez le jeton API AudD en entier.", "Music key saved": "Clé musique enregistrée", "Music key removed": "Clé musique supprimée", "Listen to this track": "Écouter ce morceau", "Song": "Morceau",  "No scans in this period.": "Aucun scan sur cette période.", "Previous": "Précédent", "Next": "Suivant", "Day": "Jour", "Week": "Semaine", "Month": "Mois", "Year": "Année",
   "Point at any art": "Visez une œuvre", "Tap the shutter to take a photo": "Touchez le déclencheur pour prendre une photo",
   "Camera blocked · tap the shutter to take a photo": "Caméra bloquée · touchez le déclencheur pour prendre une photo",
   "Add your Claude API key to scan for real. Tap the shutter.": "Ajoutez votre clé API Claude pour scanner pour de vrai. Touchez le déclencheur.",
@@ -1992,7 +2125,7 @@ es: {
   "{n} scan has no known original location (a reproduction, a poster, or a private work).": "{n} escaneo no tiene un lugar de original conocido (reproducción, póster u obra privada).",
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
-  "Browse by Date": "Explorar por fecha", "No scans in this period.": "No hay escaneos en este periodo.", "Previous": "Anterior", "Next": "Siguiente", "Day": "Día", "Week": "Semana", "Month": "Mes", "Year": "Año",
+  "Browse by Date": "Explorar por fecha", "Music recognition key (AudD)": "Clave de reconocimiento musical (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Escuchar identifica canciones con AudD y luego Claude cuenta su historia.", "AudD API token": "Token API de AudD", "Save music key": "Guardar clave de música", "Remove": "Eliminar", "Create one at dashboard.audd.io.": "Crea uno en dashboard.audd.io.", "Back": "Volver", "Identifying the music…": "Identificando la música…", "Usually a few seconds": "Normalmente unos segundos", "Writing the story…": "Escribiendo la historia…", "No match": "Sin resultado", "No match. Get closer to the music and try again.": "Sin resultado. Acércate a la música e inténtalo de nuevo.", "Microphone access was refused. Allow it in Safari settings and try again.": "Se ha denegado el acceso al micrófono. Permítelo en los ajustes de Safari e inténtalo de nuevo.", "This browser cannot record audio.": "Este navegador no puede grabar audio.", "Your AudD key was refused. Check it in Settings.": "Tu clave de AudD ha sido rechazada. Revísala en Ajustes.", "Your AudD plan has no requests left.": "A tu plan de AudD no le quedan solicitudes.", "Could not reach AudD. Check your internet and try again.": "No se ha podido conectar con AudD. Revisa tu internet e inténtalo de nuevo.", "Something went wrong. Try again.": "Algo ha fallado. Inténtalo de nuevo.", "Add your AudD key to recognise music.": "Añade tu clave de AudD para reconocer música.", "Paste the full AudD API token.": "Pega el token API de AudD completo.", "Music key saved": "Clave de música guardada", "Music key removed": "Clave de música eliminada", "Listen to this track": "Escuchar esta pista", "Song": "Canción",  "No scans in this period.": "No hay escaneos en este periodo.", "Previous": "Anterior", "Next": "Siguiente", "Day": "Día", "Week": "Semana", "Month": "Mes", "Year": "Año",
   "Point at any art": "Apunta a una obra", "Tap the shutter to take a photo": "Toca el disparador para hacer una foto",
   "Camera blocked · tap the shutter to take a photo": "Cámara bloqueada · toca el disparador para hacer una foto",
   "Add your Claude API key to scan for real. Tap the shutter.": "Añade tu clave API de Claude para escanear de verdad. Toca el disparador.",
