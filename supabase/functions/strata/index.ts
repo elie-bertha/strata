@@ -130,6 +130,20 @@ Deno.serve(async (req) => {
     return json({ error: 'invite_failed' }, 500);
   }
 
+  // Delete my account: photos, cloud journal, credit and usage, open invitations, then the account itself
+  if (action === 'delete_account') {
+    if (prof.is_admin) return json({ error: 'admin_cannot_delete' }, 403);
+    const { data: files } = await db.storage.from('photos').list(user.id, { limit: 1000 });
+    if (files && files.length) await db.storage.from('photos').remove(files.map((f: any) => user.id + '/' + f.name));
+    await db.from('scans').delete().eq('user_id', user.id);
+    await db.from('usage').delete().eq('user_id', user.id);
+    await db.from('invites').delete().eq('created_by', user.id).is('used_by', null);
+    await db.from('profiles').delete().eq('user_id', user.id);
+    const { error } = await db.auth.admin.deleteUser(user.id);
+    if (error) return json({ error: 'delete_failed', message: error.message }, 500);
+    return json({ ok: true });
+  }
+
   // ── admin only ──
   if (!prof.is_admin) return json({ error: 'forbidden' }, 403);
   if (action === 'friends') {
