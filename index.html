@@ -267,6 +267,8 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 }
 .key-sheet{position:absolute;inset:0;z-index:2000;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;}
 .key-card{width:100%;max-height:92%;overflow-y:auto;background:var(--surface);border-radius:24px 24px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;}
+.sync-box{display:flex;flex-direction:column;gap:10px;}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
 .key-sep{height:1px;background:var(--s3);margin:10px 0 4px;}
 .key-top{display:flex;align-items:center;justify-content:space-between;}
 .key-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--ink);}
@@ -476,6 +478,22 @@ label.menu-item{cursor:pointer;}
 <div class="toast" id="toast" role="status" hidden></div>
 <div class="key-sheet" id="keySheet" hidden><div class="key-card" role="dialog" aria-labelledby="keyTitle">
   <div class="key-top"><div class="key-title" id="keyTitle">Settings</div><button class="key-x" id="keyClose" aria-label="Close">×</button></div>
+  <div class="key-lbl">Cloud sync</div>
+  <div id="syncIn" class="sync-box">
+    <p class="key-p">Sign in to keep your journal in the cloud and on all your devices.</p>
+    <label class="sr" for="syncEmail">Email</label>
+    <input class="key-in" id="syncEmail" type="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="Email">
+    <label class="sr" for="syncPassword">Password</label>
+    <input class="key-in" id="syncPassword" type="password" autocomplete="current-password" placeholder="Password">
+    <div class="key-msg" id="syncMsg"></div>
+    <button class="key-btn pri" id="syncSignIn">Sign in</button>
+  </div>
+  <div id="syncOut" class="sync-box" hidden>
+    <p class="key-p"><span id="syncWho"></span></p>
+    <p class="key-note" id="syncState"></p>
+    <div class="key-row"><button class="key-btn" id="syncNow">Sync now</button><button class="key-btn" id="syncSignOut">Sign out</button></div>
+  </div>
+  <div class="key-sep"></div>
   <label class="key-lbl" for="keyInput">Claude API key</label>
   <p class="key-p">Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.</p>
   <input class="key-in" id="keyInput" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…">
@@ -619,6 +637,7 @@ label.menu-item{cursor:pointer;}
       <div class="menu-item" id="btn-lang"><div class="m-ico" style="background:#F3F0FF;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6741D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><span class="m-lbl">Language</span><span class="m-val" id="langVal">English</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item"><div class="m-ico" style="background:#F0FFF4;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2D7D46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span class="m-lbl">Share with friends</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item" id="btn-prefs"><div class="m-ico" style="background:#FFFBF0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div><span class="m-lbl">Settings</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="menu-item" id="btn-sync"><div class="m-ico" style="background:#EEF2FA;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></div><span class="m-lbl">Cloud sync</span><span class="m-val" id="syncMenuVal"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item" id="btn-export"><div class="m-ico" style="background:#EEF2FA;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><span class="m-lbl">Export journal</span><span class="m-val" id="exportVal"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <label class="menu-item" id="btn-import" for="importInput"><div class="m-ico" style="background:#EEF2FA;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div><span class="m-lbl">Import journal</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></label>
       <div class="menu-item"><div class="m-ico" style="background:#F5F5F5;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div><span class="m-lbl">About Strata</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
@@ -1459,6 +1478,7 @@ function setMode(isLive) {
 }
 
 function openKeySheet() {
+  renderSync();
   renderCamSeg();
   document.getElementById('auddInput').value = getAudd(); document.getElementById('auddMsg').textContent = '';
   document.getElementById('keyInput').value = getKey();
@@ -1532,7 +1552,7 @@ async function saveScan(d, file) {
     photo: await resizeBlob(file, 1280, 0.82, false),
     thumb: await resizeBlob(file, 360, 0.75, true)
   };
-  await tx('readwrite', function(s){ return s.put(rec); });
+  await saveLocal(rec);
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function(){});
   return rec.id;
 }
@@ -1543,6 +1563,7 @@ function loadJournal() {
   }).catch(function(){ journal = []; renderJournal(); });
 }
 function deleteScan(id) {
+  queueRemoteDelete(journal.find(function(r){ return r.id === id; }));
   return tx('readwrite', function(s){ return s.delete(id); }).then(function(){
     if (photoURLs[id]) { URL.revokeObjectURL(photoURLs[id]); delete photoURLs[id]; }
     delete ARTS['j_' + id];
@@ -1569,7 +1590,7 @@ function findDuplicate(d) {
 }
 function markSeen(r) {
   r.seen = (r.seen || 1) + 1; r.last_seen_at = new Date().toISOString();
-  tx('readwrite', function(s){ return s.put(r); }).catch(function(){});
+  saveLocal(r).catch(function(){});
 }
 
 function openScan(id) {
@@ -1720,7 +1741,7 @@ document.getElementById('tsChips').addEventListener('click', function(e){
   var on = !chip.classList.contains('on');
   chip.classList.toggle('on', on); chip.setAttribute('aria-pressed', on);
   r.cats = Array.prototype.map.call(document.querySelectorAll('#tsChips .ts-chip.on'), function(c){ return c.getAttribute('data-cat'); });
-  tx('readwrite', function(s){ return s.put(r); }).then(function(){ renderTags(); renderJournal(); }).catch(function(){ toast(t('Could not save this change')); });
+  saveLocal(r).then(function(){ renderTags(); renderJournal(); }).catch(function(){ toast(t('Could not save this change')); });
 });
 document.getElementById('tsClose').addEventListener('click', closeTagSheet);
 document.getElementById('tsDone').addEventListener('click', closeTagSheet);
@@ -1798,7 +1819,7 @@ async function backfillLocations() {
       var j = parseJSON(text);
       r.data.location = j && j.location && isFinite(j.location.lat) ? j.location : null;
     } catch (e) { if (e && (e.code === 'bad_key' || e.code === 'no_credit' || e.code === 'network')) break; r.data.location = null; }
-    await tx('readwrite', function(s){ return s.put(r); }).catch(function(){});
+    await saveLocal(r).catch(function(){});
     renderMap();
   }
   locating = false; renderMap();
@@ -1967,7 +1988,8 @@ async function importJournal(file) {
     if (!r || !r.id || !r.data) { skipped++; continue; }
     if (journal.some(function(x){ return x.id === r.id; }) || findDuplicate(r.data)) { skipped++; continue; }
     r.photo = dataURLToBlob(r.photo) || dataURLToBlob(r.thumb) || new Blob([], { type: 'image/jpeg' });
-    await tx('readwrite', function(s){ return s.put(r); });
+    r.synced = false; r.photo_path = null;
+    await saveLocal(r);
     journal.push(r); added++;
   }
   await loadJournal();
@@ -1978,6 +2000,164 @@ document.getElementById('importInput').addEventListener('change', function(e){
   var f = e.target.files && e.target.files[0]; e.target.value = '';
   if (f) importJournal(f);
 });
+
+// ─── CLOUD SYNC (Supabase) ─────────────────────
+// The journal stays on the device for speed and offline use; when signed in, every change is copied to Supabase
+// and scans from other devices come back down. The project URL and publishable key are public by design:
+// access is limited by the sign-in and the row-level rules on the database.
+var SB_URL = 'https://pkzemawtxwoccgsuuhbx.supabase.co';
+var SB_KEY = 'sb_publishable_zQNBdXh2jhUyRKCfC3z--A_T8ZGIOOQ';
+var SESSION_STORE = 'strata.session', syncTimer = null, syncing = false;
+
+function getSession() { try { return JSON.parse(localStorage.getItem(SESSION_STORE) || 'null'); } catch (e) { return window._memSession || null; } }
+function setSession(s) { window._memSession = s; try { if (s) localStorage.setItem(SESSION_STORE, JSON.stringify(s)); else localStorage.removeItem(SESSION_STORE); } catch (e) {} }
+
+async function sbAuth(grant, body) {
+  var res = await fetch(SB_URL + '/auth/v1/token?grant_type=' + grant, { method: 'POST', headers: { apikey: SB_KEY, 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  var j = await res.json().catch(function(){ return {}; });
+  if (!res.ok) throw { code: res.status === 400 || res.status === 401 ? 'bad_login' : 'sync_network', message: j.error_description || j.msg || j.message };
+  var s = { access_token: j.access_token, refresh_token: j.refresh_token, expires_at: Date.now() + (j.expires_in || 3600) * 1000, user: { id: j.user && j.user.id, email: j.user && j.user.email } };
+  setSession(s);
+  return s;
+}
+async function sbToken() {
+  var s = getSession(); if (!s) throw { code: 'signed_out' };
+  if (Date.now() > s.expires_at - 60000) s = await sbAuth('refresh_token', { refresh_token: s.refresh_token });
+  return s;
+}
+async function sb(path, opts) {
+  opts = opts || {};
+  var s = await sbToken();
+  var headers = Object.assign({ apikey: SB_KEY, Authorization: 'Bearer ' + s.access_token }, opts.headers || {});
+  var res;
+  try { res = await fetch(SB_URL + path, Object.assign({}, opts, { headers: headers })); }
+  catch (e) { throw { code: 'sync_network' }; }
+  if (res.status === 401) { setSession(null); renderSync(); throw { code: 'signed_out' }; }
+  if (!res.ok) { var txt = await res.text().catch(function(){ return ''; }); throw { code: 'sync_error', message: res.status + ' ' + txt.slice(0, 160) }; }
+  return res;
+}
+
+function toRow(r) {
+  return { id: r.id, created_at: r.created_at, updated_at: r.updated_at || r.created_at, title: r.title, creator: r.creator || null, artist_short: r.artist_short || null,
+    category: r.category || null, cats: Array.isArray(r.cats) ? r.cats : null, identified: r.identified !== false, data: r.data, thumb: r.thumb || null,
+    photo_path: r.photo_path || null, seen: r.seen || 1, last_seen_at: r.last_seen_at || null };
+}
+function fromRow(row, photo) {
+  return { id: row.id, created_at: row.created_at, updated_at: row.updated_at, title: row.title, creator: row.creator || '', artist_short: row.artist_short || '',
+    category: row.category || 'other', cats: row.cats || undefined, identified: row.identified !== false, data: row.data, thumb: row.thumb || '', photo: photo,
+    photo_path: row.photo_path, seen: row.seen || 1, last_seen_at: row.last_seen_at, synced: true, dirty: false };
+}
+
+// Every local change goes through here, so it is marked for upload
+function saveLocal(r) {
+  r.dirty = true; r.updated_at = new Date().toISOString();
+  return tx('readwrite', function(s){ return s.put(r); }).then(function(){ scheduleSync(); });
+}
+function pendingDeletes() { try { return JSON.parse(localStorage.getItem('strata.pendingDeletes') || '[]'); } catch (e) { return []; } }
+function setPendingDeletes(a) { try { localStorage.setItem('strata.pendingDeletes', JSON.stringify(a)); } catch (e) {} }
+function queueRemoteDelete(r) {
+  if (!r || !r.synced) return;
+  var a = pendingDeletes(); a.push({ id: r.id, photo_path: r.photo_path || null }); setPendingDeletes(a); scheduleSync();
+}
+function newer(a, b) { return !!a && (!b || new Date(a).getTime() > new Date(b).getTime() + 500); }
+function scheduleSync() { if (!getSession()) return; clearTimeout(syncTimer); syncTimer = setTimeout(function(){ syncNow(false); }, 1500); }
+
+var syncAgain = false;
+async function syncNow(loud) {
+  if (!getSession()) return;
+  if (syncing) { syncAgain = true; return; }   // a change arrived mid-sync: run once more at the end
+  syncing = true; renderSync(t('Syncing…'));
+  var up = 0, down = 0;
+  try {
+    var uid = (await sbToken()).user.id;
+    // 1. deletions made on this device
+    var dels = pendingDeletes(), left = [];
+    for (var i = 0; i < dels.length; i++) {
+      try {
+        await sb('/rest/v1/scans?id=eq.' + encodeURIComponent(dels[i].id), { method: 'DELETE' });
+        if (dels[i].photo_path) await sb('/storage/v1/object/photos/' + dels[i].photo_path, { method: 'DELETE' }).catch(function(){});
+      } catch (e) { if (e.code === 'sync_network') left.push(dels[i]); }
+    }
+    setPendingDeletes(left);
+    // 2. what the cloud has
+    var remote = await (await sb('/rest/v1/scans?select=*&order=created_at.desc')).json();
+    var byId = {}; remote.forEach(function(row){ byId[row.id] = row; });
+    var local = await tx('readonly', function(s){ return s.getAll(); });
+    var localById = {}; local.forEach(function(r){ localById[r.id] = r; });
+    // 3. upload new or changed scans (photo first, then the row)
+    for (var k = 0; k < local.length; k++) {
+      var r = local[k], row = byId[r.id];
+      if (r.synced && !row) { await tx('readwrite', function(s){ return s.delete(r.id); }); continue; }   // removed on another device
+      if (!r.dirty && r.synced) continue;
+      if (r.photo instanceof Blob && r.photo.size && !r.photo_path) {
+        var path = uid + '/' + r.id + '.jpg';
+        await sb('/storage/v1/object/photos/' + path, { method: 'POST', headers: { 'content-type': r.photo.type || 'image/jpeg', 'x-upsert': 'true' }, body: r.photo });
+        r.photo_path = path;
+      }
+      await sb('/rest/v1/scans?on_conflict=user_id,id', { method: 'POST', headers: { 'content-type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify(toRow(r)) });
+      r.synced = true; r.dirty = false;
+      await tx('readwrite', function(s){ return s.put(r); });
+      up++;
+    }
+    // 4. bring down scans from other devices, and newer versions of edited ones
+    for (var m = 0; m < remote.length; m++) {
+      var rw = remote[m], lr = localById[rw.id];
+      if (lr && !newer(rw.updated_at, lr.updated_at)) continue;
+      if (lr && lr.dirty) continue;
+      var photo = lr && lr.photo;
+      if (!photo && rw.photo_path) {
+        try { photo = await (await sb('/storage/v1/object/authenticated/photos/' + rw.photo_path)).blob(); } catch (e) { photo = null; }
+      }
+      var rec = fromRow(rw, photo || new Blob([], { type: 'image/jpeg' }));
+      await tx('readwrite', function(s){ return s.put(rec); });
+      if (ARTS['j_' + rec.id]) delete ARTS['j_' + rec.id];
+      down++;
+    }
+    try { localStorage.setItem('strata.lastSync', new Date().toISOString()); } catch (e) {}
+    await loadJournal();
+    syncing = false; renderSync();
+    if (syncAgain) { syncAgain = false; setTimeout(function(){ syncNow(false); }, 300); }
+    if (loud || down) toast(t('Synced · {u} up · {d} down', { u: up, d: down }));
+  } catch (e) {
+    syncing = false;
+    renderSync(e && e.code === 'signed_out' ? '' : t('Sync failed') + ' [' + ((e && e.code) || 'unknown') + ']');
+    if (loud) toast(t('Sync failed'));
+  }
+}
+
+function renderSync(status) {
+  var s = getSession(), box = document.getElementById('syncIn'), out = document.getElementById('syncOut');
+  if (!box) return;
+  box.hidden = !!s; out.hidden = !s;
+  if (s) {
+    document.getElementById('syncWho').textContent = s.user && s.user.email || '';
+    var last = null; try { last = localStorage.getItem('strata.lastSync'); } catch (e) {}
+    document.getElementById('syncState').textContent = status != null && status !== '' ? status : (last ? t('Last sync: {d}', { d: fmtDay(last) + ' ' + new Date(last).toLocaleTimeString(LOCALES[getLang()], { hour: '2-digit', minute: '2-digit' }) }) : '');
+  }
+  var mv = document.getElementById('syncMenuVal'); if (mv) mv.textContent = s ? t('On') : t('Off');
+}
+document.getElementById('syncSignIn').addEventListener('click', async function(){
+  var email = document.getElementById('syncEmail').value.trim(), pw = document.getElementById('syncPassword').value;
+  var msg = document.getElementById('syncMsg');
+  if (!email || !pw) { msg.textContent = t('Enter your email and password.'); return; }
+  msg.textContent = t('Signing in…');
+  try {
+    await sbAuth('password', { email: email, password: pw });
+    document.getElementById('syncPassword').value = ''; msg.textContent = '';
+    renderSync(); toast(t('Signed in · your journal is being copied to the cloud'));
+    syncNow(true);
+  } catch (e) { msg.textContent = e.code === 'bad_login' ? t('Wrong email or password.') : t('Could not reach the server. Try again.'); }
+});
+document.getElementById('syncNow').addEventListener('click', function(){ syncNow(true); });
+function signOut() {
+  setSession(null); renderSync(); toast(t('Signed out · your journal stays on this phone'));
+}
+document.getElementById('syncSignOut').addEventListener('click', signOut);
+document.querySelector('.menu-signout').addEventListener('click', function(){ if (getSession()) signOut(); else openKeySheet(); });
+// sync when the app opens or comes back to the foreground
+document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') scheduleSync(); });
+
+document.getElementById('btn-sync').addEventListener('click', openKeySheet);
 
 // ─── MUSIC: record a clip → AudD identifies → Claude tells the story ─
 var AUDD_STORE = 'strata.auddKey', musicRec = null, musicStream = null, musicCtl = null, musicBusy = false, musicTimer = null;
@@ -2166,7 +2346,7 @@ fr: {
   "{n} scan has no known original location (a reproduction, a poster, or a private work).": "{n} scan n'a pas de lieu d'original connu (reproduction, poster ou œuvre privée).",
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
-  "Browse by Date": "Parcourir par date", "Export journal": "Exporter le journal", "Import journal": "Importer un journal", "Preparing your export…": "Préparation de l'export…", "Journal exported": "Journal exporté", "This file is not a Strata export.": "Ce fichier n'est pas un export Strata.", "{a} imported · {s} already in your journal": "{a} importés · {s} déjà dans votre journal",  "Camera": "Appareil photo", "Phone camera": "Appareil du téléphone", "Strata viewfinder": "Viseur Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "L'appareil du téléphone offre le zoom, les objectifs et la mise au point. Le viseur Strata vous garde dans l'app.",  "Music recognition key (AudD)": "Clé de reconnaissance musicale (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Écouter identifie les morceaux avec AudD, puis Claude raconte leur histoire.", "AudD API token": "Jeton API AudD", "Save music key": "Enregistrer la clé musique", "Remove": "Supprimer", "Create one at dashboard.audd.io.": "Créez-en une sur dashboard.audd.io.", "Back": "Retour", "Identifying the music…": "Identification de la musique…", "Usually a few seconds": "Quelques secondes en général", "Writing the story…": "Écriture du récit…", "No match": "Aucun résultat", "No match. Get closer to the music and try again.": "Aucun résultat. Rapprochez-vous de la musique et réessayez.", "Microphone access was refused. Allow it in Safari settings and try again.": "L'accès au micro a été refusé. Autorisez-le dans les réglages de Safari et réessayez.", "This browser cannot record audio.": "Ce navigateur ne peut pas enregistrer de son.", "Your AudD key was refused. Check it in Settings.": "Votre clé AudD a été refusée. Vérifiez-la dans les Réglages.", "Your AudD plan has no requests left.": "Votre forfait AudD n'a plus de requêtes.", "Could not reach AudD. Check your internet and try again.": "Impossible de joindre AudD. Vérifiez votre connexion et réessayez.", "Something went wrong. Try again.": "Un problème est survenu. Réessayez.", "Add your AudD key to recognise music.": "Ajoutez votre clé AudD pour reconnaître la musique.", "Paste the full AudD API token.": "Collez le jeton API AudD en entier.", "Music key saved": "Clé musique enregistrée", "Music key removed": "Clé musique supprimée", "Listen to this track": "Écouter ce morceau", "Song": "Morceau",  "No scans in this period.": "Aucun scan sur cette période.", "Previous": "Précédent", "Next": "Suivant", "Day": "Jour", "Week": "Semaine", "Month": "Mois", "Year": "Année",
+  "Browse by Date": "Parcourir par date", "Cloud sync": "Synchronisation cloud", "Sign in to keep your journal in the cloud and on all your devices.": "Connectez-vous pour garder votre journal dans le cloud et sur tous vos appareils.", "Email": "Email", "Password": "Mot de passe", "Sign in": "Se connecter", "Sync now": "Synchroniser", "Syncing…": "Synchronisation…", "Synced · {u} up · {d} down": "Synchronisé · {u} envoyés · {d} reçus", "Sync failed": "Échec de la synchronisation", "Last sync: {d}": "Dernière synchro : {d}", "On": "Activée", "Off": "Désactivée", "Enter your email and password.": "Entrez votre email et votre mot de passe.", "Signing in…": "Connexion…", "Signed in · your journal is being copied to the cloud": "Connecté · votre journal est copié dans le cloud", "Wrong email or password.": "Email ou mot de passe incorrect.", "Could not reach the server. Try again.": "Serveur injoignable. Réessayez.", "Signed out · your journal stays on this phone": "Déconnecté · votre journal reste sur ce téléphone",  "Export journal": "Exporter le journal", "Import journal": "Importer un journal", "Preparing your export…": "Préparation de l'export…", "Journal exported": "Journal exporté", "This file is not a Strata export.": "Ce fichier n'est pas un export Strata.", "{a} imported · {s} already in your journal": "{a} importés · {s} déjà dans votre journal",  "Camera": "Appareil photo", "Phone camera": "Appareil du téléphone", "Strata viewfinder": "Viseur Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "L'appareil du téléphone offre le zoom, les objectifs et la mise au point. Le viseur Strata vous garde dans l'app.",  "Music recognition key (AudD)": "Clé de reconnaissance musicale (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Écouter identifie les morceaux avec AudD, puis Claude raconte leur histoire.", "AudD API token": "Jeton API AudD", "Save music key": "Enregistrer la clé musique", "Remove": "Supprimer", "Create one at dashboard.audd.io.": "Créez-en une sur dashboard.audd.io.", "Back": "Retour", "Identifying the music…": "Identification de la musique…", "Usually a few seconds": "Quelques secondes en général", "Writing the story…": "Écriture du récit…", "No match": "Aucun résultat", "No match. Get closer to the music and try again.": "Aucun résultat. Rapprochez-vous de la musique et réessayez.", "Microphone access was refused. Allow it in Safari settings and try again.": "L'accès au micro a été refusé. Autorisez-le dans les réglages de Safari et réessayez.", "This browser cannot record audio.": "Ce navigateur ne peut pas enregistrer de son.", "Your AudD key was refused. Check it in Settings.": "Votre clé AudD a été refusée. Vérifiez-la dans les Réglages.", "Your AudD plan has no requests left.": "Votre forfait AudD n'a plus de requêtes.", "Could not reach AudD. Check your internet and try again.": "Impossible de joindre AudD. Vérifiez votre connexion et réessayez.", "Something went wrong. Try again.": "Un problème est survenu. Réessayez.", "Add your AudD key to recognise music.": "Ajoutez votre clé AudD pour reconnaître la musique.", "Paste the full AudD API token.": "Collez le jeton API AudD en entier.", "Music key saved": "Clé musique enregistrée", "Music key removed": "Clé musique supprimée", "Listen to this track": "Écouter ce morceau", "Song": "Morceau",  "No scans in this period.": "Aucun scan sur cette période.", "Previous": "Précédent", "Next": "Suivant", "Day": "Jour", "Week": "Semaine", "Month": "Mois", "Year": "Année",
   "Point at any art": "Visez une œuvre", "Tap the shutter to take a photo": "Touchez le déclencheur pour prendre une photo",
   "Camera blocked · tap the shutter to take a photo": "Caméra bloquée · touchez le déclencheur pour prendre une photo",
   "Add your Claude API key to scan for real. Tap the shutter.": "Ajoutez votre clé API Claude pour scanner pour de vrai. Touchez le déclencheur.",
@@ -2228,7 +2408,7 @@ es: {
   "{n} scan has no known original location (a reproduction, a poster, or a private work).": "{n} escaneo no tiene un lugar de original conocido (reproducción, póster u obra privada).",
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
-  "Browse by Date": "Explorar por fecha", "Export journal": "Exportar el diario", "Import journal": "Importar un diario", "Preparing your export…": "Preparando la exportación…", "Journal exported": "Diario exportado", "This file is not a Strata export.": "Este archivo no es una exportación de Strata.", "{a} imported · {s} already in your journal": "{a} importados · {s} ya estaban en tu diario",  "Camera": "Cámara", "Phone camera": "Cámara del teléfono", "Strata viewfinder": "Visor de Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "La cámara del teléfono tiene zoom, objetivos y enfoque. El visor de Strata te mantiene dentro de la app.",  "Music recognition key (AudD)": "Clave de reconocimiento musical (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Escuchar identifica canciones con AudD y luego Claude cuenta su historia.", "AudD API token": "Token API de AudD", "Save music key": "Guardar clave de música", "Remove": "Eliminar", "Create one at dashboard.audd.io.": "Crea uno en dashboard.audd.io.", "Back": "Volver", "Identifying the music…": "Identificando la música…", "Usually a few seconds": "Normalmente unos segundos", "Writing the story…": "Escribiendo la historia…", "No match": "Sin resultado", "No match. Get closer to the music and try again.": "Sin resultado. Acércate a la música e inténtalo de nuevo.", "Microphone access was refused. Allow it in Safari settings and try again.": "Se ha denegado el acceso al micrófono. Permítelo en los ajustes de Safari e inténtalo de nuevo.", "This browser cannot record audio.": "Este navegador no puede grabar audio.", "Your AudD key was refused. Check it in Settings.": "Tu clave de AudD ha sido rechazada. Revísala en Ajustes.", "Your AudD plan has no requests left.": "A tu plan de AudD no le quedan solicitudes.", "Could not reach AudD. Check your internet and try again.": "No se ha podido conectar con AudD. Revisa tu internet e inténtalo de nuevo.", "Something went wrong. Try again.": "Algo ha fallado. Inténtalo de nuevo.", "Add your AudD key to recognise music.": "Añade tu clave de AudD para reconocer música.", "Paste the full AudD API token.": "Pega el token API de AudD completo.", "Music key saved": "Clave de música guardada", "Music key removed": "Clave de música eliminada", "Listen to this track": "Escuchar esta pista", "Song": "Canción",  "No scans in this period.": "No hay escaneos en este periodo.", "Previous": "Anterior", "Next": "Siguiente", "Day": "Día", "Week": "Semana", "Month": "Mes", "Year": "Año",
+  "Browse by Date": "Explorar por fecha", "Cloud sync": "Sincronización en la nube", "Sign in to keep your journal in the cloud and on all your devices.": "Inicia sesión para guardar tu diario en la nube y en todos tus dispositivos.", "Email": "Email", "Password": "Contraseña", "Sign in": "Iniciar sesión", "Sync now": "Sincronizar", "Syncing…": "Sincronizando…", "Synced · {u} up · {d} down": "Sincronizado · {u} enviados · {d} recibidos", "Sync failed": "Error de sincronización", "Last sync: {d}": "Última sincronización: {d}", "On": "Activada", "Off": "Desactivada", "Enter your email and password.": "Introduce tu email y tu contraseña.", "Signing in…": "Iniciando sesión…", "Signed in · your journal is being copied to the cloud": "Sesión iniciada · tu diario se está copiando en la nube", "Wrong email or password.": "Email o contraseña incorrectos.", "Could not reach the server. Try again.": "No se puede conectar con el servidor. Inténtalo de nuevo.", "Signed out · your journal stays on this phone": "Sesión cerrada · tu diario se queda en este teléfono",  "Export journal": "Exportar el diario", "Import journal": "Importar un diario", "Preparing your export…": "Preparando la exportación…", "Journal exported": "Diario exportado", "This file is not a Strata export.": "Este archivo no es una exportación de Strata.", "{a} imported · {s} already in your journal": "{a} importados · {s} ya estaban en tu diario",  "Camera": "Cámara", "Phone camera": "Cámara del teléfono", "Strata viewfinder": "Visor de Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "La cámara del teléfono tiene zoom, objetivos y enfoque. El visor de Strata te mantiene dentro de la app.",  "Music recognition key (AudD)": "Clave de reconocimiento musical (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Escuchar identifica canciones con AudD y luego Claude cuenta su historia.", "AudD API token": "Token API de AudD", "Save music key": "Guardar clave de música", "Remove": "Eliminar", "Create one at dashboard.audd.io.": "Crea uno en dashboard.audd.io.", "Back": "Volver", "Identifying the music…": "Identificando la música…", "Usually a few seconds": "Normalmente unos segundos", "Writing the story…": "Escribiendo la historia…", "No match": "Sin resultado", "No match. Get closer to the music and try again.": "Sin resultado. Acércate a la música e inténtalo de nuevo.", "Microphone access was refused. Allow it in Safari settings and try again.": "Se ha denegado el acceso al micrófono. Permítelo en los ajustes de Safari e inténtalo de nuevo.", "This browser cannot record audio.": "Este navegador no puede grabar audio.", "Your AudD key was refused. Check it in Settings.": "Tu clave de AudD ha sido rechazada. Revísala en Ajustes.", "Your AudD plan has no requests left.": "A tu plan de AudD no le quedan solicitudes.", "Could not reach AudD. Check your internet and try again.": "No se ha podido conectar con AudD. Revisa tu internet e inténtalo de nuevo.", "Something went wrong. Try again.": "Algo ha fallado. Inténtalo de nuevo.", "Add your AudD key to recognise music.": "Añade tu clave de AudD para reconocer música.", "Paste the full AudD API token.": "Pega el token API de AudD completo.", "Music key saved": "Clave de música guardada", "Music key removed": "Clave de música eliminada", "Listen to this track": "Escuchar esta pista", "Song": "Canción",  "No scans in this period.": "No hay escaneos en este periodo.", "Previous": "Anterior", "Next": "Siguiente", "Day": "Día", "Week": "Semana", "Month": "Mes", "Year": "Año",
   "Point at any art": "Apunta a una obra", "Tap the shutter to take a photo": "Toca el disparador para hacer una foto",
   "Camera blocked · tap the shutter to take a photo": "Cámara bloqueada · toca el disparador para hacer una foto",
   "Add your Claude API key to scan for real. Tap the shutter.": "Añade tu clave API de Claude para escanear de verdad. Toca el disparador.",
@@ -2293,6 +2473,7 @@ function applyLang() {
   var lv = document.getElementById('langVal'); if (lv) lv.textContent = { en: 'English', fr: 'Français', es: 'Español' }[l];
   setGreeting();
   renderExportVal();
+  renderSync();
   setMode(!!live);
   if (typeof renderJournal === 'function' && sections) renderJournal();
   var ma = document.getElementById('s-search-map'); if (ma && ma.classList.contains('active')) renderMap();
@@ -2308,7 +2489,7 @@ function setGreeting() {
 initSections();
 captureI18n();
 applyLang();
-loadJournal();
+loadJournal().then(function(){ if (getSession()) syncNow(false); });
 
 // ─── INIT ─────────────────────────────────────
 function fitPhone() {
