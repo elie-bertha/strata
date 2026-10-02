@@ -324,6 +324,9 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
 .ts-chips{display:flex;flex-wrap:wrap;gap:8px;}
 .ts-chip{font:500 14px 'DM Sans',sans-serif;padding:10px 14px;border-radius:100px;border:1.5px solid var(--s3);background:var(--surface);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
 .ts-chip.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+.seg{display:flex;background:var(--s2);border-radius:12px;padding:3px;gap:3px;}
+.seg-b{flex:1;font:500 14px 'DM Sans',sans-serif;padding:10px 6px;border:none;border-radius:9px;background:transparent;color:var(--ink2);cursor:pointer;}
+.seg-b.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12);}
 /* SAME ARTIST SECTION */
 .same-artist{background:var(--bg);padding:16px 0 28px;flex-shrink:0;}
 .sa-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px 12px;}
@@ -442,9 +445,14 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
 <div class="key-sheet" id="keySheet" hidden><div class="key-card" role="dialog" aria-labelledby="keyTitle">
-  <div class="key-top"><div class="key-title" id="keyTitle">Claude API key</div><button class="key-x" id="keyClose" aria-label="Close">×</button></div>
+  <div class="key-top"><div class="key-title" id="keyTitle">Preferences</div><button class="key-x" id="keyClose" aria-label="Close">×</button></div>
+  <div class="key-lbl" id="langLbl">Story language</div>
+  <div class="seg" role="radiogroup" aria-labelledby="langLbl" id="langSeg">
+    <button class="seg-b" role="radio" data-lang="en">English</button><button class="seg-b" role="radio" data-lang="fr">Français</button><button class="seg-b" role="radio" data-lang="es">Español</button>
+  </div>
+  <p class="key-note">Cards and chat for new scans are written in this language. Saved scans keep theirs.</p>
+  <label class="key-lbl" for="keyInput">Claude API key</label>
   <p class="key-p">Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.</p>
-  <label class="key-lbl" for="keyInput">API key</label>
   <input class="key-in" id="keyInput" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…">
   <div class="key-msg" id="keyMsg"></div>
   <button class="key-btn pri" id="keySave">Save key</button>
@@ -1193,7 +1201,7 @@ async function runLiveScan(file) {
   var t = setTimeout(function(){ if (liveScanning) scanStatus('Checking and writing the story…', 'Claude may search the web to confirm · up to a minute'); }, 9000);
   liveScanCtl = new AbortController();
   try {
-    var d = await live.json(SCAN_PROMPT, { images: [file], signal: liveScanCtl.signal });
+    var d = await live.json(SCAN_PROMPT + langRule(), { images: [file], signal: liveScanCtl.signal });
     if (!d || typeof d !== 'object' || !d.title) throw { code: 'invalid_json' };
     var dup = findDuplicate(d);
     liveScanning = false;
@@ -1243,7 +1251,7 @@ function chatRules(a) {
                      : (a.title + ' by ' + a.meta.join(', ') + '. ' + a.spark[1] + ' ' + a.story[1] + ' ' + a.surp[1]);
   return 'You are the narrator of Strata, an app that tells the story behind artworks. Voice: a knowledgeable friend who finds everything slightly fascinating and shares the strange part. ' +
     'The user photographed this work and has read these cards: ' + facts + '\n\n' +
-    'Answer their questions about it in 2 to 4 sentences, conversational, no markdown, no lists. Reply in the language the user writes in. Only state facts you are confident about; if you do not know, say so in one sentence.';
+    'Answer their questions about it in 2 to 4 sentences, conversational, no markdown, no lists. Reply in ' + LANGS[getLang()] + ', unless the user writes in another language: then reply in theirs. Only state facts you are confident about; if you do not know, say so in one sentence.';
 }
 
 async function askLive(text) {
@@ -1273,6 +1281,23 @@ function answer(text) {
 
 // Resolve live mode: this standalone page calls the Claude API directly with the user's own key
 var searchOff = false;
+var LANGS = { en: 'English', fr: 'French', es: 'Spanish' };
+var LANG_EX = { en: 'The Starry Night', fr: 'La Nuit étoilée', es: 'La noche estrellada' };
+function getLang() {
+  try { var s = localStorage.getItem('strata.lang'); if (LANGS[s]) return s; } catch (e) {}
+  var n = (navigator.language || 'en').slice(0, 2); return LANGS[n] ? n : 'en';
+}
+function setLang(l) { try { localStorage.setItem('strata.lang', l); } catch (e) {} renderLangSeg(); }
+function renderLangSeg() {
+  var l = getLang();
+  document.querySelectorAll('#langSeg .seg-b').forEach(function(b){ var on = b.getAttribute('data-lang') === l; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+}
+function langRule() {
+  var l = getLang(), name = LANGS[l];
+  return '\n\nLanguage: write every text value in ' + name + ' (title, medium, heads, bodies, hooks, more_by titles, deep_dive titles, chat_intro, questions, place). ' +
+    'Use the title the work is usually known by in ' + name + ' (e.g. "' + LANG_EX[l] + '"). Keep JSON keys, category values and "kind" values in English. ' +
+    'Also add "title_en": the usual English title, used to recognise the same work across languages.';
+}
 var API_MODELS = ['claude-sonnet-5-5', 'claude-sonnet-4-6'];
 var KEY_STORE = 'strata.apiKey';
 function getKey() { try { return localStorage.getItem(KEY_STORE) || ''; } catch (e) { return window._memKey || ''; } }
@@ -1419,6 +1444,7 @@ function setMode(isLive) {
 }
 
 function openKeySheet() {
+  renderLangSeg();
   document.getElementById('keyInput').value = getKey();
   document.getElementById('keyMsg').textContent = '';
   document.getElementById('keySheet').hidden = false;
@@ -1433,6 +1459,7 @@ document.getElementById('keySave').addEventListener('click', function(){
 document.getElementById('keyRemove').addEventListener('click', function(){ setKey(''); setMode(false); closeKeySheet(); });
 document.getElementById('keyDemo').addEventListener('click', function(){ closeKeySheet(); currentArt = 'hokusai'; show('s-scanning'); });
 document.getElementById('keyClose').addEventListener('click', closeKeySheet);
+document.getElementById('langSeg').addEventListener('click', function(e){ var b = e.target.closest('.seg-b'); if (b) setLang(b.getAttribute('data-lang')); });
 document.querySelectorAll('.mode-pill').forEach(function(p){ p.addEventListener('click', openKeySheet); });
 var prefs = document.getElementById('btn-prefs'); if (prefs) prefs.addEventListener('click', openKeySheet);
 setMode(!!getKey());
@@ -1511,12 +1538,12 @@ function normName(s) {
 }
 function findDuplicate(d) {
   if (d.identified === false) return null;          // a "best guess" is never treated as the same work
-  var t = normName(d.title), c = normName(d.creator);
+  var t = normName(d.title), te = normName(d.title_en), c = normName(d.creator);
   if (!t) return null;
   return journal.find(function(r){
     if (!r.identified) return false;
-    var rt = normName(r.title), rc = normName(r.creator);
-    var sameTitle = rt === t || (Math.min(rt.length, t.length) >= 8 && (rt.indexOf(t) === 0 || t.indexOf(rt) === 0));
+    var rt = normName(r.title), rte = normName(r.data && r.data.title_en), rc = normName(r.creator);
+    var sameTitle = rt === t || (Math.min(rt.length, t.length) >= 8 && (rt.indexOf(t) === 0 || t.indexOf(rt) === 0)) || (te && (te === rt || te === rte)) || (rte && rte === t);
     var sameCreator = !c || !rc || rc === c || rc.indexOf(c) >= 0 || c.indexOf(rc) >= 0;
     return sameTitle && sameCreator;
   }) || null;
