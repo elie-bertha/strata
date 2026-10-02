@@ -18,7 +18,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 [hidden]{display:none!important;}
-:root{--bg:#F2F2F7;--surface:#FFF;--s2:#F2F2F7;--s3:#E5E5EA;--border:rgba(0,0,0,.07);--muted:#8E8E93;--ink:#1C1C1E;--ink2:#3A3A3C;--night:#16346B;--night2:#102A5C;--sun:#F4C542;--sun-deep:#C9921A;}
+:root{--bg:#F2F2F7;--surface:#FFF;--s2:#F2F2F7;--s3:#E5E5EA;--border:rgba(0,0,0,.07);--muted:#8E8E93;--ink:#1C1C1E;--ink2:#3A3A3C;--night:#16346B;--night2:#102A5C;--sun:#F4C542;--sun-deep:#C9921A;--sun-ink:#B7850F;--sun-bg:#FDF4D6;}
 html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:var(--ink);-webkit-font-smoothing:antialiased;overflow:hidden;}
 .wrapper{display:flex;align-items:center;justify-content:center;height:100%;padding:20px;}
 .legend{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:var(--ink);color:white;font-size:11px;padding:7px 18px;border-radius:100px;white-space:nowrap;opacity:.45;pointer-events:none;z-index:9999;}
@@ -59,7 +59,9 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 .home-body::-webkit-scrollbar{display:none;}
 .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .sec-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink);display:flex;align-items:center;gap:8px;}
-.sec-badge{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:6px;font-size:10px;font-weight:700;font-family:'DM Sans',sans-serif;color:white;background:var(--night);}
+.sec-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 5px;border-radius:6px;font-size:10px;font-weight:700;font-family:'DM Sans',sans-serif;color:var(--night);background:var(--sun);}
+.sec-title>svg{color:var(--sun-ink);}
+.qs-pill>svg{color:var(--sun-ink);}
 .sec-more{font-size:12px;font-weight:500;color:var(--muted);background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:3px;}
 .h-strip{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin:0 -16px;padding-left:16px;padding-right:16px;scrollbar-width:none;}
 .h-strip::-webkit-scrollbar{display:none;}
@@ -90,11 +92,38 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 #s-menu{background:var(--bg);}
 .menu-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#C4B49A,#8B6914);display:flex;align-items:center;justify-content:center;margin:28px auto 10px;font-family:'DM Serif Display',serif;font-size:20px;color:white;}
 .menu-uname{font-family:'DM Serif Display',serif;font-size:20px;color:var(--ink);text-align:center;margin-bottom:4px;}
-.menu-email{font-size:12px;color:var(--muted);text-align:center;margin-bottom:24px;}
+.menu-email{font-size:12px;color:var(--muted);text-align:center;margin-bottom:20px;min-height:4px;}
+.menu-prof{display:block;width:100%;background:none;border:none;padding:0;cursor:pointer;font:inherit;}
+.menu-avatar{background-size:cover!important;background-position:center!important;}
+.menu-avatar.ph{background:var(--night)!important;color:var(--sun);}
+.menu-foot{display:flex;align-items:center;justify-content:center;gap:8px;margin:26px auto 0;background:none;border:none;cursor:pointer;font:500 11px 'DM Sans',sans-serif;color:var(--muted);letter-spacing:.3px;}
+.logo-sm{width:22px;height:22px;border-radius:6px;overflow:hidden;display:block;}
+[data-logo] svg{display:block;width:100%;height:100%;}
+.scan-ic.scan-logo{width:60px;height:60px;border-radius:16px;overflow:hidden;background:none;box-shadow:0 6px 24px rgba(0,0,0,.4);}
+.prof-photo{display:flex;align-items:center;gap:16px;margin:4px 0 6px;}
+.prof-av{width:72px;height:72px;border-radius:50%;background:var(--night) center/cover;display:flex;align-items:center;justify-content:center;font-family:'DM Serif Display',serif;font-size:28px;color:var(--sun);flex-shrink:0;}
+.prof-ph-acts{display:flex;flex-direction:column;align-items:flex-start;gap:6px;}
+.prof-link{font:600 14px 'DM Sans',sans-serif;color:var(--night);background:none;border:none;padding:0;cursor:pointer;}
+.prof-link.mute{font-weight:500;font-size:13px;color:var(--muted);}
+.key-msg.ok{color:#2D7D46;}
+label.key-btn{text-align:center;display:block;}
+.about-card{gap:0;}
+.ab-logo{width:88px;height:88px;border-radius:22px;overflow:hidden;margin:0 auto 14px;box-shadow:0 8px 28px rgba(16,42,92,.28);}
+.ab-name{font-family:'DM Serif Display',serif;font-size:30px;color:var(--ink);text-align:center;line-height:1;}
+.ab-tag{font-family:'DM Serif Display',serif;font-style:italic;font-size:15px;color:var(--ink2);text-align:center;margin:8px 0 4px;}
+.ab-ver{font-size:11px;color:var(--muted);text-align:center;margin-bottom:18px;}
+.ab-p{font-size:14px;line-height:1.6;color:var(--ink2);margin:0 0 14px;}
+.ab-h{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:8px 0 10px;}
+.ab-layers{display:flex;flex-direction:column;gap:10px;margin:0 0 18px;}
+.ab-l{display:flex;gap:12px;align-items:flex-start;}
+.ab-n{width:22px;height:22px;border-radius:6px;background:var(--sun);color:var(--night);font:700 11px 'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+.ab-l b{font-family:'DM Serif Display',serif;font-weight:400;font-size:15px;color:var(--ink);}
+.ab-l span{display:block;font-size:13px;line-height:1.45;color:var(--ink2);}
+.ab-foot{border-top:1px solid var(--s3);padding-top:14px;margin-top:4px;font-size:12px;line-height:1.6;color:var(--muted);}
 .menu-list{display:flex;flex-direction:column;padding:0 16px;gap:6px;}
 .menu-item{display:flex;align-items:center;gap:14px;padding:13px 16px;background:var(--surface);border-radius:14px;border:1px solid var(--border);cursor:pointer;}
 .menu-item:active{background:var(--s2);}
-.m-ico{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.m-ico{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--sun-bg);color:var(--sun-ink);}
 .m-lbl{font-size:14px;font-weight:500;color:var(--ink);flex:1;}
 .menu-signout{margin:16px 16px 0;padding:14px;border-radius:14px;background:#FFF2F2;border:1px solid rgba(255,59,48,.12);cursor:pointer;text-align:center;font-size:14px;font-weight:500;color:#FF3B30;}
 
@@ -104,7 +133,7 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 .cat-filter-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:8px;}
 .cat-chips{display:flex;gap:7px;flex-wrap:wrap;}
 .cat-chip{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:100px;font-size:12px;font-weight:500;border:1.5px solid var(--border);background:var(--surface);cursor:pointer;transition:all .2s;color:var(--ink);}
-.cat-chip.on{background:var(--night);color:white;border-color:var(--night);}
+.cat-chip.on{background:var(--sun);color:var(--night);border-color:var(--sun);font-weight:600;}
 .cat-list{flex:1;overflow-y:auto;padding:14px 16px 80px;display:flex;flex-direction:column;gap:9px;}
 .cat-list::-webkit-scrollbar{display:none;}
 .cat-row{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:16px;border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:transform .18s;}
@@ -338,7 +367,7 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
 .ts-p{font-size:13px;color:var(--muted);}
 .ts-chips{display:flex;flex-wrap:wrap;gap:8px;}
 .ts-chip{font:500 14px 'DM Sans',sans-serif;padding:10px 14px;border-radius:100px;border:1.5px solid var(--s3);background:var(--surface);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
-.ts-chip.on{background:var(--night);border-color:var(--night);color:#fff;}
+.ts-chip.on{background:var(--sun);border-color:var(--sun);color:var(--night);font-weight:600;}
 .seg{display:flex;background:var(--s2);border-radius:12px;padding:3px;gap:3px;}
 .seg-b{flex:1;font:500 14px 'DM Sans',sans-serif;padding:10px 6px;border:none;border-radius:9px;background:transparent;color:var(--ink2);cursor:pointer;}
 .seg-b.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12);}
@@ -449,16 +478,65 @@ label.menu-item{cursor:pointer;}
 <body>
 <div class="wrapper">
 <div class="phone"><div class="notch"></div>
+<input type="file" id="avatarInput" class="file-vh" accept="image/*" tabindex="-1">
 <input type="file" id="importInput" class="file-vh" accept="application/json,.json" tabindex="-1">
 <input type="file" id="camInput" class="file-vh" accept="image/*" capture="environment" tabindex="-1"><input type="file" id="libInput" class="file-vh" accept="image/*" tabindex="-1">
-<div class="key-sheet" id="langSheet" hidden><div class="key-card" role="dialog" aria-labelledby="langTitle">
-  <div class="key-top"><div class="key-title" id="langTitle">Language</div><button class="key-x" id="langClose" aria-label="Close">×</button></div>
-  <p class="key-p">Choose the language for the app, the stories and the chat.</p>
+<div class="key-sheet" id="dataSheet" hidden><div class="key-card" role="dialog" aria-labelledby="dataTitle">
+  <div class="key-top"><div class="key-title" id="dataTitle">Journal &amp; sync</div><button class="key-x" id="dataClose" aria-label="Close">×</button></div>
+  <div class="key-lbl">Cloud sync</div>
+  <div id="syncIn" class="sync-box">
+    <p class="key-p">Sign in to keep your journal in the cloud and on all your devices.</p>
+    <label class="sr" for="syncEmail">Email</label>
+    <input class="key-in" id="syncEmail" type="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="Email">
+    <label class="sr" for="syncPassword">Password</label>
+    <input class="key-in" id="syncPassword" type="password" autocomplete="current-password" placeholder="Password">
+    <div class="key-msg" id="syncMsg"></div>
+    <button class="key-btn pri" id="syncSignIn">Sign in</button>
+  </div>
+  <div id="syncOut" class="sync-box" hidden>
+    <p class="key-p"><span id="syncWho"></span></p>
+    <p class="key-note" id="syncState"></p>
+    <div class="key-row"><button class="key-btn" id="syncNow">Sync now</button><button class="key-btn" id="syncSignOut">Sign out</button></div>
+  </div>
+  <div class="key-sep"></div>
+  <div class="key-lbl">Backup</div>
+  <p class="key-p">Save your whole journal, photos included, as one file. Import it on another phone to restore it.</p>
+  <div class="key-row"><button class="key-btn" id="btn-export">Export</button><label class="key-btn" id="btn-import" for="importInput">Import</label></div>
+  <p class="key-note" id="exportVal"></p>
+</div></div>
+<div class="key-sheet" id="profSheet" hidden><div class="key-card" role="dialog" aria-labelledby="profTitle">
+  <div class="key-top"><div class="key-title" id="profTitle">Edit Profile</div><button class="key-x" id="profClose" aria-label="Close">×</button></div>
+  <div class="prof-photo"><div class="prof-av" id="profAv"></div><div class="prof-ph-acts"><label class="prof-link" for="avatarInput">Change photo</label><button class="prof-link mute" id="profPhotoRm">Remove</button></div></div>
+  <label class="key-lbl" for="profName">Name</label>
+  <input class="key-in" id="profName" autocomplete="name" placeholder="Your name">
+  <div class="key-lbl" id="langTitle">Language</div>
   <div class="seg" role="radiogroup" aria-labelledby="langTitle" id="langSeg">
     <button class="seg-b" role="radio" data-lang="en">English</button><button class="seg-b" role="radio" data-lang="fr">Français</button><button class="seg-b" role="radio" data-lang="es">Español</button>
   </div>
+  <p class="key-note">Choose the language for the app, the stories and the chat.</p>
   <p class="key-note">Saved scans keep the language they were written in.</p>
-  <button class="key-btn pri" id="langDone">Done</button>
+  <div class="key-sep"></div>
+  <div class="key-lbl">Account</div>
+  <div id="profAcctOut" class="sync-box">
+    <p class="key-p">Turn on cloud sync to change your email and password.</p>
+    <button class="key-btn" id="profGoSync">Set up cloud sync</button>
+  </div>
+  <div id="profAcctIn" class="sync-box" hidden>
+    <label class="sr" for="profEmail">Email</label>
+    <input class="key-in" id="profEmail" type="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="Email">
+    <p class="key-note" id="profEmailNote"></p>
+    <div class="key-lbl">Change password</div>
+    <label class="sr" for="profPwCur">Current password</label>
+    <input class="key-in" id="profPwCur" type="password" autocomplete="current-password" placeholder="Current password">
+    <label class="sr" for="profPwNew">New password</label>
+    <input class="key-in" id="profPwNew" type="password" autocomplete="new-password" placeholder="New password (6 characters or more)">
+  </div>
+  <div class="key-msg" id="profMsg"></div>
+  <button class="key-btn pri" id="profSave">Save</button>
+</div></div>
+<div class="key-sheet" id="aboutSheet" hidden><div class="key-card about-card" role="dialog" aria-labelledby="aboutTitle">
+  <div class="key-top"><span></span><button class="key-x" id="aboutClose" aria-label="Close">×</button></div>
+  <div id="aboutBody"></div>
 </div></div>
 <div class="tag-sheet" id="tagSheet" hidden>
   <div class="ts-card" role="dialog" aria-labelledby="tsTitle">
@@ -478,22 +556,6 @@ label.menu-item{cursor:pointer;}
 <div class="toast" id="toast" role="status" hidden></div>
 <div class="key-sheet" id="keySheet" hidden><div class="key-card" role="dialog" aria-labelledby="keyTitle">
   <div class="key-top"><div class="key-title" id="keyTitle">Settings</div><button class="key-x" id="keyClose" aria-label="Close">×</button></div>
-  <div class="key-lbl">Cloud sync</div>
-  <div id="syncIn" class="sync-box">
-    <p class="key-p">Sign in to keep your journal in the cloud and on all your devices.</p>
-    <label class="sr" for="syncEmail">Email</label>
-    <input class="key-in" id="syncEmail" type="email" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="Email">
-    <label class="sr" for="syncPassword">Password</label>
-    <input class="key-in" id="syncPassword" type="password" autocomplete="current-password" placeholder="Password">
-    <div class="key-msg" id="syncMsg"></div>
-    <button class="key-btn pri" id="syncSignIn">Sign in</button>
-  </div>
-  <div id="syncOut" class="sync-box" hidden>
-    <p class="key-p"><span id="syncWho"></span></p>
-    <p class="key-note" id="syncState"></p>
-    <div class="key-row"><button class="key-btn" id="syncNow">Sync now</button><button class="key-btn" id="syncSignOut">Sign out</button></div>
-  </div>
-  <div class="key-sep"></div>
   <label class="key-lbl" for="keyInput">Claude API key</label>
   <p class="key-p">Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.</p>
   <input class="key-in" id="keyInput" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…">
@@ -616,7 +678,7 @@ label.menu-item{cursor:pointer;}
       Listen
     </button>
     <label class="action-btn-pri" id="btn-scan" for="camInput" role="button">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F4C542" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
       Scan Art
     </label>
     <label class="action-btn-ico" id="btn-library" for="libInput" role="button" aria-label="Choose a photo from your library"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></label>
@@ -630,19 +692,16 @@ label.menu-item{cursor:pointer;}
     <span class="page-title">Account</span>
   </div>
   <div style="overflow-y:auto;flex:1;padding-bottom:40px;">
-    <div class="menu-avatar">E</div>
-    <div class="menu-uname">Elie Bertha</div>
+    <button class="menu-prof" id="menuProf" aria-label="Edit Profile"><div class="menu-avatar" id="menuAv"></div><div class="menu-uname" id="menuName"></div><div class="menu-email" id="menuEmail"></div></button>
     <div class="menu-list">
-      <div class="menu-item"><div class="m-ico" style="background:#F0F4FF;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B5BDB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span class="m-lbl">Edit Profile</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
-      <div class="menu-item" id="btn-lang"><div class="m-ico" style="background:#F3F0FF;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6741D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><span class="m-lbl">Language</span><span class="m-val" id="langVal">English</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
-      <div class="menu-item"><div class="m-ico" style="background:#F0FFF4;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2D7D46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span class="m-lbl">Share with friends</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
-      <div class="menu-item" id="btn-prefs"><div class="m-ico" style="background:#FFFBF0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div><span class="m-lbl">Settings</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
-      <div class="menu-item" id="btn-sync"><div class="m-ico" style="background:#EEF2FA;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg></div><span class="m-lbl">Cloud sync</span><span class="m-val" id="syncMenuVal"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
-      <div class="menu-item" id="btn-export"><div class="m-ico" style="background:#EEF2FA;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><span class="m-lbl">Export journal</span><span class="m-val" id="exportVal"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
-      <label class="menu-item" id="btn-import" for="importInput"><div class="m-ico" style="background:#EEF2FA;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div><span class="m-lbl">Import journal</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></label>
-      <div class="menu-item"><div class="m-ico" style="background:#F5F5F5;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div><span class="m-lbl">About Strata</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="menu-item" id="btn-profile"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span class="m-lbl">Edit Profile</span><span class="m-val" id="langVal"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="menu-item"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span class="m-lbl">Share with friends</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="menu-item" id="btn-data"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div><span class="m-lbl">Journal &amp; sync</span><span class="m-val" id="syncMenuVal"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="menu-item" id="btn-prefs"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></div><span class="m-lbl">Settings</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="menu-item" id="btn-about"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div><span class="m-lbl">About Strata</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
     </div>
     <div class="menu-signout">Sign out</div>
+    <button class="menu-foot" id="menuFoot"><span class="logo-sm" data-logo></span><span>Strata · <span id="menuVer"></span></span></button>
   </div>
 </div>
 
@@ -750,7 +809,7 @@ label.menu-item{cursor:pointer;}
 <!-- SCANNING -->
 <div class="screen" id="s-scanning">
   <div class="scan-bg" id="scanBg"></div>
-  <div class="scan-wrap"><div class="scan-ring" id="scanRing"><div class="spin"></div><div class="scan-ic"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></div></div><div class="scan-lbl" id="scanLbl">Identifying artwork…</div><div class="scan-sub" id="scanSub">Powered by Claude</div><div class="scan-actions"><button class="scan-btn" id="scanCancel">Cancel</button></div><div class="scan-actions" id="scanErr" hidden><button class="scan-btn" id="scanBack">Back to camera</button><button class="scan-btn pri" id="scanRetry">Try again</button></div></div>
+  <div class="scan-wrap"><div class="scan-ring" id="scanRing"><div class="spin"></div><div class="scan-ic scan-logo" data-logo></div></div><div class="scan-lbl" id="scanLbl">Identifying artwork…</div><div class="scan-sub" id="scanSub">Powered by Claude</div><div class="scan-actions"><button class="scan-btn" id="scanCancel">Cancel</button></div><div class="scan-actions" id="scanErr" hidden><button class="scan-btn" id="scanBack">Back to camera</button><button class="scan-btn pri" id="scanRetry">Try again</button></div></div>
 </div>
 
 <!-- RESULT -->
@@ -1478,7 +1537,6 @@ function setMode(isLive) {
 }
 
 function openKeySheet() {
-  renderSync();
   renderCamSeg();
   document.getElementById('auddInput').value = getAudd(); document.getElementById('auddMsg').textContent = '';
   document.getElementById('keyInput').value = getKey();
@@ -1495,9 +1553,6 @@ document.getElementById('keySave').addEventListener('click', function(){
 document.getElementById('keyRemove').addEventListener('click', function(){ setKey(''); setMode(false); closeKeySheet(); });
 document.getElementById('keyDemo').addEventListener('click', function(){ closeKeySheet(); currentArt = 'hokusai'; show('s-scanning'); });
 document.getElementById('keyClose').addEventListener('click', closeKeySheet);
-document.getElementById('btn-lang').addEventListener('click', function(){ renderLangSeg(); document.getElementById('langSheet').hidden = false; });
-['langClose', 'langDone'].forEach(function(id){ document.getElementById(id).addEventListener('click', function(){ document.getElementById('langSheet').hidden = true; }); });
-document.getElementById('langSheet').addEventListener('click', function(e){ if (e.target.id === 'langSheet') e.target.hidden = true; });
 document.getElementById('langSeg').addEventListener('click', function(e){ var b = e.target.closest('.seg-b'); if (b) setLang(b.getAttribute('data-lang')); });
 document.querySelectorAll('.mode-pill').forEach(function(p){ p.addEventListener('click', openKeySheet); });
 var prefs = document.getElementById('btn-prefs'); if (prefs) prefs.addEventListener('click', openKeySheet);
@@ -1976,7 +2031,7 @@ function markExported() {
 function renderExportVal() {
   var el = document.getElementById('exportVal'); if (!el) return;
   var last = null; try { last = localStorage.getItem('strata.lastExport'); } catch (e) {}
-  el.textContent = last ? fmtDay(last) : '';
+  el.textContent = last ? t('Last export: {d}', { d: fmtDay(last) }) : '';
 }
 async function importJournal(file) {
   var data;
@@ -2118,6 +2173,7 @@ async function syncNow(loud) {
     try { localStorage.setItem('strata.lastSync', new Date().toISOString()); } catch (e) {}
     await loadJournal();
     syncing = false; renderSync();
+    pullProfile().catch(function(){});
     if (syncAgain) { syncAgain = false; setTimeout(function(){ syncNow(false); }, 300); }
     if (loud || down) toast(t('Synced · {u} up · {d} down', { u: up, d: down }));
   } catch (e) {
@@ -2140,6 +2196,7 @@ function renderSync(status) {
     document.getElementById('syncState').textContent = status != null && status !== '' ? status : (last ? t('Last sync: {d}', { d: fmtDay(last) + ' ' + new Date(last).toLocaleTimeString(LOCALES[getLang()], { hour: '2-digit', minute: '2-digit' }) }) : '');
   }
   var mv = document.getElementById('syncMenuVal'); if (mv) mv.textContent = s ? t('On') : t('Off');
+  if (typeof renderProfile === 'function' && document.getElementById('menuName')) renderProfile();
 }
 document.getElementById('syncSignIn').addEventListener('click', async function(){
   var email = document.getElementById('syncEmail').value.trim(), pw = document.getElementById('syncPassword').value;
@@ -2150,19 +2207,191 @@ document.getElementById('syncSignIn').addEventListener('click', async function()
     await sbAuth('password', { email: email, password: pw });
     document.getElementById('syncPassword').value = ''; msg.textContent = '';
     renderSync(); toast(t('Signed in · your journal is being copied to the cloud'));
-    syncNow(true);
+    syncNow(true); pullProfile().catch(function(){});
   } catch (e) { msg.textContent = e.code === 'bad_login' ? t('Wrong email or password.') : t('Could not reach the server. Try again.'); }
 });
 document.getElementById('syncNow').addEventListener('click', function(){ syncNow(true); });
 function signOut() {
-  setSession(null); renderSync(); toast(t('Signed out · your journal stays on this phone'));
+  setSession(null); renderSync(); renderProfile(); toast(t('Signed out · your journal stays on this phone'));
 }
 document.getElementById('syncSignOut').addEventListener('click', signOut);
-document.querySelector('.menu-signout').addEventListener('click', function(){ if (getSession()) signOut(); else openKeySheet(); });
+document.querySelector('.menu-signout').addEventListener('click', function(){ if (getSession()) signOut(); else openDataSheet(); });
 // sync when the app opens or comes back to the foreground
 document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') scheduleSync(); });
 
-document.getElementById('btn-sync').addEventListener('click', openKeySheet);
+
+// ─── PROFILE, ABOUT, LOGO ──────────────────────
+var APP_VERSION = '0.9';
+var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
+function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
+
+// Profile lives on the device; when signed in it is mirrored to the account (name in user metadata, photo in storage)
+function getProfile() { try { return JSON.parse(localStorage.getItem('strata.profile') || '{}') || {}; } catch (e) { return window._memProfile || {}; } }
+function setProfile(pr) { window._memProfile = pr; try { localStorage.setItem('strata.profile', JSON.stringify(pr)); } catch (e) {} }
+function initials(n) { var w = (n || '').trim().split(/\s+/).filter(Boolean); return w.length ? (w[0][0] + (w.length > 1 ? w[w.length - 1][0] : '')).toUpperCase() : ''; }
+function paintAvatar(el, pr) {
+  if (pr.photo) { el.style.backgroundImage = 'url(' + pr.photo + ')'; el.textContent = ''; el.classList.remove('ph'); }
+  else { el.style.backgroundImage = ''; el.classList.add('ph'); el.innerHTML = initials(pr.name) || '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>'; }
+}
+function homeTitle(name) {
+  var first = (name || '').trim().split(/\s+/)[0];
+  if (!first) return t('My Discoveries');
+  if (getLang() === 'fr') return 'Les découvertes ' + (/^[aeiouyhàâéèêëîïôûü]/i.test(first) ? "d'" : 'de ') + first;
+  return t("{n}'s Discoveries", { n: first });
+}
+function renderProfile() {
+  var pr = getProfile(), s = getSession();
+  paintAvatar(document.getElementById('menuAv'), pr);
+  document.getElementById('menuName').textContent = pr.name || t('Add your name');
+  document.getElementById('menuEmail').textContent = s && s.user && s.user.email || '';
+  document.querySelector('.home-name').textContent = homeTitle(pr.name);
+  document.getElementById('menuVer').textContent = 'v' + APP_VERSION;
+}
+var profDraftPhoto;   // undefined = unchanged, '' = removed, data URL = new
+function openProfile() {
+  var pr = getProfile(), s = getSession();
+  profDraftPhoto = undefined;
+  document.getElementById('profName').value = pr.name || '';
+  paintAvatar(document.getElementById('profAv'), pr);
+  document.getElementById('profPhotoRm').hidden = !pr.photo;
+  document.getElementById('profAcctIn').hidden = !s; document.getElementById('profAcctOut').hidden = !!s;
+  document.getElementById('profEmail').value = s && s.user && s.user.email || '';
+  document.getElementById('profEmailNote').textContent = pr.pendingEmail ? t('Waiting for confirmation of {e}', { e: pr.pendingEmail }) : '';
+  document.getElementById('profPwCur').value = ''; document.getElementById('profPwNew').value = '';
+  var m = document.getElementById('profMsg'); m.textContent = ''; m.classList.remove('ok');
+  renderLangSeg();
+  document.getElementById('profSheet').hidden = false;
+}
+function squarePhoto(file, size) {
+  return new Promise(function(ok, ko){
+    var img = new Image(), u = URL.createObjectURL(file);
+    img.onload = function(){
+      var c = document.createElement('canvas'); c.width = c.height = size;
+      var m = Math.min(img.naturalWidth, img.naturalHeight);
+      c.getContext('2d').drawImage(img, (img.naturalWidth - m) / 2, (img.naturalHeight - m) / 2, m, m, 0, 0, size, size);
+      URL.revokeObjectURL(u); ok(c.toDataURL('image/jpeg', .85));
+    };
+    img.onerror = function(){ URL.revokeObjectURL(u); ko(); };
+    img.src = u;
+  });
+}
+document.getElementById('avatarInput').addEventListener('change', async function(e){
+  var f = e.target.files && e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    profDraftPhoto = await squarePhoto(f, 320);
+    paintAvatar(document.getElementById('profAv'), { photo: profDraftPhoto });
+    document.getElementById('profPhotoRm').hidden = false;
+  } catch (err) { document.getElementById('profMsg').textContent = t('This photo could not be read.'); }
+});
+document.getElementById('profPhotoRm').addEventListener('click', function(){
+  profDraftPhoto = '';
+  paintAvatar(document.getElementById('profAv'), { name: document.getElementById('profName').value });
+  this.hidden = true;
+});
+document.getElementById('profSave').addEventListener('click', async function(){
+  var btn = this, msg = document.getElementById('profMsg'), s = getSession(), pr = getProfile();
+  msg.classList.remove('ok'); msg.textContent = '';
+  var name = document.getElementById('profName').value.trim().replace(/\s+/g, ' ').slice(0, 60);
+  var email = document.getElementById('profEmail').value.trim(), cur = document.getElementById('profPwCur').value, nw = document.getElementById('profPwNew').value;
+  var emailChanged = !!s && !!email && email.toLowerCase() !== ((s.user && s.user.email) || '').toLowerCase();
+  if (s && (cur || nw)) {
+    if (!cur) { msg.textContent = t('Enter your current password.'); return; }
+    if (nw.length < 6) { msg.textContent = t('The new password needs 6 characters or more.'); return; }
+  }
+  if (emailChanged && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { msg.textContent = t('This email address does not look right.'); return; }
+  btn.disabled = true; msg.textContent = t('Saving…');
+  var notes = [];
+  try {
+    pr.name = name;
+    if (profDraftPhoto !== undefined) pr.photo = profDraftPhoto || null;
+    pr.updated_at = new Date().toISOString();
+    setProfile(pr); renderProfile();
+    if (s) {
+      if (cur && nw) {
+        await sbAuth('password', { email: s.user.email, password: cur }).catch(function(e){ throw e.code === 'bad_login' ? { code: 'bad_current' } : e; });
+        await sb('/auth/v1/user', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ password: nw }) });
+        notes.push(t('Password changed.'));
+      }
+      if (emailChanged) {
+        await sb('/auth/v1/user', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ email: email }) });
+        pr.pendingEmail = email; setProfile(pr);
+        notes.push(t('Check your inbox: click the confirmation link to switch to {e}.', { e: email }));
+      }
+      await pushProfile(profDraftPhoto !== undefined);
+    }
+    btn.disabled = false;
+    if (notes.length) { msg.classList.add('ok'); msg.textContent = notes.join(' '); document.getElementById('profPwCur').value = ''; document.getElementById('profPwNew').value = ''; document.getElementById('profEmailNote').textContent = pr.pendingEmail ? t('Waiting for confirmation of {e}', { e: pr.pendingEmail }) : ''; }
+    else { document.getElementById('profSheet').hidden = true; toast(t('Profile saved')); }
+  } catch (e) {
+    btn.disabled = false;
+    msg.textContent = e && e.code === 'bad_current' ? t('Your current password is not right.') :
+      e && e.code === 'sync_network' ? t('Could not reach the server. Try again.') :
+      t('Saved on this phone, but the account could not be updated.') + (e && e.message ? ' (' + String(e.message).replace(/<[^>]*>/g, '').slice(0, 120) + ')' : '');
+  }
+});
+async function pushProfile(photoChanged) {
+  var s = getSession(); if (!s) return;
+  var pr = getProfile(), path = null;
+  if (pr.photo) {
+    path = s.user.id + '/avatar.jpg';
+    if (photoChanged) await sb('/storage/v1/object/photos/' + path, { method: 'POST', headers: { 'content-type': 'image/jpeg', 'x-upsert': 'true' }, body: dataURLToBlob(pr.photo) });
+  } else if (photoChanged) {
+    await sb('/storage/v1/object/photos/' + s.user.id + '/avatar.jpg', { method: 'DELETE' }).catch(function(){});
+  }
+  await sb('/auth/v1/user', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ data: { name: pr.name || '', avatar_path: path, profile_updated_at: pr.updated_at || new Date().toISOString() } }) });
+}
+// Pull the account's profile (name, photo, confirmed email) — on sign-in and after each sync
+async function pullProfile() {
+  var s = getSession(); if (!s) return;
+  var u = await (await sb('/auth/v1/user')).json();
+  var pr = getProfile(), md = u.user_metadata || {}, changed = false;
+  if (u.email && s.user.email !== u.email) { s.user.email = u.email; setSession(s); changed = true; }
+  if (pr.pendingEmail && (u.email || '').toLowerCase() === pr.pendingEmail.toLowerCase()) { delete pr.pendingEmail; changed = true; }
+  if (md.profile_updated_at && newer(md.profile_updated_at, pr.updated_at)) {
+    pr.name = md.name || ''; pr.updated_at = md.profile_updated_at; pr.photo = null;
+    if (md.avatar_path) { try { pr.photo = await blobToDataURL(await (await sb('/storage/v1/object/authenticated/photos/' + md.avatar_path)).blob()); } catch (e) {} }
+    changed = true;
+  } else if (!md.profile_updated_at && (pr.name || pr.photo)) {
+    pushProfile(true).catch(function(){});   // first sign-in from this phone: the account gets this profile
+  }
+  if (changed) { setProfile(pr); renderProfile(); }
+}
+document.getElementById('profGoSync').addEventListener('click', function(){ document.getElementById('profSheet').hidden = true; openDataSheet(); });
+
+function openDataSheet() { renderSync(); renderExportVal(); document.getElementById('dataSheet').hidden = false; }
+
+function renderAbout() {
+  var L = [['Spark', 'The hook, in fifteen seconds.'], ['Story', 'What was happening in the artist’s life.'], ['Surprise', 'The detail nobody tells you. Always last.'], ['Deep Dive', 'A few good places to go further.']];
+  document.getElementById('aboutBody').innerHTML =
+    '<div class="ab-logo" data-logo></div><div class="ab-name" id="aboutTitle">Strata</div>' +
+    '<div class="ab-tag">' + t('Every work has layers.') + '</div>' +
+    '<div class="ab-ver">' + t('Version {v}', { v: APP_VERSION }) + '</div>' +
+    '<p class="ab-p">' + t('Point your phone at a painting, a building, a sculpture or a book cover, and Strata tells you its story. Not a museum label or an encyclopedia entry: the story behind it, told like a curious friend who can’t help sharing the strange part.') + '</p>' +
+    '<div class="ab-h">' + t('Four layers per discovery') + '</div>' +
+    '<div class="ab-layers">' + L.map(function(x, i){ return '<div class="ab-l"><div class="ab-n">' + (i + 1) + '</div><div><b>' + t(x[0]) + '</b><span>' + t(x[1]) + '</span></div></div>'; }).join('') + '</div>' +
+    '<p class="ab-p">' + t('Then keep the conversation going in the chat. Everything you scan is kept in your journal: by category, on the map where the original lives, and by date.') + '</p>' +
+    '<div class="ab-h">' + t('The name') + '</div>' +
+    '<p class="ab-p">' + t('Strata are the layers of rock that hold the history of a landscape. Every artwork, building and book has them too: the life of its maker, its time, the accidents that shaped it.') + '</p>' +
+    '<div class="ab-h">' + t('The logo') + '</div>' +
+    '<p class="ab-p">' + t('A yellow S under a starry sky, framed by a camera viewfinder, over layers of blue. A nod to Van Gogh’s nights.') + '</p>' +
+    '<div class="ab-foot">' + t('Made in Barcelona by Elie, for friends.') + '<br>' + t('Stories are written by Claude, Anthropic’s AI. They can contain mistakes: the Deep Dive links are there to check.') + '</div>';
+  paintLogos();
+}
+function openAbout() { renderAbout(); document.getElementById('aboutSheet').hidden = false; document.querySelector('#aboutSheet .key-card').scrollTop = 0; }
+
+['dataSheet', 'profSheet', 'aboutSheet'].forEach(function(id){
+  var el = document.getElementById(id);
+  el.addEventListener('click', function(e){ if (e.target === el) el.hidden = true; });
+});
+document.getElementById('dataClose').addEventListener('click', function(){ document.getElementById('dataSheet').hidden = true; });
+document.getElementById('profClose').addEventListener('click', function(){ document.getElementById('profSheet').hidden = true; });
+document.getElementById('aboutClose').addEventListener('click', function(){ document.getElementById('aboutSheet').hidden = true; });
+document.getElementById('btn-profile').addEventListener('click', openProfile);
+document.getElementById('menuProf').addEventListener('click', openProfile);
+document.getElementById('btn-data').addEventListener('click', openDataSheet);
+document.getElementById('btn-about').addEventListener('click', openAbout);
+document.getElementById('menuFoot').addEventListener('click', openAbout);
+paintLogos();
 
 // ─── MUSIC: record a clip → AudD identifies → Claude tells the story ─
 var AUDD_STORE = 'strata.auddKey', musicRec = null, musicStream = null, musicCtl = null, musicBusy = false, musicTimer = null;
@@ -2351,7 +2580,7 @@ fr: {
   "{n} scan has no known original location (a reproduction, a poster, or a private work).": "{n} scan n'a pas de lieu d'original connu (reproduction, poster ou œuvre privée).",
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
-  "Browse by Date": "Parcourir par date", "Cloud sync": "Synchronisation cloud", "Sign in to keep your journal in the cloud and on all your devices.": "Connectez-vous pour garder votre journal dans le cloud et sur tous vos appareils.", "Email": "Email", "Password": "Mot de passe", "Sign in": "Se connecter", "Sync now": "Synchroniser", "Syncing…": "Synchronisation…", "Synced · {u} up · {d} down": "Synchronisé · {u} envoyés · {d} reçus", "Sync failed": "Échec de la synchronisation", "Last sync: {d}": "Dernière synchro : {d}", "On": "Activée", "Off": "Désactivée", "Enter your email and password.": "Entrez votre email et votre mot de passe.", "Signing in…": "Connexion…", "Signed in · your journal is being copied to the cloud": "Connecté · votre journal est copié dans le cloud", "Wrong email or password.": "Email ou mot de passe incorrect.", "Could not reach the server. Try again.": "Serveur injoignable. Réessayez.", "Signed out · your journal stays on this phone": "Déconnecté · votre journal reste sur ce téléphone",  "Export journal": "Exporter le journal", "Import journal": "Importer un journal", "Preparing your export…": "Préparation de l'export…", "Journal exported": "Journal exporté", "This file is not a Strata export.": "Ce fichier n'est pas un export Strata.", "{a} imported · {s} already in your journal": "{a} importés · {s} déjà dans votre journal",  "Camera": "Appareil photo", "Phone camera": "Appareil du téléphone", "Strata viewfinder": "Viseur Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "L'appareil du téléphone offre le zoom, les objectifs et la mise au point. Le viseur Strata vous garde dans l'app.",  "Music recognition key (AudD)": "Clé de reconnaissance musicale (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Écouter identifie les morceaux avec AudD, puis Claude raconte leur histoire.", "AudD API token": "Jeton API AudD", "Save music key": "Enregistrer la clé musique", "Remove": "Supprimer", "Create one at dashboard.audd.io.": "Créez-en une sur dashboard.audd.io.", "Back": "Retour", "Identifying the music…": "Identification de la musique…", "Usually a few seconds": "Quelques secondes en général", "Writing the story…": "Écriture du récit…", "No match": "Aucun résultat", "No match. Get closer to the music and try again.": "Aucun résultat. Rapprochez-vous de la musique et réessayez.", "Microphone access was refused. Allow it in Safari settings and try again.": "L'accès au micro a été refusé. Autorisez-le dans les réglages de Safari et réessayez.", "This browser cannot record audio.": "Ce navigateur ne peut pas enregistrer de son.", "Your AudD key was refused. Check it in Settings.": "Votre clé AudD a été refusée. Vérifiez-la dans les Réglages.", "Your AudD plan has no requests left.": "Votre forfait AudD n'a plus de requêtes.", "Could not reach AudD. Check your internet and try again.": "Impossible de joindre AudD. Vérifiez votre connexion et réessayez.", "Something went wrong. Try again.": "Un problème est survenu. Réessayez.", "Add your AudD key to recognise music.": "Ajoutez votre clé AudD pour reconnaître la musique.", "Paste the full AudD API token.": "Collez le jeton API AudD en entier.", "Music key saved": "Clé musique enregistrée", "Music key removed": "Clé musique supprimée", "Listen to this track": "Écouter ce morceau", "Song": "Morceau",  "No scans in this period.": "Aucun scan sur cette période.", "Previous": "Précédent", "Next": "Suivant", "Day": "Jour", "Week": "Semaine", "Month": "Mois", "Year": "Année",
+  "Browse by Date": "Parcourir par date", "Journal & sync": "Journal et synchro", "Backup": "Sauvegarde", "Save your whole journal, photos included, as one file. Import it on another phone to restore it.": "Enregistrez tout votre journal, photos comprises, dans un seul fichier. Importez-le sur un autre téléphone pour le restaurer.", "Export": "Exporter", "Import": "Importer", "Last export: {d}": "Dernier export : {d}", "Change photo": "Changer la photo", "Remove": "Supprimer", "Name": "Nom", "Your name": "Votre nom", "Turn on cloud sync to change your email and password.": "Activez la synchronisation cloud pour modifier votre email et votre mot de passe.", "Set up cloud sync": "Activer la synchronisation", "Change password": "Changer le mot de passe", "Current password": "Mot de passe actuel", "New password (6 characters or more)": "Nouveau mot de passe (6 caractères minimum)", "Save": "Enregistrer", "My Discoveries": "Mes découvertes", "{n}'s Discoveries": "Les découvertes de {n}", "Add your name": "Ajoutez votre nom", "Waiting for confirmation of {e}": "En attente de confirmation pour {e}", "This photo could not be read.": "Impossible de lire cette photo.", "Enter your current password.": "Entrez votre mot de passe actuel.", "The new password needs 6 characters or more.": "Le nouveau mot de passe doit faire au moins 6 caractères.", "This email address does not look right.": "Cette adresse email semble incorrecte.", "Saving…": "Enregistrement…", "Password changed.": "Mot de passe modifié.", "Check your inbox: click the confirmation link to switch to {e}.": "Vérifiez vos emails : cliquez sur le lien de confirmation pour passer à {e}.", "Profile saved": "Profil enregistré", "Your current password is not right.": "Votre mot de passe actuel est incorrect.", "Saved on this phone, but the account could not be updated.": "Enregistré sur ce téléphone, mais le compte n'a pas pu être mis à jour.", "Sync on": "Synchro activée", "Sync off": "Synchro désactivée", "Every work has layers.": "Chaque œuvre a ses strates.", "Version {v}": "Version {v}", "Point your phone at a painting, a building, a sculpture or a book cover, and Strata tells you its story. Not a museum label or an encyclopedia entry: the story behind it, told like a curious friend who can’t help sharing the strange part.": "Visez un tableau, un bâtiment, une sculpture ou une couverture de livre : Strata vous raconte son histoire. Pas un cartel de musée ni une fiche d'encyclopédie, mais l'histoire derrière l'œuvre, racontée comme le ferait un ami curieux qui ne peut s'empêcher de partager le détail étrange.", "Four layers per discovery": "Quatre strates par découverte", "The hook, in fifteen seconds.": "L'accroche, en quinze secondes.", "What was happening in the artist’s life.": "Ce qui se passait dans la vie de l'artiste.", "The detail nobody tells you. Always last.": "Le détail que personne ne raconte. Toujours en dernier.", "A few good places to go further.": "Quelques bonnes adresses pour aller plus loin.", "Then keep the conversation going in the chat. Everything you scan is kept in your journal: by category, on the map where the original lives, and by date.": "Ensuite, poursuivez la conversation dans le chat. Tout ce que vous scannez est gardé dans votre journal : par catégorie, sur la carte là où se trouve l'original, et par date.", "The name": "Le nom", "Strata are the layers of rock that hold the history of a landscape. Every artwork, building and book has them too: the life of its maker, its time, the accidents that shaped it.": "Les strates sont les couches de roche qui gardent l'histoire d'un paysage. Chaque œuvre, chaque bâtiment, chaque livre en a aussi : la vie de son auteur, son époque, les hasards qui l'ont façonné.", "The logo": "Le logo", "A yellow S under a starry sky, framed by a camera viewfinder, over layers of blue. A nod to Van Gogh’s nights.": "Un S jaune sous un ciel étoilé, cadré par un viseur d'appareil photo, au-dessus de strates bleues. Un clin d'œil aux nuits de Van Gogh.", "Made in Barcelona by Elie, for friends.": "Fait à Barcelone par Elie, pour les amis.", "Stories are written by Claude, Anthropic’s AI. They can contain mistakes: the Deep Dive links are there to check.": "Les histoires sont écrites par Claude, l'IA d'Anthropic. Elles peuvent contenir des erreurs : les liens Deep Dive sont là pour vérifier.",  "Cloud sync": "Synchronisation cloud", "Sign in to keep your journal in the cloud and on all your devices.": "Connectez-vous pour garder votre journal dans le cloud et sur tous vos appareils.", "Email": "Email", "Password": "Mot de passe", "Sign in": "Se connecter", "Sync now": "Synchroniser", "Syncing…": "Synchronisation…", "Synced · {u} up · {d} down": "Synchronisé · {u} envoyés · {d} reçus", "Sync failed": "Échec de la synchronisation", "Last sync: {d}": "Dernière synchro : {d}", "On": "Activée", "Off": "Désactivée", "Enter your email and password.": "Entrez votre email et votre mot de passe.", "Signing in…": "Connexion…", "Signed in · your journal is being copied to the cloud": "Connecté · votre journal est copié dans le cloud", "Wrong email or password.": "Email ou mot de passe incorrect.", "Could not reach the server. Try again.": "Serveur injoignable. Réessayez.", "Signed out · your journal stays on this phone": "Déconnecté · votre journal reste sur ce téléphone",  "Export journal": "Exporter le journal", "Import journal": "Importer un journal", "Preparing your export…": "Préparation de l'export…", "Journal exported": "Journal exporté", "This file is not a Strata export.": "Ce fichier n'est pas un export Strata.", "{a} imported · {s} already in your journal": "{a} importés · {s} déjà dans votre journal",  "Camera": "Appareil photo", "Phone camera": "Appareil du téléphone", "Strata viewfinder": "Viseur Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "L'appareil du téléphone offre le zoom, les objectifs et la mise au point. Le viseur Strata vous garde dans l'app.",  "Music recognition key (AudD)": "Clé de reconnaissance musicale (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Écouter identifie les morceaux avec AudD, puis Claude raconte leur histoire.", "AudD API token": "Jeton API AudD", "Save music key": "Enregistrer la clé musique", "Remove": "Supprimer", "Create one at dashboard.audd.io.": "Créez-en une sur dashboard.audd.io.", "Back": "Retour", "Identifying the music…": "Identification de la musique…", "Usually a few seconds": "Quelques secondes en général", "Writing the story…": "Écriture du récit…", "No match": "Aucun résultat", "No match. Get closer to the music and try again.": "Aucun résultat. Rapprochez-vous de la musique et réessayez.", "Microphone access was refused. Allow it in Safari settings and try again.": "L'accès au micro a été refusé. Autorisez-le dans les réglages de Safari et réessayez.", "This browser cannot record audio.": "Ce navigateur ne peut pas enregistrer de son.", "Your AudD key was refused. Check it in Settings.": "Votre clé AudD a été refusée. Vérifiez-la dans les Réglages.", "Your AudD plan has no requests left.": "Votre forfait AudD n'a plus de requêtes.", "Could not reach AudD. Check your internet and try again.": "Impossible de joindre AudD. Vérifiez votre connexion et réessayez.", "Something went wrong. Try again.": "Un problème est survenu. Réessayez.", "Add your AudD key to recognise music.": "Ajoutez votre clé AudD pour reconnaître la musique.", "Paste the full AudD API token.": "Collez le jeton API AudD en entier.", "Music key saved": "Clé musique enregistrée", "Music key removed": "Clé musique supprimée", "Listen to this track": "Écouter ce morceau", "Song": "Morceau",  "No scans in this period.": "Aucun scan sur cette période.", "Previous": "Précédent", "Next": "Suivant", "Day": "Jour", "Week": "Semaine", "Month": "Mois", "Year": "Année",
   "Point at any art": "Visez une œuvre", "Tap the shutter to take a photo": "Touchez le déclencheur pour prendre une photo",
   "Camera blocked · tap the shutter to take a photo": "Caméra bloquée · touchez le déclencheur pour prendre une photo",
   "Add your Claude API key to scan for real. Tap the shutter.": "Ajoutez votre clé API Claude pour scanner pour de vrai. Touchez le déclencheur.",
@@ -2413,7 +2642,7 @@ es: {
   "{n} scan has no known original location (a reproduction, a poster, or a private work).": "{n} escaneo no tiene un lugar de original conocido (reproducción, póster u obra privada).",
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
-  "Browse by Date": "Explorar por fecha", "Cloud sync": "Sincronización en la nube", "Sign in to keep your journal in the cloud and on all your devices.": "Inicia sesión para guardar tu diario en la nube y en todos tus dispositivos.", "Email": "Email", "Password": "Contraseña", "Sign in": "Iniciar sesión", "Sync now": "Sincronizar", "Syncing…": "Sincronizando…", "Synced · {u} up · {d} down": "Sincronizado · {u} enviados · {d} recibidos", "Sync failed": "Error de sincronización", "Last sync: {d}": "Última sincronización: {d}", "On": "Activada", "Off": "Desactivada", "Enter your email and password.": "Introduce tu email y tu contraseña.", "Signing in…": "Iniciando sesión…", "Signed in · your journal is being copied to the cloud": "Sesión iniciada · tu diario se está copiando en la nube", "Wrong email or password.": "Email o contraseña incorrectos.", "Could not reach the server. Try again.": "No se puede conectar con el servidor. Inténtalo de nuevo.", "Signed out · your journal stays on this phone": "Sesión cerrada · tu diario se queda en este teléfono",  "Export journal": "Exportar el diario", "Import journal": "Importar un diario", "Preparing your export…": "Preparando la exportación…", "Journal exported": "Diario exportado", "This file is not a Strata export.": "Este archivo no es una exportación de Strata.", "{a} imported · {s} already in your journal": "{a} importados · {s} ya estaban en tu diario",  "Camera": "Cámara", "Phone camera": "Cámara del teléfono", "Strata viewfinder": "Visor de Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "La cámara del teléfono tiene zoom, objetivos y enfoque. El visor de Strata te mantiene dentro de la app.",  "Music recognition key (AudD)": "Clave de reconocimiento musical (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Escuchar identifica canciones con AudD y luego Claude cuenta su historia.", "AudD API token": "Token API de AudD", "Save music key": "Guardar clave de música", "Remove": "Eliminar", "Create one at dashboard.audd.io.": "Crea uno en dashboard.audd.io.", "Back": "Volver", "Identifying the music…": "Identificando la música…", "Usually a few seconds": "Normalmente unos segundos", "Writing the story…": "Escribiendo la historia…", "No match": "Sin resultado", "No match. Get closer to the music and try again.": "Sin resultado. Acércate a la música e inténtalo de nuevo.", "Microphone access was refused. Allow it in Safari settings and try again.": "Se ha denegado el acceso al micrófono. Permítelo en los ajustes de Safari e inténtalo de nuevo.", "This browser cannot record audio.": "Este navegador no puede grabar audio.", "Your AudD key was refused. Check it in Settings.": "Tu clave de AudD ha sido rechazada. Revísala en Ajustes.", "Your AudD plan has no requests left.": "A tu plan de AudD no le quedan solicitudes.", "Could not reach AudD. Check your internet and try again.": "No se ha podido conectar con AudD. Revisa tu internet e inténtalo de nuevo.", "Something went wrong. Try again.": "Algo ha fallado. Inténtalo de nuevo.", "Add your AudD key to recognise music.": "Añade tu clave de AudD para reconocer música.", "Paste the full AudD API token.": "Pega el token API de AudD completo.", "Music key saved": "Clave de música guardada", "Music key removed": "Clave de música eliminada", "Listen to this track": "Escuchar esta pista", "Song": "Canción",  "No scans in this period.": "No hay escaneos en este periodo.", "Previous": "Anterior", "Next": "Siguiente", "Day": "Día", "Week": "Semana", "Month": "Mes", "Year": "Año",
+  "Browse by Date": "Explorar por fecha", "Journal & sync": "Diario y sincronización", "Backup": "Copia de seguridad", "Save your whole journal, photos included, as one file. Import it on another phone to restore it.": "Guarda todo tu diario, fotos incluidas, en un solo archivo. Impórtalo en otro teléfono para restaurarlo.", "Export": "Exportar", "Import": "Importar", "Last export: {d}": "Última exportación: {d}", "Change photo": "Cambiar foto", "Remove": "Quitar", "Name": "Nombre", "Your name": "Tu nombre", "Turn on cloud sync to change your email and password.": "Activa la sincronización en la nube para cambiar tu email y tu contraseña.", "Set up cloud sync": "Activar la sincronización", "Change password": "Cambiar contraseña", "Current password": "Contraseña actual", "New password (6 characters or more)": "Nueva contraseña (6 caracteres o más)", "Save": "Guardar", "My Discoveries": "Mis descubrimientos", "{n}'s Discoveries": "Los descubrimientos de {n}", "Add your name": "Añade tu nombre", "Waiting for confirmation of {e}": "Esperando la confirmación de {e}", "This photo could not be read.": "No se pudo leer esta foto.", "Enter your current password.": "Introduce tu contraseña actual.", "The new password needs 6 characters or more.": "La nueva contraseña necesita 6 caracteres o más.", "This email address does not look right.": "Esta dirección de email no parece correcta.", "Saving…": "Guardando…", "Password changed.": "Contraseña cambiada.", "Check your inbox: click the confirmation link to switch to {e}.": "Revisa tu correo: haz clic en el enlace de confirmación para cambiar a {e}.", "Profile saved": "Perfil guardado", "Your current password is not right.": "Tu contraseña actual no es correcta.", "Saved on this phone, but the account could not be updated.": "Guardado en este teléfono, pero no se pudo actualizar la cuenta.", "Sync on": "Sincronización activada", "Sync off": "Sincronización desactivada", "Every work has layers.": "Cada obra tiene sus capas.", "Version {v}": "Versión {v}", "Point your phone at a painting, a building, a sculpture or a book cover, and Strata tells you its story. Not a museum label or an encyclopedia entry: the story behind it, told like a curious friend who can’t help sharing the strange part.": "Apunta tu teléfono a un cuadro, un edificio, una escultura o la portada de un libro, y Strata te cuenta su historia. No una cartela de museo ni una entrada de enciclopedia: la historia que hay detrás, contada como lo haría un amigo curioso que no puede evitar compartir el detalle extraño.", "Four layers per discovery": "Cuatro capas por descubrimiento", "The hook, in fifteen seconds.": "El gancho, en quince segundos.", "What was happening in the artist’s life.": "Lo que pasaba en la vida del artista.", "The detail nobody tells you. Always last.": "El detalle que nadie te cuenta. Siempre al final.", "A few good places to go further.": "Algunos buenos sitios para ir más allá.", "Then keep the conversation going in the chat. Everything you scan is kept in your journal: by category, on the map where the original lives, and by date.": "Después, sigue la conversación en el chat. Todo lo que escaneas se guarda en tu diario: por categoría, en el mapa donde está el original y por fecha.", "The name": "El nombre", "Strata are the layers of rock that hold the history of a landscape. Every artwork, building and book has them too: the life of its maker, its time, the accidents that shaped it.": "Los estratos son las capas de roca que guardan la historia de un paisaje. Cada obra, cada edificio y cada libro también los tiene: la vida de su autor, su época, los azares que le dieron forma.", "The logo": "El logo", "A yellow S under a starry sky, framed by a camera viewfinder, over layers of blue. A nod to Van Gogh’s nights.": "Una S amarilla bajo un cielo estrellado, enmarcada por un visor de cámara, sobre capas de azul. Un guiño a las noches de Van Gogh.", "Made in Barcelona by Elie, for friends.": "Hecho en Barcelona por Elie, para los amigos.", "Stories are written by Claude, Anthropic’s AI. They can contain mistakes: the Deep Dive links are there to check.": "Las historias las escribe Claude, la IA de Anthropic. Pueden contener errores: los enlaces de Deep Dive están para comprobarlo.",  "Cloud sync": "Sincronización en la nube", "Sign in to keep your journal in the cloud and on all your devices.": "Inicia sesión para guardar tu diario en la nube y en todos tus dispositivos.", "Email": "Email", "Password": "Contraseña", "Sign in": "Iniciar sesión", "Sync now": "Sincronizar", "Syncing…": "Sincronizando…", "Synced · {u} up · {d} down": "Sincronizado · {u} enviados · {d} recibidos", "Sync failed": "Error de sincronización", "Last sync: {d}": "Última sincronización: {d}", "On": "Activada", "Off": "Desactivada", "Enter your email and password.": "Introduce tu email y tu contraseña.", "Signing in…": "Iniciando sesión…", "Signed in · your journal is being copied to the cloud": "Sesión iniciada · tu diario se está copiando en la nube", "Wrong email or password.": "Email o contraseña incorrectos.", "Could not reach the server. Try again.": "No se puede conectar con el servidor. Inténtalo de nuevo.", "Signed out · your journal stays on this phone": "Sesión cerrada · tu diario se queda en este teléfono",  "Export journal": "Exportar el diario", "Import journal": "Importar un diario", "Preparing your export…": "Preparando la exportación…", "Journal exported": "Diario exportado", "This file is not a Strata export.": "Este archivo no es una exportación de Strata.", "{a} imported · {s} already in your journal": "{a} importados · {s} ya estaban en tu diario",  "Camera": "Cámara", "Phone camera": "Cámara del teléfono", "Strata viewfinder": "Visor de Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "La cámara del teléfono tiene zoom, objetivos y enfoque. El visor de Strata te mantiene dentro de la app.",  "Music recognition key (AudD)": "Clave de reconocimiento musical (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Escuchar identifica canciones con AudD y luego Claude cuenta su historia.", "AudD API token": "Token API de AudD", "Save music key": "Guardar clave de música", "Remove": "Eliminar", "Create one at dashboard.audd.io.": "Crea uno en dashboard.audd.io.", "Back": "Volver", "Identifying the music…": "Identificando la música…", "Usually a few seconds": "Normalmente unos segundos", "Writing the story…": "Escribiendo la historia…", "No match": "Sin resultado", "No match. Get closer to the music and try again.": "Sin resultado. Acércate a la música e inténtalo de nuevo.", "Microphone access was refused. Allow it in Safari settings and try again.": "Se ha denegado el acceso al micrófono. Permítelo en los ajustes de Safari e inténtalo de nuevo.", "This browser cannot record audio.": "Este navegador no puede grabar audio.", "Your AudD key was refused. Check it in Settings.": "Tu clave de AudD ha sido rechazada. Revísala en Ajustes.", "Your AudD plan has no requests left.": "A tu plan de AudD no le quedan solicitudes.", "Could not reach AudD. Check your internet and try again.": "No se ha podido conectar con AudD. Revisa tu internet e inténtalo de nuevo.", "Something went wrong. Try again.": "Algo ha fallado. Inténtalo de nuevo.", "Add your AudD key to recognise music.": "Añade tu clave de AudD para reconocer música.", "Paste the full AudD API token.": "Pega el token API de AudD completo.", "Music key saved": "Clave de música guardada", "Music key removed": "Clave de música eliminada", "Listen to this track": "Escuchar esta pista", "Song": "Canción",  "No scans in this period.": "No hay escaneos en este periodo.", "Previous": "Anterior", "Next": "Siguiente", "Day": "Día", "Week": "Semana", "Month": "Mes", "Year": "Año",
   "Point at any art": "Apunta a una obra", "Tap the shutter to take a photo": "Toca el disparador para hacer una foto",
   "Camera blocked · tap the shutter to take a photo": "Cámara bloqueada · toca el disparador para hacer una foto",
   "Add your Claude API key to scan for real. Tap the shutter.": "Añade tu clave API de Claude para escanear de verdad. Toca el disparador.",
@@ -2479,6 +2708,8 @@ function applyLang() {
   setGreeting();
   renderExportVal();
   renderSync();
+  if (typeof renderProfile === 'function') renderProfile();
+  if (document.getElementById('aboutSheet') && !document.getElementById('aboutSheet').hidden) renderAbout();
   setMode(!!live);
   if (typeof renderJournal === 'function' && sections) renderJournal();
   var ma = document.getElementById('s-search-map'); if (ma && ma.classList.contains('active')) renderMap();
