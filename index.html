@@ -123,6 +123,7 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 .map-list-count{border:none;background:none;font:inherit;font-size:11px;color:var(--muted);padding:0;}
 .map-list-count.link{color:var(--ink);font-weight:600;cursor:pointer;}
 .leaflet-control-attribution{font-size:9px!important;}
+#lmap .leaflet-tile-pane{filter:grayscale(1) brightness(1.06) contrast(.92);}
 .map-bg{position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px),#DDE4EC;background-size:36px 36px;}
 .map-road-h{position:absolute;left:0;right:0;height:5px;background:white;opacity:.9;}
 .map-road-v{position:absolute;top:0;bottom:0;width:4px;background:white;opacity:.9;}
@@ -1682,7 +1683,7 @@ function renderMap() {
   if (!window.L) { document.getElementById('lmap').innerHTML = '<div class="j-none" style="padding:20px">The map could not load. Check your connection.</div>'; return; }
   if (!lmap) {
     lmap = L.map('lmap', { zoomControl: false, attributionControl: true, worldCopyJump: true }).setView([30, 5], 1);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd', attribution: '© OpenStreetMap © CARTO' }).addTo(lmap);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(lmap);
     mapLayer = L.layerGroup().addTo(lmap);
     lmap.on('click', function(){ if (mapPlace) { mapPlace = null; renderMap(); } });
   }
