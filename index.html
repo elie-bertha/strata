@@ -71,6 +71,7 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 .h-card-info{position:absolute;bottom:0;left:0;right:0;padding:9px 10px;}
 .h-card-name{font-family:'DM Serif Display',serif;font-size:12px;color:white;line-height:1.2;margin-bottom:1px;}
 .h-card-meta{font-size:9px;color:rgba(255,255,255,.6);}
+.no-music #btn-listen,.no-music .mode-tabs,.no-music .cat-chip[data-cat="music"],.no-music .stat-music,.no-music #auddBlock,.no-music .ts-chip[data-cat="music"]{display:none!important;}
 .music-list,.books-list{display:flex;flex-direction:column;gap:8px;}
 .list-item{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:11px 14px;cursor:pointer;transition:background .15s;}
 .list-item:active{background:var(--s2);}
@@ -735,6 +736,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
     <button class="seg-b" role="radio" data-cam="native">Phone camera</button><button class="seg-b" role="radio" data-cam="viewfinder">Strata viewfinder</button>
   </div>
   <p class="key-note">The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.</p>
+  <div id="auddBlock">
   <div class="key-sep"></div>
   <label class="key-lbl" for="auddInput">Music recognition key (AudD)</label>
   <p class="key-p">Listen identifies songs with AudD, then Claude tells their story.</p>
@@ -742,6 +744,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
   <div class="key-msg" id="auddMsg"></div>
   <div class="key-row"><button class="key-btn pri" id="auddSave">Save music key</button><button class="key-btn" id="auddRemove">Remove</button></div>
   <p class="key-note">Create one at dashboard.audd.io.</p>
+  </div>
 </div></div>
 
 <!-- HOME -->
@@ -775,7 +778,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
     </div>
     <div class="home-stats">
       <div class="stat"><div class="stat-num">17</div><div class="stat-label">Artworks</div></div>
-      <div class="stat"><div class="stat-num">4</div><div class="stat-label">Music</div></div>
+      <div class="stat stat-music"><div class="stat-num">4</div><div class="stat-label">Music</div></div>
       <div class="stat"><div class="stat-num">6</div><div class="stat-label">Buildings</div></div>
       <div class="stat"><div class="stat-num">3</div><div class="stat-label">Books</div></div>
     </div>
@@ -2048,7 +2051,7 @@ function renderJournal() {
       return '<div class="h-card" data-scan="' + r.id + '" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;"><div class="h-card-scrim"></div><div class="h-card-info"><div class="h-card-name">' + esc(rTitle(r)) + '</div><div class="h-card-meta">' + esc(rShort(r)) + '</div></div></div>';
     }).join(''));
     badge.textContent = mine.length; badge.hidden = !mine.length;
-    sec.hidden = !mine.length;
+    sec.hidden = !mine.length || (cat === 'music' && !MUSIC_ENABLED);
     order.push({ sec: sec, n: mine.length, last: mine[0] ? mine[0].created_at : '' });
   });
   // categories with real scans first, most recent scan first; the rest keep their original order
@@ -2139,7 +2142,9 @@ function toast(msg) {
 
 
 // ─── MAP: where each original lives ─────────────────────────────
-var TAG_ORDER = ['painting', 'arch', 'sculpture', 'book', 'plants', 'stars', 'mountains', 'music'];
+// Music recognition is switched off for now: set MUSIC_ENABLED = true to bring back Listen, the Music category and the AudD key
+var MUSIC_ENABLED = false;
+var TAG_ORDER = ['painting', 'arch', 'sculpture', 'book', 'plants', 'stars', 'mountains'].concat(MUSIC_ENABLED ? ['music'] : []);
 var TAG_LABEL = { painting: 'Paintings', arch: 'Architecture', sculpture: 'Sculptures', book: 'Books', plants: 'Plants', stars: 'Stars & Sky', mountains: 'Mountains', music: 'Music', other: 'More discoveries' };
 var PENCIL = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
 function currentRec() { var a = ARTS[currentArt]; return a && a.journalId ? journal.find(function(r){ return r.id === a.journalId; }) : null; }
@@ -2589,7 +2594,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.16';
+var APP_VERSION = '0.17';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -3600,6 +3605,7 @@ function setGreeting() {
 }
 
 // Start-up: map home sections, translate the interface, then load the journal
+document.querySelector('.phone').classList.toggle('no-music', !MUSIC_ENABLED);
 initSections();
 captureI18n();
 applyLang();
