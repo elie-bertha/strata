@@ -163,6 +163,15 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 .cal-d.sel{background:var(--ink);color:white;}
 .cal-d.sel::after{background:white;}
 .cal-d.dim{color:var(--muted);}
+.cal-grid .cal-d{aspect-ratio:auto;width:34px;height:34px;margin:0 auto;}
+.cal-d.today{box-shadow:inset 0 0 0 1.5px var(--ink);}
+.cal-d.wk{background:var(--s2);border-radius:8px;}
+.cal-d.sel.today{box-shadow:none;}
+.cal-year{grid-template-columns:repeat(4,1fr);gap:6px;}
+.cal-m{padding:10px 4px;border-radius:12px;text-align:center;cursor:pointer;background:var(--s2);font-size:12px;color:var(--ink);text-transform:capitalize;}
+.cal-m.none{background:transparent;color:var(--muted);}
+.cal-m.now{box-shadow:inset 0 0 0 1.5px var(--ink);}
+.cal-m b{display:block;font:600 15px 'DM Sans',sans-serif;margin-top:2px;}
 .date-results{flex:1;overflow-y:auto;padding:12px 16px 80px;display:flex;flex-direction:column;gap:6px;}
 .date-results::-webkit-scrollbar{display:none;}
 .date-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding:6px 0 2px;}
@@ -650,27 +659,18 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
   </div>
   <div class="cal-wrap">
     <div class="gran-tabs">
-      <div class="gran-tab on" data-gran="Day">Day</div>
+      <div class="gran-tab" data-gran="Day">Day</div>
       <div class="gran-tab" data-gran="Week">Week</div>
-      <div class="gran-tab" data-gran="Month">Month</div>
+      <div class="gran-tab on" data-gran="Month">Month</div>
       <div class="gran-tab" data-gran="Year">Year</div>
     </div>
     <div class="cal-nav">
-      <button class="cal-nav-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-      <div class="cal-month">May 2026</div>
-      <button class="cal-nav-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+      <button class="cal-nav-btn" id="calPrev" aria-label="Previous"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <div class="cal-month" id="calLabel"></div>
+      <button class="cal-nav-btn" id="calNext" aria-label="Next"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
     </div>
-    <div class="cal-grid" style="margin-bottom:4px;">
-      <div class="cal-dlbl">S</div><div class="cal-dlbl">M</div><div class="cal-dlbl">T</div><div class="cal-dlbl">W</div><div class="cal-dlbl">T</div><div class="cal-dlbl">F</div><div class="cal-dlbl">S</div>
-    </div>
-    <div class="cal-grid">
-      <div></div><div></div><div></div><div></div>
-      <div class="cal-d dim">1</div><div class="cal-d dim">2</div><div class="cal-d dim">3</div>
-      <div class="cal-d">4</div><div class="cal-d has">5</div><div class="cal-d">6</div><div class="cal-d">7</div><div class="cal-d">8</div><div class="cal-d">9</div><div class="cal-d">10</div>
-      <div class="cal-d">11</div><div class="cal-d has">12</div><div class="cal-d">13</div><div class="cal-d has">14</div><div class="cal-d">15</div><div class="cal-d">16</div><div class="cal-d">17</div>
-      <div class="cal-d">18</div><div class="cal-d">19</div><div class="cal-d has">20</div><div class="cal-d">21</div><div class="cal-d">22</div><div class="cal-d">23</div><div class="cal-d">24</div>
-      <div class="cal-d sel" data-date="May 25">25</div><div class="cal-d">26</div><div class="cal-d">27</div><div class="cal-d">28</div><div class="cal-d">29</div><div class="cal-d">30</div><div class="cal-d">31</div>
-    </div>
+    <div class="cal-grid" id="calHead" style="margin-bottom:4px;"></div>
+    <div class="cal-grid" id="calGrid"></div>
   </div>
   <div class="date-results">
     <div class="j-sub" id="jDateHead" hidden>Your scans</div>
@@ -914,6 +914,7 @@ function show(id) {
   if (id === 's-camera') startCamera(); else stopCamera();
   var cz = document.getElementById('cardZoom'); if (cz) cz.hidden = true;
   var tsh = document.getElementById('tagSheet'); if (tsh) tsh.hidden = true;
+  if (id === 's-search-date') renderCal();
   if (id === 's-search-map') setTimeout(function(){ mapPlace = null; renderMap(); backfillLocations(); }, 0);
   document.querySelectorAll('.screen').forEach(s => {
     s.classList.remove('active');
@@ -980,23 +981,6 @@ document.querySelectorAll('.map-pin').forEach(function(pin) {
 });
 
 // ─── GRAN TABS ────────────────────────────────
-document.querySelectorAll('.gran-tab').forEach(function(tab) {
-  tab.addEventListener('click', function() {
-    document.querySelectorAll('.gran-tab').forEach(function(t){ t.classList.remove('on'); });
-    tab.classList.add('on');
-  });
-});
-
-// ─── CALENDAR DAYS ────────────────────────────
-document.querySelectorAll('.cal-d').forEach(function(d) {
-  d.addEventListener('click', function() {
-    document.querySelectorAll('.cal-d').forEach(function(x){ x.classList.remove('sel'); });
-    d.classList.add('sel');
-    var date = d.getAttribute('data-date');
-    if (date) document.getElementById('dateLbl').textContent = date + ', 2026';
-  });
-});
-
 // ─── CAROUSEL ─────────────────────────────────
 var currentCard = 0;
 var CARDS = 4;
@@ -1639,14 +1623,8 @@ function renderJournal() {
     return '<div class="cat-row" data-scan="' + r.id + '" data-cat="' + scanCats(r).join(' ') + '"><div class="cat-thumb" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;"></div><div class="cat-body"><div class="cat-type">' + t(CAT_LABEL[scanCats(r)[0]] || 'Discovery') + ' · ' + fmtDay(r.created_at) + '</div><div class="cat-name">' + esc(r.title) + '</div><div class="cat-meta">' + esc(r.creator) + '</div><div class="cat-spark">' + esc((r.data.spark && r.data.spark.head) || '') + '</div></div></div>';
   }).join('');
   applyCatFilter();
-  // Search by date
-  var html = '', last = '';
-  journal.forEach(function(r){
-    if (!sameDay(r.created_at, last)) { html += '<div class="date-lbl">' + fmtDay(r.created_at) + '</div>'; last = r.created_at; }
-    html += '<div class="map-row" data-scan="' + r.id + '"><div class="map-icon" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;border-radius:10px;"></div><div><div class="map-name">' + esc(r.title) + '</div><div class="map-loc">' + esc(r.creator) + ' · ' + new Date(r.created_at).toLocaleTimeString(LOCALES[getLang()], { hour: '2-digit', minute: '2-digit' }) + '</div></div></div>';
-  });
-  document.getElementById('jDateRows').innerHTML = html;
-  document.querySelectorAll('.j-none').forEach(function(e){ e.hidden = !!n; });
+  renderCal();
+  document.querySelectorAll('.j-none[data-for]').forEach(function(e){ e.hidden = !!n; });
 }
 
 (function(){
@@ -1799,6 +1777,95 @@ async function backfillLocations() {
   locating = false; renderMap();
 }
 
+// ─── CALENDAR ─────────────────────────────────
+var calGran = 'month', calSel = startOfDay(new Date()), calView = new Date(calSel.getFullYear(), calSel.getMonth(), 1);
+function startOfDay(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+function dayKey(d) { return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+function weekStart(d) { var s = startOfDay(d), wd = (s.getDay() + 6) % 7; s.setDate(s.getDate() - wd); return s; }   // weeks start on Monday
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function inRange(r) {
+  var d = new Date(r.created_at);
+  if (calGran === 'day') return dayKey(d) === dayKey(calSel);
+  if (calGran === 'week') { var w = weekStart(calSel), e = new Date(w); e.setDate(e.getDate() + 7); return d >= w && d < e; }
+  if (calGran === 'month') return d.getFullYear() === calView.getFullYear() && d.getMonth() === calView.getMonth();
+  return d.getFullYear() === calView.getFullYear();
+}
+function renderCal() {
+  var loc = LOCALES[getLang()], grid = document.getElementById('calGrid'), head = document.getElementById('calHead');
+  if (!grid) return;
+  document.querySelectorAll('.gran-tab').forEach(function(tb){ tb.classList.toggle('on', tb.getAttribute('data-gran').toLowerCase() === calGran); });
+  var counts = {}; journal.forEach(function(r){ var k = dayKey(new Date(r.created_at)); counts[k] = (counts[k] || 0) + 1; });
+  var today = dayKey(new Date());
+  if (calGran === 'year') {
+    var y = calView.getFullYear();
+    document.getElementById('calLabel').textContent = y;
+    head.hidden = true; grid.className = 'cal-grid cal-year';
+    var html = '';
+    for (var m = 0; m < 12; m++) {
+      var c = journal.filter(function(r){ var d = new Date(r.created_at); return d.getFullYear() === y && d.getMonth() === m; }).length;
+      var now = new Date(); var isNow = now.getFullYear() === y && now.getMonth() === m;
+      html += '<div class="cal-m' + (c ? '' : ' none') + (isNow ? ' now' : '') + '" data-month="' + m + '">' + new Date(y, m, 1).toLocaleDateString(loc, { month: 'short' }).replace('.', '') + '<b>' + (c || '·') + '</b></div>';
+    }
+    grid.innerHTML = html;
+  } else {
+    document.getElementById('calLabel').textContent = cap(calView.toLocaleDateString(loc, { month: 'long', year: 'numeric' }));
+    head.hidden = false; grid.className = 'cal-grid';
+    var mon = new Date(2024, 0, 1);   // a Monday
+    head.innerHTML = [0, 1, 2, 3, 4, 5, 6].map(function(i){ var d = new Date(mon); d.setDate(1 + i); return '<div class="cal-dlbl">' + d.toLocaleDateString(loc, { weekday: 'narrow' }) + '</div>'; }).join('');
+    var first = new Date(calView), lead = (first.getDay() + 6) % 7, days = new Date(calView.getFullYear(), calView.getMonth() + 1, 0).getDate();
+    var ws = weekStart(calSel), we = new Date(ws); we.setDate(we.getDate() + 7);
+    var cells = '';
+    for (var i = 0; i < lead; i++) cells += '<div></div>';
+    for (var dd = 1; dd <= days; dd++) {
+      var date = new Date(calView.getFullYear(), calView.getMonth(), dd), k = dayKey(date), cls = 'cal-d';
+      if (counts[k]) cls += ' has'; else cls += ' dim';
+      if (k === today) cls += ' today';
+      if (calGran === 'day' && k === dayKey(calSel)) cls += ' sel';
+      if (calGran === 'week' && date >= ws && date < we) cls += ' wk';
+      cells += '<div class="' + cls + '" data-day="' + dd + '">' + dd + '</div>';
+    }
+    grid.innerHTML = cells;
+  }
+  // list for the selected period, grouped by day
+  var list = journal.filter(inRange), out = '', last = '';
+  list.forEach(function(r){
+    var k = dayKey(new Date(r.created_at));
+    if (k !== last) { out += '<div class="date-lbl">' + fmtDay(r.created_at) + '</div>'; last = k; }
+    out += '<div class="map-row" data-scan="' + r.id + '"><div class="map-icon" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;border-radius:10px;"></div><div><div class="map-name">' + esc(r.title) + '</div><div class="map-loc">' + esc(r.creator) + ' · ' + new Date(r.created_at).toLocaleTimeString(loc, { hour: '2-digit', minute: '2-digit' }) + '</div></div></div>';
+  });
+  if (!list.length && journal.length) out = '<div class="j-none">' + t('No scans in this period.') + '</div>';
+  document.getElementById('jDateRows').innerHTML = out;
+}
+document.getElementById('calGrid').addEventListener('click', function(e){
+  var m = e.target.closest('.cal-m');
+  if (m) { calView = new Date(calView.getFullYear(), +m.getAttribute('data-month'), 1); calGran = 'month'; renderCal(); return; }
+  var d = e.target.closest('.cal-d'); if (!d) return;
+  calSel = new Date(calView.getFullYear(), calView.getMonth(), +d.getAttribute('data-day'));
+  if (calGran === 'month') calGran = 'day';
+  renderCal();
+});
+document.querySelectorAll('.gran-tab').forEach(function(tb){
+  tb.addEventListener('click', function(){
+    calGran = tb.getAttribute('data-gran').toLowerCase();
+    // day and week views follow the selected day; keep it inside the month on screen
+    if ((calGran === 'day' || calGran === 'week') && (calSel.getMonth() !== calView.getMonth() || calSel.getFullYear() !== calView.getFullYear())) {
+      var now = new Date();
+      calSel = (now.getMonth() === calView.getMonth() && now.getFullYear() === calView.getFullYear()) ? startOfDay(now) : new Date(calView);
+    }
+    renderCal();
+  });
+});
+function calStep(dir) {
+  if (calGran === 'year') calView = new Date(calView.getFullYear() + dir, calView.getMonth(), 1);
+  else {
+    calView = new Date(calView.getFullYear(), calView.getMonth() + dir, 1);
+    if (calGran === 'day' || calGran === 'week') calSel = new Date(calView);
+  }
+  renderCal();
+}
+document.getElementById('calPrev').addEventListener('click', function(){ calStep(-1); });
+document.getElementById('calNext').addEventListener('click', function(){ calStep(1); });
+
 // ─── CARD ZOOM ─────────────────────────────────
 var zoomIdx = 0;
 function openZoom(i) {
@@ -1863,7 +1930,7 @@ fr: {
   "{n} scan has no known original location (a reproduction, a poster, or a private work).": "{n} scan n'a pas de lieu d'original connu (reproduction, poster ou œuvre privée).",
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
-  "Browse by Date": "Parcourir par date", "Day": "Jour", "Week": "Semaine", "Month": "Mois", "Year": "Année",
+  "Browse by Date": "Parcourir par date", "No scans in this period.": "Aucun scan sur cette période.", "Previous": "Précédent", "Next": "Suivant", "Day": "Jour", "Week": "Semaine", "Month": "Mois", "Year": "Année",
   "Point at any art": "Visez une œuvre", "Tap the shutter to take a photo": "Touchez le déclencheur pour prendre une photo",
   "Camera blocked · tap the shutter to take a photo": "Caméra bloquée · touchez le déclencheur pour prendre une photo",
   "Add your Claude API key to scan for real. Tap the shutter.": "Ajoutez votre clé API Claude pour scanner pour de vrai. Touchez le déclencheur.",
@@ -1925,7 +1992,7 @@ es: {
   "{n} scan has no known original location (a reproduction, a poster, or a private work).": "{n} escaneo no tiene un lugar de original conocido (reproducción, póster u obra privada).",
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
-  "Browse by Date": "Explorar por fecha", "Day": "Día", "Week": "Semana", "Month": "Mes", "Year": "Año",
+  "Browse by Date": "Explorar por fecha", "No scans in this period.": "No hay escaneos en este periodo.", "Previous": "Anterior", "Next": "Siguiente", "Day": "Día", "Week": "Semana", "Month": "Mes", "Year": "Año",
   "Point at any art": "Apunta a una obra", "Tap the shutter to take a photo": "Toca el disparador para hacer una foto",
   "Camera blocked · tap the shutter to take a photo": "Cámara bloqueada · toca el disparador para hacer una foto",
   "Add your Claude API key to scan for real. Tap the shutter.": "Añade tu clave API de Claude para escanear de verdad. Toca el disparador.",
@@ -1992,6 +2059,7 @@ function applyLang() {
   setMode(!!live);
   if (typeof renderJournal === 'function' && sections) renderJournal();
   var ma = document.getElementById('s-search-map'); if (ma && ma.classList.contains('active')) renderMap();
+  if (document.getElementById('calGrid')) renderCal();
   var rs = document.getElementById('s-result'); if (rs && rs.classList.contains('active') && ARTS[currentArt]) renderArt(currentArt);
 }
 function setGreeting() {
