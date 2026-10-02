@@ -270,7 +270,7 @@ label.key-btn{text-align:center;display:block;}
 .cam-vf.photo .cam-hint{color:rgba(255,255,255,.7);}
 .scan-bg{position:absolute;inset:-20px;background-size:cover;background-position:center;filter:blur(18px) brightness(.35);}
 .scan-wrap{position:relative;z-index:1;}
-.chat-art-badge{background-size:cover;background-position:center;}
+#chatBadge{background-size:cover!important;background-position:center!important;background-repeat:no-repeat;}
 #s-result{background:#1C1C1E;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
 #s-result > *{flex-shrink:0;}
 #s-result .res-sheet{padding-bottom:env(safe-area-inset-bottom,0px);}
@@ -389,6 +389,10 @@ label.menu-item{cursor:pointer;}
 .sa-spark{font-size:10px;font-style:italic;color:var(--ink2);opacity:.55;margin-top:2px;line-height:1.3;}
 .sheet-handle{width:36px;height:4px;border-radius:2px;background:var(--s3);margin:0 auto 12px;}
 .car-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px 10px;}
+.car-acts{display:flex;gap:8px;align-items:center;}
+#btn-narrate.on{background:var(--sun);}
+#btn-narrate.on svg{stroke:var(--night);}
+.c-card.reading{box-shadow:0 0 0 2px var(--sun);}
 .dots{display:flex;align-items:center;gap:6px;}
 .dot{width:6px;height:6px;border-radius:50%;background:var(--s3);transition:all .3s;}
 .dot.on{width:18px;border-radius:3px;background:var(--night);}
@@ -679,7 +683,7 @@ label.menu-item{cursor:pointer;}
     </button>
     <label class="action-btn-pri" id="btn-scan" for="camInput" role="button">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F4C542" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-      Scan Art
+      Scan
     </label>
     <label class="action-btn-ico" id="btn-library" for="libInput" role="button" aria-label="Choose a photo from your library"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></label>
   </div>
@@ -828,7 +832,7 @@ label.menu-item{cursor:pointer;}
       <div class="dots">
         <div class="dot on" data-i="0"></div><div class="dot" data-i="1"></div><div class="dot" data-i="2"></div><div class="dot" data-i="3"></div>
       </div>
-      <button class="chat-ico-btn" id="btn-chat-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button>
+      <div class="car-acts"><button class="chat-ico-btn" id="btn-narrate" aria-label="Listen to the story"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F4C542" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button><button class="chat-ico-btn" id="btn-chat-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button></div>
     </div>
     <div class="car-wrap" id="carWrap" style="height:250px;flex:0 0 250px;">
       <div class="car-track" id="carTrack">
@@ -872,7 +876,7 @@ label.menu-item{cursor:pointer;}
 </div>
 
 </div></div>
-<div class="legend">Live demo: Scan Art → shutter → Hokusai · Tap Starry Night for a 2nd example</div>
+<div class="legend">Live demo: Scan → shutter → Hokusai · Tap Starry Night for a 2nd example</div>
 
 <script>
 // ─── ARTWORK DATA (stands in for the Claude API response) ─────
@@ -985,7 +989,7 @@ function renderArt(key) {
     cardHTML('cc-dive',  ICO.dive,  t('Deep Dive · Go further'), t('Explore more'), '<div class="lnk-list">' + links + '</div>');
   document.getElementById('saTitle').innerHTML = (a.live && !a.identified) ? t('More like this') : a.nature ? t('Also in {a}', { a: a.artist }) : t('More by {a}', { a: a.artist });
   document.getElementById('saScroll').innerHTML = a.more.map(function(m){
-    return '<div class="sa-card"><div class="sa-thumb" style="' + m[3] + '"' + (m[4] ? ' data-wiki="' + m[4] + '"' : '') + '></div><div class="sa-name">' + m[0] + '</div><div class="sa-year">' + m[1] + '</div><div class="sa-spark">' + m[2] + '</div></div>';
+    return '<div class="sa-card"><div class="sa-thumb" style="' + m[3] + '"' + (m[4] ? ' data-wiki="' + m[4] + '"' : '') + ' data-q="' + esc((m[0] + ' ' + (a.nature ? '' : a.artist)).replace(/&amp;/g, '&').replace(/&#39;/g, "'")) + '" data-book="' + (a.category === 'book' ? '1' : '') + '"></div><div class="sa-name">' + m[0] + '</div><div class="sa-year">' + m[1] + '</div><div class="sa-spark">' + m[2] + '</div></div>';
   }).join('');
   document.getElementById('saScroll').scrollLeft = 0;
   renderTags();
@@ -1016,6 +1020,7 @@ function nextFallback() {
 
 // ─── NAVIGATION ───────────────────────────────
 function show(id) {
+  if (id !== 's-result' && typeof narr !== 'undefined' && narr.on) stopNarration();
   if (id === 's-camera') startCamera(); else stopCamera();
   if (id !== 's-music' && typeof stopMusic === 'function' && musicBusy) stopMusic();
   var cz = document.getElementById('cardZoom'); if (cz) cz.hidden = true;
@@ -1212,7 +1217,7 @@ var SCAN_PROMPT = [
   '  "location": { "place": "museum, collection or site where the original is today", "city": "...", "country": "...", "lat": 0.0, "lng": 0.0 },',
   '  (location: ' + LOCATION_RULE + ')',
   '  "spark": { "head": "3-6 words", "body": "the 15-second hook: the most surprising way into this work, 40-55 words" },',
-  '  "story": { "head": "3-6 words", "body": "what was happening in the creator\'s life or world when it was made, 80-110 words" },',
+  '  "story": { "head": "3-6 words", "body": "the 2-minute story in three short paragraphs separated by a blank line (\\n\\n), 200-260 words in total: first, what was happening in the creator\'s life or world when it was made; then how it was made or received and the people around it; last, what to look for in it now, the details that carry this story. For nature: where it comes from, how people have lived with it, what to notice when you look at it." },',
   '  "surprise": { "head": "3-6 words", "body": "one unexpected, true fact that ends on delight, 35-60 words" },',
   '  "deep_dive": [ { "title": "a specific resource to go further (museum collection page, documentary, book, archive)", "source": "its website domain, e.g. metmuseum.org", "url": "the exact page URL if it appeared in your search results, otherwise empty string", "kind": "museum" | "video" | "read" } ],',
   '  "more_by": [ { "title": "another work by the same creator", "year": "year or c. date", "hook": "max 8 words, intriguing", "wiki": "exact English Wikipedia article title of this work, or empty string", "colors": ["#hex", "#hex", "#hex"] } ],',
@@ -1228,6 +1233,7 @@ function esc(s) {
 function hex(c, d) { return /^#[0-9a-f]{3,8}$/i.test(String(c)) ? c : d; }
 
 // Turn Claude's JSON into the same shape the demo artworks use
+function paras(s) { return String(s || '').trim().replace(/\s*\n\s*\n\s*/g, '<br><br>').replace(/\n/g, ' '); }
 function toArt(d, imgURL) {
   var mb = Array.isArray(d.more_by) ? d.more_by.slice(0, 4) : [];
   var dd = Array.isArray(d.deep_dive) ? d.deep_dive.slice(0, 3) : [];
@@ -1239,7 +1245,7 @@ function toArt(d, imgURL) {
     meta: [d.creator, d.date, d.medium].filter(Boolean).map(esc),
     photo: true, img: imgURL, badge: 'url(' + imgURL + ')',
     spark: [esc(d.spark && d.spark.head), esc(d.spark && d.spark.body)],
-    story: [esc(d.story && d.story.head), esc(d.story && d.story.body)],
+    story: [esc(d.story && d.story.head), paras(esc(d.story && d.story.body))],
     surp:  [esc(d.surprise && d.surprise.head), esc(d.surprise && d.surprise.body)],
     links: (d.song_link ? [{ title: t('Listen to this track'), source: 'lis.tn', url: d.song_link, kind: 'video' }] : []).concat(dd).map(function(l){
       var k = ['museum','video','read'].indexOf(l.kind) >= 0 ? l.kind : 'read';
@@ -1247,6 +1253,7 @@ function toArt(d, imgURL) {
     }),
     artist: esc(short),
     nature: ['plant', 'sky', 'mountain'].indexOf(d.category) >= 0,
+    category: d.category || '', creator: esc(d.creator || ''), lang: d.lang || null,
     moreLabel: d.identified === false ? 'More like this' : 'More by ' + esc(short),
     more: mb.map(function(w){
       var c = Array.isArray(w.colors) ? w.colors : [];
@@ -1307,6 +1314,7 @@ async function runLiveScan(file) {
       toast(t('Already in your journal · first scanned {d}', { d: fmtDay(dup.created_at) }));
       return;
     }
+    if (!d.lang) d.lang = getLang();
     ARTS.live = toArt(d, url);
     saveScan(d, file).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; loadJournal().then(function(){ if (currentArt === 'live') renderTags(); }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
       .catch(function(){ toast(t('Could not save this scan on this device')); });
@@ -1485,15 +1493,34 @@ function makeLive() {
 }
 
 // Real thumbnails for "More by", from Wikipedia (free, no key)
+function jget(u) { return fetch(u).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }); }
+async function findThumb(wiki, q, book) {
+  var j;
+  if (book) {
+    j = await jget('https://openlibrary.org/search.json?limit=1&fields=cover_i&q=' + encodeURIComponent(q));
+    if (j && j.docs && j.docs[0] && j.docs[0].cover_i) return 'https://covers.openlibrary.org/b/id/' + j.docs[0].cover_i + '-M.jpg';
+  }
+  if (wiki) {
+    j = await jget('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(wiki.replace(/ /g, '_')));
+    if (j && j.thumbnail && j.thumbnail.source) return j.thumbnail.source;
+  }
+  if (q) {
+    j = await jget('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=3&prop=pageimages&piprop=thumbnail&pithumbsize=400&gsrsearch=' + encodeURIComponent(q));
+    var pages = j && j.query && j.query.pages ? Object.values(j.query.pages).sort(function(a, b){ return a.index - b.index; }) : [];
+    for (var k = 0; k < pages.length; k++) if (pages[k].thumbnail) return pages[k].thumbnail.source;
+    j = await jget('https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=1&prop=imageinfo&iiprop=url&iiurlwidth=400&gsrsearch=' + encodeURIComponent(q));
+    var files = j && j.query && j.query.pages ? Object.values(j.query.pages) : [];
+    if (files[0] && files[0].imageinfo && files[0].imageinfo[0]) return files[0].imageinfo[0].thumburl || files[0].imageinfo[0].url;
+  }
+  return null;
+}
 function loadThumbs() {
-  document.querySelectorAll('#saScroll .sa-thumb[data-wiki]').forEach(function(el){
-    var t = el.getAttribute('data-wiki'); if (!t) return;
-    fetch('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(t.replace(/ /g, '_')))
-      .then(function(r){ return r.ok ? r.json() : null; })
-      .then(function(j){
-        var src = j && (j.thumbnail && j.thumbnail.source);
-        if (src) { el.style.backgroundImage = 'url("' + src + '")'; el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center'; }
-      }).catch(function(){});
+  document.querySelectorAll('#saScroll .sa-thumb').forEach(function(el){
+    var wiki = el.getAttribute('data-wiki') || '', q = el.getAttribute('data-q') || '', book = !!el.getAttribute('data-book');
+    if (!wiki && !q) return;
+    findThumb(wiki, q, book).then(function(src){
+      if (src) { el.style.backgroundImage = 'url("' + src + '")'; el.style.backgroundSize = 'cover'; el.style.backgroundPosition = 'center'; }
+    });
   });
 }
 
@@ -1535,7 +1562,7 @@ function setMode(isLive) {
   document.getElementById('camStatus').textContent = isLive ? '' : t('Add your Claude API key to scan for real. Tap the shutter.');
   var vf = document.getElementById('camVf');
   if (isLive) { vf.style.backgroundImage = 'linear-gradient(160deg,#2A2A2E 0%,#121214 100%)'; vf.classList.remove('photo'); document.getElementById('camHint').textContent = t('Tap the shutter to take a photo'); }
-  var lg = document.querySelector('.legend'); if (lg) lg.textContent = isLive ? 'Live: Scan Art → shutter → take a photo' : 'Add your API key in Settings to scan for real';
+  var lg = document.querySelector('.legend'); if (lg) lg.textContent = isLive ? 'Live: Scan → shutter → take a photo' : 'Add your API key in Settings to scan for real';
 }
 
 function openKeySheet() {
@@ -1737,7 +1764,7 @@ function renderJournal() {
   var dr = document.getElementById('jDateRows'); while (dr.nextSibling) dr.parentNode.removeChild(dr.nextSibling);
   document.getElementById('jCatHead').remove(); document.getElementById('jDateHead').remove();
   ['jCatRows', 'jDateRows'].forEach(function(id){
-    document.getElementById(id).insertAdjacentHTML('afterend', '<div class="j-none" data-for="' + id + '">No scans yet. Tap Scan Art to add your first discovery.</div>');
+    document.getElementById(id).insertAdjacentHTML('afterend', '<div class="j-none" data-for="' + id + '">No scans yet. Tap Scan to add your first discovery.</div>');
   });
 })();
 var catFilter = 'all';
@@ -2395,6 +2422,74 @@ document.getElementById('btn-about').addEventListener('click', openAbout);
 document.getElementById('menuFoot').addEventListener('click', openAbout);
 paintLogos();
 
+// ─── NARRATION: the phone's own voice reads Spark, Story and Surprise ─────
+var narr = { on: false, token: 0 };
+var PAUSE_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="#16346B" stroke="none"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
+var SPEAKER_SVG = document.getElementById('btn-narrate').innerHTML;
+function plain(html) { var d = document.createElement('div'); d.innerHTML = String(html || '').replace(/<br\s*\/?>/gi, '\n'); return d.textContent.replace(/\s+/g, ' ').trim(); }
+function pickVoice(lang) {
+  var vs = (window.speechSynthesis && speechSynthesis.getVoices()) || [], want = LOCALES[lang] || lang, best = null, bs = -1;
+  vs.forEach(function(v){
+    var vl = (v.lang || '').replace('_', '-');
+    if (vl.slice(0, 2).toLowerCase() !== lang) return;
+    var s = 0;
+    if (vl.toLowerCase() === want.toLowerCase()) s += 3;
+    if (/premium|enhanced|améliorée|mejorada|natural|neural/i.test(v.name)) s += 4;
+    if (/^(Daniel|Thomas|Mónica|Monica|Samantha|Amélie|Audrey|Marie|Jorge|Paulina|Google)/i.test(v.name)) s += 1;
+    if (v.localService) s += 1;
+    if (s > bs) { bs = s; best = v; }
+  });
+  return best;
+}
+function chunks(text) {
+  var out = [], cur = '';
+  (text.match(/[^.!?…]+[.!?…]+["»”’)]*\s*|[^.!?…]+$/g) || [text]).forEach(function(s){
+    if ((cur + s).length > 220 && cur) { out.push(cur.trim()); cur = ''; }
+    cur += s;
+  });
+  if (cur.trim()) out.push(cur.trim());
+  return out;
+}
+function setReading(i) {
+  document.querySelectorAll('#carTrack .c-card').forEach(function(c, k){ c.classList.toggle('reading', k === i); });
+  if (i >= 0 && currentCard !== i) { currentCard = i; updateCarousel(true); }
+}
+function stopNarration() {
+  narr.on = false; narr.token++;
+  if (window.speechSynthesis) speechSynthesis.cancel();
+  var b = document.getElementById('btn-narrate'); b.classList.remove('on'); b.innerHTML = SPEAKER_SVG; b.setAttribute('aria-label', t('Listen to the story'));
+  setReading(-1);
+}
+function startNarration() {
+  var a = ARTS[currentArt]; if (!a || !window.speechSynthesis) return;
+  var lang = a.lang || getLang(), voice = pickVoice(lang), token = ++narr.token;
+  var parts = [
+    [0, plain(a.title) + (a.creator ? (lang === 'fr' ? ', ' : ', ') + plain(a.creator) : '') + '.'],
+    [0, plain(a.spark[0]) + '. ' + plain(a.spark[1])],
+    [1, plain(a.story[0]) + '. ' + plain(a.story[1])],
+    [2, plain(a.surp[0]) + '. ' + plain(a.surp[1])]
+  ];
+  var queue = [];
+  parts.forEach(function(p){ chunks(p[1]).forEach(function(c){ queue.push([p[0], c]); }); });
+  speechSynthesis.cancel();
+  narr.on = true;
+  var b = document.getElementById('btn-narrate'); b.classList.add('on'); b.innerHTML = PAUSE_SVG; b.setAttribute('aria-label', t('Stop reading'));
+  queue.forEach(function(q, k){
+    var u = new SpeechSynthesisUtterance(q[1]);
+    u.lang = (voice && voice.lang) || LOCALES[lang] || lang; if (voice) u.voice = voice;
+    u.rate = 1; u.pitch = 1;
+    u.onstart = function(){ if (token === narr.token) setReading(q[0]); };
+    u.onend = function(){ if (token === narr.token && k === queue.length - 1) stopNarration(); };
+    u.onerror = function(e){ if (token === narr.token && e.error !== 'interrupted' && e.error !== 'canceled') stopNarration(); };
+    speechSynthesis.speak(u);
+  });
+}
+if (!window.speechSynthesis) document.getElementById('btn-narrate').hidden = true;
+else {
+  speechSynthesis.getVoices();
+  document.getElementById('btn-narrate').addEventListener('click', function(e){ e.stopPropagation(); if (narr.on) stopNarration(); else startNarration(); });
+}
+
 // ─── MUSIC: record a clip → AudD identifies → Claude tells the story ─
 var AUDD_STORE = 'strata.auddKey', musicRec = null, musicStream = null, musicCtl = null, musicBusy = false, musicTimer = null;
 function getAudd() { try { return localStorage.getItem(AUDD_STORE) || ''; } catch (e) { return window._memAudd || ''; } }
@@ -2495,6 +2590,7 @@ async function runMusic() {
     musicBusy = false;
     var dup = findDuplicate(d);
     if (dup) { URL.revokeObjectURL(url); markSeen(dup); openScan(dup.id); toast(t('Already in your journal · first scanned {d}', { d: fmtDay(dup.created_at) })); return; }
+    if (!d.lang) d.lang = getLang();
     ARTS.live = toArt(d, url);
     saveScan(d, img).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; loadJournal().then(function(){ if (currentArt === 'live') renderTags(); }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
       .catch(function(){ toast(t('Could not save this scan on this device')); });
@@ -2571,10 +2667,10 @@ fr: {
   "Scan a painting, a building or a book cover. It will appear in its category below.": "Scannez un tableau, un bâtiment ou une couverture de livre. Il apparaîtra dans sa catégorie ci-dessous.",
   "Scan your first artwork": "Scannez votre première œuvre",
   "Paintings": "Peintures", "See all": "Tout voir", "Architecture": "Architecture", "Plants": "Plantes", "Stars & Sky": "Étoiles et ciel", "Mountains": "Montagnes", "Sculptures": "Sculptures", "More discoveries": "Autres découvertes",
-  "Listen": "Écouter", "Scan Art": "Scanner",
+  "Listen": "Écouter", "Scan Art": "Scanner", "Scan": "Scanner",
   "Account": "Compte", "Edit Profile": "Modifier le profil", "Share with friends": "Partager avec des amis", "About Strata": "À propos de Strata", "Sign out": "Se déconnecter",
   "Browse by Category": "Parcourir par catégorie", "Filter by type": "Filtrer par type", "All": "Tout", "Stars": "Étoiles",
-  "No scans yet. Tap Scan Art to add your first discovery.": "Aucun scan pour l'instant. Touchez Scanner pour ajouter votre première découverte.",
+  "No scans yet. Tap Scan to add your first discovery.": "Aucun scan pour l'instant. Touchez Scanner pour ajouter votre première découverte.",
   "Where the originals live": "Où sont les originaux", "All places": "Tous les lieux", "Show all": "Tout afficher",
   "{n} original": "{n} original", "{n} originals": "{n} originaux",
   "No scans yet. Scan an artwork and its museum or site appears here.": "Aucun scan pour l'instant. Scannez une œuvre et son musée ou son site apparaîtra ici.",
@@ -2582,7 +2678,7 @@ fr: {
   "{n} scan has no known original location (a reproduction, a poster, or a private work).": "{n} scan n'a pas de lieu d'original connu (reproduction, poster ou œuvre privée).",
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
-  "Browse by Date": "Parcourir par date", "Journal & sync": "Journal et synchro", "Backup": "Sauvegarde", "Save your whole journal, photos included, as one file. Import it on another phone to restore it.": "Enregistrez tout votre journal, photos comprises, dans un seul fichier. Importez-le sur un autre téléphone pour le restaurer.", "Export": "Exporter", "Import": "Importer", "Last export: {d}": "Dernier export : {d}", "Change photo": "Changer la photo", "Remove": "Supprimer", "Name": "Nom", "Your name": "Votre nom", "Turn on cloud sync to change your email and password.": "Activez la synchronisation cloud pour modifier votre email et votre mot de passe.", "Set up cloud sync": "Activer la synchronisation", "Change password": "Changer le mot de passe", "Current password": "Mot de passe actuel", "New password (6 characters or more)": "Nouveau mot de passe (6 caractères minimum)", "Save": "Enregistrer", "My Discoveries": "Mes découvertes", "{n}'s Discoveries": "Les découvertes de {n}", "Add your name": "Ajoutez votre nom", "Waiting for confirmation of {e}": "En attente de confirmation pour {e}", "This photo could not be read.": "Impossible de lire cette photo.", "Enter your current password.": "Entrez votre mot de passe actuel.", "The new password needs 6 characters or more.": "Le nouveau mot de passe doit faire au moins 6 caractères.", "This email address does not look right.": "Cette adresse email semble incorrecte.", "Saving…": "Enregistrement…", "Password changed.": "Mot de passe modifié.", "Check your inbox: click the confirmation link to switch to {e}.": "Vérifiez vos emails : cliquez sur le lien de confirmation pour passer à {e}.", "Profile saved": "Profil enregistré", "Your current password is not right.": "Votre mot de passe actuel est incorrect.", "Saved on this phone, but the account could not be updated.": "Enregistré sur ce téléphone, mais le compte n'a pas pu être mis à jour.", "Sync on": "Synchro activée", "Sync off": "Synchro désactivée", "Every work has layers.": "Chaque œuvre a ses strates.", "Version {v}": "Version {v}", "Point your phone at a painting, a building, a sculpture or a book cover, and Strata tells you its story. Not a museum label or an encyclopedia entry: the story behind it, told like a curious friend who can’t help sharing the strange part.": "Visez un tableau, un bâtiment, une sculpture ou une couverture de livre : Strata vous raconte son histoire. Pas un cartel de musée ni une fiche d'encyclopédie, mais l'histoire derrière l'œuvre, racontée comme le ferait un ami curieux qui ne peut s'empêcher de partager le détail étrange.", "Four layers per discovery": "Quatre strates par découverte", "The hook, in fifteen seconds.": "L'accroche, en quinze secondes.", "What was happening in the artist’s life.": "Ce qui se passait dans la vie de l'artiste.", "The detail nobody tells you. Always last.": "Le détail que personne ne raconte. Toujours en dernier.", "A few good places to go further.": "Quelques bonnes adresses pour aller plus loin.", "Then keep the conversation going in the chat. Everything you scan is kept in your journal: by category, on the map where the original lives, and by date.": "Ensuite, poursuivez la conversation dans le chat. Tout ce que vous scannez est gardé dans votre journal : par catégorie, sur la carte là où se trouve l'original, et par date.", "The name": "Le nom", "Strata are the layers of rock that hold the history of a landscape. Every artwork, building and book has them too: the life of its maker, its time, the accidents that shaped it.": "Les strates sont les couches de roche qui gardent l'histoire d'un paysage. Chaque œuvre, chaque bâtiment, chaque livre en a aussi : la vie de son auteur, son époque, les hasards qui l'ont façonné.", "The logo": "Le logo", "A yellow S under a starry sky, framed by a camera viewfinder, over layers of blue. A nod to Van Gogh’s nights.": "Un S jaune sous un ciel étoilé, cadré par un viseur d'appareil photo, au-dessus de strates bleues. Un clin d'œil aux nuits de Van Gogh.", "Made in Barcelona by Elie, for friends.": "Fait à Barcelone par Elie, pour les amis.", "Stories are written by Claude, Anthropic’s AI. They can contain mistakes: the Deep Dive links are there to check.": "Les histoires sont écrites par Claude, l'IA d'Anthropic. Elles peuvent contenir des erreurs : les liens Deep Dive sont là pour vérifier.",  "Cloud sync": "Synchronisation cloud", "Sign in to keep your journal in the cloud and on all your devices.": "Connectez-vous pour garder votre journal dans le cloud et sur tous vos appareils.", "Email": "Email", "Password": "Mot de passe", "Sign in": "Se connecter", "Sync now": "Synchroniser", "Syncing…": "Synchronisation…", "Synced · {u} up · {d} down": "Synchronisé · {u} envoyés · {d} reçus", "Sync failed": "Échec de la synchronisation", "Last sync: {d}": "Dernière synchro : {d}", "On": "Activée", "Off": "Désactivée", "Enter your email and password.": "Entrez votre email et votre mot de passe.", "Signing in…": "Connexion…", "Signed in · your journal is being copied to the cloud": "Connecté · votre journal est copié dans le cloud", "Wrong email or password.": "Email ou mot de passe incorrect.", "Could not reach the server. Try again.": "Serveur injoignable. Réessayez.", "Signed out · your journal stays on this phone": "Déconnecté · votre journal reste sur ce téléphone",  "Export journal": "Exporter le journal", "Import journal": "Importer un journal", "Preparing your export…": "Préparation de l'export…", "Journal exported": "Journal exporté", "This file is not a Strata export.": "Ce fichier n'est pas un export Strata.", "{a} imported · {s} already in your journal": "{a} importés · {s} déjà dans votre journal",  "Camera": "Appareil photo", "Phone camera": "Appareil du téléphone", "Strata viewfinder": "Viseur Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "L'appareil du téléphone offre le zoom, les objectifs et la mise au point. Le viseur Strata vous garde dans l'app.",  "Music recognition key (AudD)": "Clé de reconnaissance musicale (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Écouter identifie les morceaux avec AudD, puis Claude raconte leur histoire.", "AudD API token": "Jeton API AudD", "Save music key": "Enregistrer la clé musique", "Remove": "Supprimer", "Create one at dashboard.audd.io.": "Créez-en une sur dashboard.audd.io.", "Back": "Retour", "Identifying the music…": "Identification de la musique…", "Usually a few seconds": "Quelques secondes en général", "Writing the story…": "Écriture du récit…", "No match": "Aucun résultat", "No match. Get closer to the music and try again.": "Aucun résultat. Rapprochez-vous de la musique et réessayez.", "Microphone access was refused. Allow it in Safari settings and try again.": "L'accès au micro a été refusé. Autorisez-le dans les réglages de Safari et réessayez.", "This browser cannot record audio.": "Ce navigateur ne peut pas enregistrer de son.", "Your AudD key was refused. Check it in Settings.": "Votre clé AudD a été refusée. Vérifiez-la dans les Réglages.", "Your AudD plan has no requests left.": "Votre forfait AudD n'a plus de requêtes.", "Could not reach AudD. Check your internet and try again.": "Impossible de joindre AudD. Vérifiez votre connexion et réessayez.", "Something went wrong. Try again.": "Un problème est survenu. Réessayez.", "Add your AudD key to recognise music.": "Ajoutez votre clé AudD pour reconnaître la musique.", "Paste the full AudD API token.": "Collez le jeton API AudD en entier.", "Music key saved": "Clé musique enregistrée", "Music key removed": "Clé musique supprimée", "Listen to this track": "Écouter ce morceau", "Song": "Morceau",  "No scans in this period.": "Aucun scan sur cette période.", "Previous": "Précédent", "Next": "Suivant", "Day": "Jour", "Week": "Semaine", "Month": "Mois", "Year": "Année",
+  "Browse by Date": "Parcourir par date", "Listen to the story": "Écouter l'histoire", "Stop reading": "Arrêter la lecture",  "Journal & sync": "Journal et synchro", "Backup": "Sauvegarde", "Save your whole journal, photos included, as one file. Import it on another phone to restore it.": "Enregistrez tout votre journal, photos comprises, dans un seul fichier. Importez-le sur un autre téléphone pour le restaurer.", "Export": "Exporter", "Import": "Importer", "Last export: {d}": "Dernier export : {d}", "Change photo": "Changer la photo", "Remove": "Supprimer", "Name": "Nom", "Your name": "Votre nom", "Turn on cloud sync to change your email and password.": "Activez la synchronisation cloud pour modifier votre email et votre mot de passe.", "Set up cloud sync": "Activer la synchronisation", "Change password": "Changer le mot de passe", "Current password": "Mot de passe actuel", "New password (6 characters or more)": "Nouveau mot de passe (6 caractères minimum)", "Save": "Enregistrer", "My Discoveries": "Mes découvertes", "{n}'s Discoveries": "Les découvertes de {n}", "Add your name": "Ajoutez votre nom", "Waiting for confirmation of {e}": "En attente de confirmation pour {e}", "This photo could not be read.": "Impossible de lire cette photo.", "Enter your current password.": "Entrez votre mot de passe actuel.", "The new password needs 6 characters or more.": "Le nouveau mot de passe doit faire au moins 6 caractères.", "This email address does not look right.": "Cette adresse email semble incorrecte.", "Saving…": "Enregistrement…", "Password changed.": "Mot de passe modifié.", "Check your inbox: click the confirmation link to switch to {e}.": "Vérifiez vos emails : cliquez sur le lien de confirmation pour passer à {e}.", "Profile saved": "Profil enregistré", "Your current password is not right.": "Votre mot de passe actuel est incorrect.", "Saved on this phone, but the account could not be updated.": "Enregistré sur ce téléphone, mais le compte n'a pas pu être mis à jour.", "Sync on": "Synchro activée", "Sync off": "Synchro désactivée", "Every work has layers.": "Chaque œuvre a ses strates.", "Version {v}": "Version {v}", "Point your phone at a painting, a building, a sculpture or a book cover, and Strata tells you its story. Not a museum label or an encyclopedia entry: the story behind it, told like a curious friend who can’t help sharing the strange part.": "Visez un tableau, un bâtiment, une sculpture ou une couverture de livre : Strata vous raconte son histoire. Pas un cartel de musée ni une fiche d'encyclopédie, mais l'histoire derrière l'œuvre, racontée comme le ferait un ami curieux qui ne peut s'empêcher de partager le détail étrange.", "Four layers per discovery": "Quatre strates par découverte", "The hook, in fifteen seconds.": "L'accroche, en quinze secondes.", "What was happening in the artist’s life.": "Ce qui se passait dans la vie de l'artiste.", "The detail nobody tells you. Always last.": "Le détail que personne ne raconte. Toujours en dernier.", "A few good places to go further.": "Quelques bonnes adresses pour aller plus loin.", "Then keep the conversation going in the chat. Everything you scan is kept in your journal: by category, on the map where the original lives, and by date.": "Ensuite, poursuivez la conversation dans le chat. Tout ce que vous scannez est gardé dans votre journal : par catégorie, sur la carte là où se trouve l'original, et par date.", "The name": "Le nom", "Strata are the layers of rock that hold the history of a landscape. Every artwork, building and book has them too: the life of its maker, its time, the accidents that shaped it.": "Les strates sont les couches de roche qui gardent l'histoire d'un paysage. Chaque œuvre, chaque bâtiment, chaque livre en a aussi : la vie de son auteur, son époque, les hasards qui l'ont façonné.", "The logo": "Le logo", "A yellow S under a starry sky, framed by a camera viewfinder, over layers of blue. A nod to Van Gogh’s nights.": "Un S jaune sous un ciel étoilé, cadré par un viseur d'appareil photo, au-dessus de strates bleues. Un clin d'œil aux nuits de Van Gogh.", "Made in Barcelona by Elie, for friends.": "Fait à Barcelone par Elie, pour les amis.", "Stories are written by Claude, Anthropic’s AI. They can contain mistakes: the Deep Dive links are there to check.": "Les histoires sont écrites par Claude, l'IA d'Anthropic. Elles peuvent contenir des erreurs : les liens Deep Dive sont là pour vérifier.",  "Cloud sync": "Synchronisation cloud", "Sign in to keep your journal in the cloud and on all your devices.": "Connectez-vous pour garder votre journal dans le cloud et sur tous vos appareils.", "Email": "Email", "Password": "Mot de passe", "Sign in": "Se connecter", "Sync now": "Synchroniser", "Syncing…": "Synchronisation…", "Synced · {u} up · {d} down": "Synchronisé · {u} envoyés · {d} reçus", "Sync failed": "Échec de la synchronisation", "Last sync: {d}": "Dernière synchro : {d}", "On": "Activée", "Off": "Désactivée", "Enter your email and password.": "Entrez votre email et votre mot de passe.", "Signing in…": "Connexion…", "Signed in · your journal is being copied to the cloud": "Connecté · votre journal est copié dans le cloud", "Wrong email or password.": "Email ou mot de passe incorrect.", "Could not reach the server. Try again.": "Serveur injoignable. Réessayez.", "Signed out · your journal stays on this phone": "Déconnecté · votre journal reste sur ce téléphone",  "Export journal": "Exporter le journal", "Import journal": "Importer un journal", "Preparing your export…": "Préparation de l'export…", "Journal exported": "Journal exporté", "This file is not a Strata export.": "Ce fichier n'est pas un export Strata.", "{a} imported · {s} already in your journal": "{a} importés · {s} déjà dans votre journal",  "Camera": "Appareil photo", "Phone camera": "Appareil du téléphone", "Strata viewfinder": "Viseur Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "L'appareil du téléphone offre le zoom, les objectifs et la mise au point. Le viseur Strata vous garde dans l'app.",  "Music recognition key (AudD)": "Clé de reconnaissance musicale (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Écouter identifie les morceaux avec AudD, puis Claude raconte leur histoire.", "AudD API token": "Jeton API AudD", "Save music key": "Enregistrer la clé musique", "Remove": "Supprimer", "Create one at dashboard.audd.io.": "Créez-en une sur dashboard.audd.io.", "Back": "Retour", "Identifying the music…": "Identification de la musique…", "Usually a few seconds": "Quelques secondes en général", "Writing the story…": "Écriture du récit…", "No match": "Aucun résultat", "No match. Get closer to the music and try again.": "Aucun résultat. Rapprochez-vous de la musique et réessayez.", "Microphone access was refused. Allow it in Safari settings and try again.": "L'accès au micro a été refusé. Autorisez-le dans les réglages de Safari et réessayez.", "This browser cannot record audio.": "Ce navigateur ne peut pas enregistrer de son.", "Your AudD key was refused. Check it in Settings.": "Votre clé AudD a été refusée. Vérifiez-la dans les Réglages.", "Your AudD plan has no requests left.": "Votre forfait AudD n'a plus de requêtes.", "Could not reach AudD. Check your internet and try again.": "Impossible de joindre AudD. Vérifiez votre connexion et réessayez.", "Something went wrong. Try again.": "Un problème est survenu. Réessayez.", "Add your AudD key to recognise music.": "Ajoutez votre clé AudD pour reconnaître la musique.", "Paste the full AudD API token.": "Collez le jeton API AudD en entier.", "Music key saved": "Clé musique enregistrée", "Music key removed": "Clé musique supprimée", "Listen to this track": "Écouter ce morceau", "Song": "Morceau",  "No scans in this period.": "Aucun scan sur cette période.", "Previous": "Précédent", "Next": "Suivant", "Day": "Jour", "Week": "Semaine", "Month": "Mois", "Year": "Année",
   "Point at any art": "Visez une œuvre", "Tap the shutter to take a photo": "Touchez le déclencheur pour prendre une photo",
   "Camera blocked · tap the shutter to take a photo": "Caméra bloquée · touchez le déclencheur pour prendre une photo",
   "Add your Claude API key to scan for real. Tap the shutter.": "Ajoutez votre clé API Claude pour scanner pour de vrai. Touchez le déclencheur.",
@@ -2633,10 +2729,10 @@ es: {
   "Scan a painting, a building or a book cover. It will appear in its category below.": "Escanea un cuadro, un edificio o la portada de un libro. Aparecerá en su categoría aquí abajo.",
   "Scan your first artwork": "Escanea tu primera obra",
   "Paintings": "Pinturas", "See all": "Ver todo", "Architecture": "Arquitectura", "Plants": "Plantas", "Stars & Sky": "Estrellas y cielo", "Mountains": "Montañas", "Sculptures": "Esculturas", "More discoveries": "Otros descubrimientos",
-  "Listen": "Escuchar", "Scan Art": "Escanear",
+  "Listen": "Escuchar", "Scan Art": "Escanear", "Scan": "Escanear",
   "Account": "Cuenta", "Edit Profile": "Editar perfil", "Share with friends": "Compartir con amigos", "About Strata": "Acerca de Strata", "Sign out": "Cerrar sesión",
   "Browse by Category": "Explorar por categoría", "Filter by type": "Filtrar por tipo", "All": "Todo", "Stars": "Estrellas",
-  "No scans yet. Tap Scan Art to add your first discovery.": "Aún no hay escaneos. Toca Escanear para añadir tu primer descubrimiento.",
+  "No scans yet. Tap Scan to add your first discovery.": "Aún no hay escaneos. Toca Escanear para añadir tu primer descubrimiento.",
   "Where the originals live": "Dónde están los originales", "All places": "Todos los lugares", "Show all": "Mostrar todo",
   "{n} original": "{n} original", "{n} originals": "{n} originales",
   "No scans yet. Scan an artwork and its museum or site appears here.": "Aún no hay escaneos. Escanea una obra y su museo o lugar aparecerá aquí.",
@@ -2644,7 +2740,7 @@ es: {
   "{n} scan has no known original location (a reproduction, a poster, or a private work).": "{n} escaneo no tiene un lugar de original conocido (reproducción, póster u obra privada).",
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
-  "Browse by Date": "Explorar por fecha", "Journal & sync": "Diario y sincronización", "Backup": "Copia de seguridad", "Save your whole journal, photos included, as one file. Import it on another phone to restore it.": "Guarda todo tu diario, fotos incluidas, en un solo archivo. Impórtalo en otro teléfono para restaurarlo.", "Export": "Exportar", "Import": "Importar", "Last export: {d}": "Última exportación: {d}", "Change photo": "Cambiar foto", "Remove": "Quitar", "Name": "Nombre", "Your name": "Tu nombre", "Turn on cloud sync to change your email and password.": "Activa la sincronización en la nube para cambiar tu email y tu contraseña.", "Set up cloud sync": "Activar la sincronización", "Change password": "Cambiar contraseña", "Current password": "Contraseña actual", "New password (6 characters or more)": "Nueva contraseña (6 caracteres o más)", "Save": "Guardar", "My Discoveries": "Mis descubrimientos", "{n}'s Discoveries": "Los descubrimientos de {n}", "Add your name": "Añade tu nombre", "Waiting for confirmation of {e}": "Esperando la confirmación de {e}", "This photo could not be read.": "No se pudo leer esta foto.", "Enter your current password.": "Introduce tu contraseña actual.", "The new password needs 6 characters or more.": "La nueva contraseña necesita 6 caracteres o más.", "This email address does not look right.": "Esta dirección de email no parece correcta.", "Saving…": "Guardando…", "Password changed.": "Contraseña cambiada.", "Check your inbox: click the confirmation link to switch to {e}.": "Revisa tu correo: haz clic en el enlace de confirmación para cambiar a {e}.", "Profile saved": "Perfil guardado", "Your current password is not right.": "Tu contraseña actual no es correcta.", "Saved on this phone, but the account could not be updated.": "Guardado en este teléfono, pero no se pudo actualizar la cuenta.", "Sync on": "Sincronización activada", "Sync off": "Sincronización desactivada", "Every work has layers.": "Cada obra tiene sus capas.", "Version {v}": "Versión {v}", "Point your phone at a painting, a building, a sculpture or a book cover, and Strata tells you its story. Not a museum label or an encyclopedia entry: the story behind it, told like a curious friend who can’t help sharing the strange part.": "Apunta tu teléfono a un cuadro, un edificio, una escultura o la portada de un libro, y Strata te cuenta su historia. No una cartela de museo ni una entrada de enciclopedia: la historia que hay detrás, contada como lo haría un amigo curioso que no puede evitar compartir el detalle extraño.", "Four layers per discovery": "Cuatro capas por descubrimiento", "The hook, in fifteen seconds.": "El gancho, en quince segundos.", "What was happening in the artist’s life.": "Lo que pasaba en la vida del artista.", "The detail nobody tells you. Always last.": "El detalle que nadie te cuenta. Siempre al final.", "A few good places to go further.": "Algunos buenos sitios para ir más allá.", "Then keep the conversation going in the chat. Everything you scan is kept in your journal: by category, on the map where the original lives, and by date.": "Después, sigue la conversación en el chat. Todo lo que escaneas se guarda en tu diario: por categoría, en el mapa donde está el original y por fecha.", "The name": "El nombre", "Strata are the layers of rock that hold the history of a landscape. Every artwork, building and book has them too: the life of its maker, its time, the accidents that shaped it.": "Los estratos son las capas de roca que guardan la historia de un paisaje. Cada obra, cada edificio y cada libro también los tiene: la vida de su autor, su época, los azares que le dieron forma.", "The logo": "El logo", "A yellow S under a starry sky, framed by a camera viewfinder, over layers of blue. A nod to Van Gogh’s nights.": "Una S amarilla bajo un cielo estrellado, enmarcada por un visor de cámara, sobre capas de azul. Un guiño a las noches de Van Gogh.", "Made in Barcelona by Elie, for friends.": "Hecho en Barcelona por Elie, para los amigos.", "Stories are written by Claude, Anthropic’s AI. They can contain mistakes: the Deep Dive links are there to check.": "Las historias las escribe Claude, la IA de Anthropic. Pueden contener errores: los enlaces de Deep Dive están para comprobarlo.",  "Cloud sync": "Sincronización en la nube", "Sign in to keep your journal in the cloud and on all your devices.": "Inicia sesión para guardar tu diario en la nube y en todos tus dispositivos.", "Email": "Email", "Password": "Contraseña", "Sign in": "Iniciar sesión", "Sync now": "Sincronizar", "Syncing…": "Sincronizando…", "Synced · {u} up · {d} down": "Sincronizado · {u} enviados · {d} recibidos", "Sync failed": "Error de sincronización", "Last sync: {d}": "Última sincronización: {d}", "On": "Activada", "Off": "Desactivada", "Enter your email and password.": "Introduce tu email y tu contraseña.", "Signing in…": "Iniciando sesión…", "Signed in · your journal is being copied to the cloud": "Sesión iniciada · tu diario se está copiando en la nube", "Wrong email or password.": "Email o contraseña incorrectos.", "Could not reach the server. Try again.": "No se puede conectar con el servidor. Inténtalo de nuevo.", "Signed out · your journal stays on this phone": "Sesión cerrada · tu diario se queda en este teléfono",  "Export journal": "Exportar el diario", "Import journal": "Importar un diario", "Preparing your export…": "Preparando la exportación…", "Journal exported": "Diario exportado", "This file is not a Strata export.": "Este archivo no es una exportación de Strata.", "{a} imported · {s} already in your journal": "{a} importados · {s} ya estaban en tu diario",  "Camera": "Cámara", "Phone camera": "Cámara del teléfono", "Strata viewfinder": "Visor de Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "La cámara del teléfono tiene zoom, objetivos y enfoque. El visor de Strata te mantiene dentro de la app.",  "Music recognition key (AudD)": "Clave de reconocimiento musical (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Escuchar identifica canciones con AudD y luego Claude cuenta su historia.", "AudD API token": "Token API de AudD", "Save music key": "Guardar clave de música", "Remove": "Eliminar", "Create one at dashboard.audd.io.": "Crea uno en dashboard.audd.io.", "Back": "Volver", "Identifying the music…": "Identificando la música…", "Usually a few seconds": "Normalmente unos segundos", "Writing the story…": "Escribiendo la historia…", "No match": "Sin resultado", "No match. Get closer to the music and try again.": "Sin resultado. Acércate a la música e inténtalo de nuevo.", "Microphone access was refused. Allow it in Safari settings and try again.": "Se ha denegado el acceso al micrófono. Permítelo en los ajustes de Safari e inténtalo de nuevo.", "This browser cannot record audio.": "Este navegador no puede grabar audio.", "Your AudD key was refused. Check it in Settings.": "Tu clave de AudD ha sido rechazada. Revísala en Ajustes.", "Your AudD plan has no requests left.": "A tu plan de AudD no le quedan solicitudes.", "Could not reach AudD. Check your internet and try again.": "No se ha podido conectar con AudD. Revisa tu internet e inténtalo de nuevo.", "Something went wrong. Try again.": "Algo ha fallado. Inténtalo de nuevo.", "Add your AudD key to recognise music.": "Añade tu clave de AudD para reconocer música.", "Paste the full AudD API token.": "Pega el token API de AudD completo.", "Music key saved": "Clave de música guardada", "Music key removed": "Clave de música eliminada", "Listen to this track": "Escuchar esta pista", "Song": "Canción",  "No scans in this period.": "No hay escaneos en este periodo.", "Previous": "Anterior", "Next": "Siguiente", "Day": "Día", "Week": "Semana", "Month": "Mes", "Year": "Año",
+  "Browse by Date": "Explorar por fecha", "Listen to the story": "Escuchar la historia", "Stop reading": "Detener la lectura",  "Journal & sync": "Diario y sincronización", "Backup": "Copia de seguridad", "Save your whole journal, photos included, as one file. Import it on another phone to restore it.": "Guarda todo tu diario, fotos incluidas, en un solo archivo. Impórtalo en otro teléfono para restaurarlo.", "Export": "Exportar", "Import": "Importar", "Last export: {d}": "Última exportación: {d}", "Change photo": "Cambiar foto", "Remove": "Quitar", "Name": "Nombre", "Your name": "Tu nombre", "Turn on cloud sync to change your email and password.": "Activa la sincronización en la nube para cambiar tu email y tu contraseña.", "Set up cloud sync": "Activar la sincronización", "Change password": "Cambiar contraseña", "Current password": "Contraseña actual", "New password (6 characters or more)": "Nueva contraseña (6 caracteres o más)", "Save": "Guardar", "My Discoveries": "Mis descubrimientos", "{n}'s Discoveries": "Los descubrimientos de {n}", "Add your name": "Añade tu nombre", "Waiting for confirmation of {e}": "Esperando la confirmación de {e}", "This photo could not be read.": "No se pudo leer esta foto.", "Enter your current password.": "Introduce tu contraseña actual.", "The new password needs 6 characters or more.": "La nueva contraseña necesita 6 caracteres o más.", "This email address does not look right.": "Esta dirección de email no parece correcta.", "Saving…": "Guardando…", "Password changed.": "Contraseña cambiada.", "Check your inbox: click the confirmation link to switch to {e}.": "Revisa tu correo: haz clic en el enlace de confirmación para cambiar a {e}.", "Profile saved": "Perfil guardado", "Your current password is not right.": "Tu contraseña actual no es correcta.", "Saved on this phone, but the account could not be updated.": "Guardado en este teléfono, pero no se pudo actualizar la cuenta.", "Sync on": "Sincronización activada", "Sync off": "Sincronización desactivada", "Every work has layers.": "Cada obra tiene sus capas.", "Version {v}": "Versión {v}", "Point your phone at a painting, a building, a sculpture or a book cover, and Strata tells you its story. Not a museum label or an encyclopedia entry: the story behind it, told like a curious friend who can’t help sharing the strange part.": "Apunta tu teléfono a un cuadro, un edificio, una escultura o la portada de un libro, y Strata te cuenta su historia. No una cartela de museo ni una entrada de enciclopedia: la historia que hay detrás, contada como lo haría un amigo curioso que no puede evitar compartir el detalle extraño.", "Four layers per discovery": "Cuatro capas por descubrimiento", "The hook, in fifteen seconds.": "El gancho, en quince segundos.", "What was happening in the artist’s life.": "Lo que pasaba en la vida del artista.", "The detail nobody tells you. Always last.": "El detalle que nadie te cuenta. Siempre al final.", "A few good places to go further.": "Algunos buenos sitios para ir más allá.", "Then keep the conversation going in the chat. Everything you scan is kept in your journal: by category, on the map where the original lives, and by date.": "Después, sigue la conversación en el chat. Todo lo que escaneas se guarda en tu diario: por categoría, en el mapa donde está el original y por fecha.", "The name": "El nombre", "Strata are the layers of rock that hold the history of a landscape. Every artwork, building and book has them too: the life of its maker, its time, the accidents that shaped it.": "Los estratos son las capas de roca que guardan la historia de un paisaje. Cada obra, cada edificio y cada libro también los tiene: la vida de su autor, su época, los azares que le dieron forma.", "The logo": "El logo", "A yellow S under a starry sky, framed by a camera viewfinder, over layers of blue. A nod to Van Gogh’s nights.": "Una S amarilla bajo un cielo estrellado, enmarcada por un visor de cámara, sobre capas de azul. Un guiño a las noches de Van Gogh.", "Made in Barcelona by Elie, for friends.": "Hecho en Barcelona por Elie, para los amigos.", "Stories are written by Claude, Anthropic’s AI. They can contain mistakes: the Deep Dive links are there to check.": "Las historias las escribe Claude, la IA de Anthropic. Pueden contener errores: los enlaces de Deep Dive están para comprobarlo.",  "Cloud sync": "Sincronización en la nube", "Sign in to keep your journal in the cloud and on all your devices.": "Inicia sesión para guardar tu diario en la nube y en todos tus dispositivos.", "Email": "Email", "Password": "Contraseña", "Sign in": "Iniciar sesión", "Sync now": "Sincronizar", "Syncing…": "Sincronizando…", "Synced · {u} up · {d} down": "Sincronizado · {u} enviados · {d} recibidos", "Sync failed": "Error de sincronización", "Last sync: {d}": "Última sincronización: {d}", "On": "Activada", "Off": "Desactivada", "Enter your email and password.": "Introduce tu email y tu contraseña.", "Signing in…": "Iniciando sesión…", "Signed in · your journal is being copied to the cloud": "Sesión iniciada · tu diario se está copiando en la nube", "Wrong email or password.": "Email o contraseña incorrectos.", "Could not reach the server. Try again.": "No se puede conectar con el servidor. Inténtalo de nuevo.", "Signed out · your journal stays on this phone": "Sesión cerrada · tu diario se queda en este teléfono",  "Export journal": "Exportar el diario", "Import journal": "Importar un diario", "Preparing your export…": "Preparando la exportación…", "Journal exported": "Diario exportado", "This file is not a Strata export.": "Este archivo no es una exportación de Strata.", "{a} imported · {s} already in your journal": "{a} importados · {s} ya estaban en tu diario",  "Camera": "Cámara", "Phone camera": "Cámara del teléfono", "Strata viewfinder": "Visor de Strata", "The phone camera has zoom, lenses and focus. The Strata viewfinder keeps you inside the app.": "La cámara del teléfono tiene zoom, objetivos y enfoque. El visor de Strata te mantiene dentro de la app.",  "Music recognition key (AudD)": "Clave de reconocimiento musical (AudD)", "Listen identifies songs with AudD, then Claude tells their story.": "Escuchar identifica canciones con AudD y luego Claude cuenta su historia.", "AudD API token": "Token API de AudD", "Save music key": "Guardar clave de música", "Remove": "Eliminar", "Create one at dashboard.audd.io.": "Crea uno en dashboard.audd.io.", "Back": "Volver", "Identifying the music…": "Identificando la música…", "Usually a few seconds": "Normalmente unos segundos", "Writing the story…": "Escribiendo la historia…", "No match": "Sin resultado", "No match. Get closer to the music and try again.": "Sin resultado. Acércate a la música e inténtalo de nuevo.", "Microphone access was refused. Allow it in Safari settings and try again.": "Se ha denegado el acceso al micrófono. Permítelo en los ajustes de Safari e inténtalo de nuevo.", "This browser cannot record audio.": "Este navegador no puede grabar audio.", "Your AudD key was refused. Check it in Settings.": "Tu clave de AudD ha sido rechazada. Revísala en Ajustes.", "Your AudD plan has no requests left.": "A tu plan de AudD no le quedan solicitudes.", "Could not reach AudD. Check your internet and try again.": "No se ha podido conectar con AudD. Revisa tu internet e inténtalo de nuevo.", "Something went wrong. Try again.": "Algo ha fallado. Inténtalo de nuevo.", "Add your AudD key to recognise music.": "Añade tu clave de AudD para reconocer música.", "Paste the full AudD API token.": "Pega el token API de AudD completo.", "Music key saved": "Clave de música guardada", "Music key removed": "Clave de música eliminada", "Listen to this track": "Escuchar esta pista", "Song": "Canción",  "No scans in this period.": "No hay escaneos en este periodo.", "Previous": "Anterior", "Next": "Siguiente", "Day": "Día", "Week": "Semana", "Month": "Mes", "Year": "Año",
   "Point at any art": "Apunta a una obra", "Tap the shutter to take a photo": "Toca el disparador para hacer una foto",
   "Camera blocked · tap the shutter to take a photo": "Cámara bloqueada · toca el disparador para hacer una foto",
   "Add your Claude API key to scan for real. Tap the shutter.": "Añade tu clave API de Claude para escanear de verdad. Toca el disparador.",
