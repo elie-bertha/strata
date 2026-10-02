@@ -858,7 +858,7 @@ function renderArt(key) {
   var loc = a.raw && a.raw.location, wh = document.getElementById('resWhere');
   wh.hidden = !(loc && (loc.place || loc.city));
   if (!wh.hidden) wh.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + (a.raw.category === 'architecture' ? '' : 'Original at ') + esc([loc.place, loc.city].filter(Boolean).join(', '));
-  var links = a.links.map(function(l){ return '<a class="lnk-row" target="_blank" rel="noopener" href="https://www.google.com/search?q=' + encodeURIComponent((l[1] + ' ' + l[2]).replace(/&amp;/g,'&')) + '"><div class="lnk-ico" style="background:' + LNK[l[0]][0] + ';">' + LNK[l[0]][1] + '</div><div><div class="lnk-name">' + l[1] + '</div><div class="lnk-url">' + l[2] + '</div></div></a>'; }).join('');
+  var links = a.links.map(function(l){ return '<a class="lnk-row" target="_blank" rel="noopener" href="' + (l[3] || 'https://www.google.com/search?q=' + encodeURIComponent((l[1] + ' ' + l[2]).replace(/&amp;/g,'&'))) + '"><div class="lnk-ico" style="background:' + LNK[l[0]][0] + ';">' + LNK[l[0]][1] + '</div><div><div class="lnk-name">' + l[1] + '</div><div class="lnk-url">' + l[2] + '</div></div></a>'; }).join('');
   document.getElementById('carTrack').innerHTML =
     cardHTML('cc-spark', ICO.spark, 'Spark · 15 sec', a.spark[0], '<div class="c-body">' + a.spark[1] + '</div><div class="c-more" style="color:rgba(255,255,255,.4);">' + ICO.arrow + 'Swipe for more</div>') +
     cardHTML('cc-story', ICO.story, 'Story · 2 min', a.story[0], '<div class="c-body">' + a.story[1] + '</div>') +
@@ -1089,11 +1089,15 @@ var SCAN_PROMPT = [
   'Voice: a knowledgeable friend who finds everything slightly fascinating and cannot help sharing the strange part. Warm, vivid, precise. Never Wikipedia tone. No markdown.',
   '',
   'The image is a photo the user just took with their phone. The subject may be on a screen, in a book, on a wall, or outdoors.',
-  'Identify it. Read any visible inscriptions, signatures or titles: they are strong evidence.',
+  'Identify it. Read any visible text first: titles, author names, signatures, inscriptions, museum wall labels. Text is the strongest evidence.',
+  'Books: a book cover is a book. Identify the book from its title and author on the cover (any language, including recent books), and write the cards about the book and its author. The cover image may reproduce a famous artwork: mention it, but the subject is the book. For books, location is null and more_by lists other books by the same author.',
+  'Paintings in a museum or gallery: consider the setting and the city when it helps (for example a gilded frame in Barcelona may hang in the Museu Picasso or MNAC).',
+  'Use the web_search tool when you are not certain of the exact work: search with what you see (artist style, subject, landmarks, any visible text, likely museum). Confirm the identification before answering. Also use search results for the deep_dive links.',
+  'Answer with "identified": true whenever the visible text or a confirmed search identifies the work, even if it is little known.',
   'Accuracy rules: only state facts you are confident about. If you are unsure of a fact, leave it out rather than guess. Never invent quotes, dates or URLs.',
   'If you cannot identify the specific work, set "identified" to false, give your best description as the title (e.g. "Ukiyo-e landscape print"), use the style, movement or likely period as the creator, and make the cards about that style. Never a dead end.',
   '',
-  'Reply with only this JSON object:',
+  'Your final message must be only this JSON object, with no text before or after it and no citations:',
   '{',
   '  "identified": true,',
   '  "confidence": "high" | "medium" | "low",',
@@ -1109,7 +1113,7 @@ var SCAN_PROMPT = [
   '  "spark": { "head": "3-6 words", "body": "the 15-second hook: the most surprising way into this work, 40-55 words" },',
   '  "story": { "head": "3-6 words", "body": "what was happening in the creator\'s life or world when it was made, 80-110 words" },',
   '  "surprise": { "head": "3-6 words", "body": "one unexpected, true fact that ends on delight, 35-60 words" },',
-  '  "deep_dive": [ { "title": "a specific resource to go further (museum collection page, documentary, book, archive)", "source": "its website domain, e.g. metmuseum.org", "kind": "museum" | "video" | "read" } ],',
+  '  "deep_dive": [ { "title": "a specific resource to go further (museum collection page, documentary, book, archive)", "source": "its website domain, e.g. metmuseum.org", "url": "the exact page URL if it appeared in your search results, otherwise empty string", "kind": "museum" | "video" | "read" } ],',
   '  "more_by": [ { "title": "another work by the same creator", "year": "year or c. date", "hook": "max 8 words, intriguing", "wiki": "exact English Wikipedia article title of this work, or empty string", "colors": ["#hex", "#hex", "#hex"] } ],',
   '  "chat_intro": "one or two sentences inviting questions, in the narrator voice",',
   '  "questions": ["three short follow-up questions a curious person would ask about this specific work, max 6 words each"]',
@@ -1138,7 +1142,7 @@ function toArt(d, imgURL) {
     surp:  [esc(d.surprise && d.surprise.head), esc(d.surprise && d.surprise.body)],
     links: dd.map(function(l){
       var k = ['museum','video','read'].indexOf(l.kind) >= 0 ? l.kind : 'read';
-      return [k, esc(l.title), esc(l.source)];
+      return [k, esc(l.title), esc(l.source), /^https:\/\/[^\s"'<>]+$/.test(String(l.url || '')) ? esc(l.url) : ''];
     }),
     artist: esc(short),
     moreLabel: d.identified === false ? 'More like this' : 'More by ' + esc(short),
@@ -1164,6 +1168,7 @@ var SCAN_ERR = {
   image_rejected: 'This photo could not be read. Try another one, under 20 MB.',
   refused: 'Claude declined this photo. Try a different subject.',
   invalid_json: 'The answer came back incomplete. Try again.',
+  search_off: 'Web search is turned off for your API account.',
   bad_key: 'Your API key was refused. Check it in Preferences.',
   no_credit: 'Your Claude API balance is empty. Add credit at platform.claude.com → Billing.',
   network: 'No connection to Claude. Check your internet and try again.',
@@ -1185,7 +1190,7 @@ async function runLiveScan(file) {
   liveScanning = true;
   scanStatus('Identifying artwork…', 'Asking Claude · usually 10–40 seconds');
   show('s-scanning');
-  var t = setTimeout(function(){ if (liveScanning) scanStatus('Writing the story…', 'Spark, Story, Surprise, Deep Dive'); }, 9000);
+  var t = setTimeout(function(){ if (liveScanning) scanStatus('Checking and writing the story…', 'Claude may search the web to confirm · up to a minute'); }, 9000);
   liveScanCtl = new AbortController();
   try {
     var d = await live.json(SCAN_PROMPT, { images: [file], signal: liveScanCtl.signal });
@@ -1209,7 +1214,7 @@ async function runLiveScan(file) {
   } catch (e) {
     liveScanning = false;
     if (e && e.code === 'cancelled') { show('s-camera'); return; }
-    scanStatus('Could not identify this one', SCAN_ERR[e && e.code] || 'Something went wrong while asking Claude. Try again.', true);
+    scanStatus('Could not identify this one', (SCAN_ERR[e && e.code] || 'Something went wrong while asking Claude. Try again.') + ' [' + ((e && e.code) || 'unknown') + (e && e.message ? ': ' + String(e.message).slice(0, 120) : '') + ']', true);
   } finally { clearTimeout(t); }
 }
 
@@ -1267,6 +1272,7 @@ function answer(text) {
 }
 
 // Resolve live mode: this standalone page calls the Claude API directly with the user's own key
+var searchOff = false;
 var API_MODELS = ['claude-sonnet-5-5', 'claude-sonnet-4-6'];
 var KEY_STORE = 'strata.apiKey';
 function getKey() { try { return localStorage.getItem(KEY_STORE) || ''; } catch (e) { return window._memKey || ''; } }
@@ -1300,9 +1306,12 @@ async function callClaude(body, signal) {
     }
     var data = await res.json().catch(function(){ return {}; });
     if (res.ok) { if (i > 0) API_MODELS = API_MODELS.slice(i).concat(API_MODELS.slice(0, i));
-      return (data.content || []).filter(function(b){ return b.type === 'text'; }).map(function(b){ return b.text; }).join(''); }
+      var blocks = data.content || [], lastTool = -1;
+      blocks.forEach(function(b, k){ if (b.type === 'web_search_tool_result' || b.type === 'server_tool_use') lastTool = k; });
+      return blocks.slice(lastTool + 1).filter(function(b){ return b.type === 'text'; }).map(function(b){ return b.text; }).join(''); }
     var msg = (data.error && data.error.message) || '';
     if (res.status === 404 || /model/i.test(msg) && res.status === 400 && /not.*found|invalid/i.test(msg)) { lastErr = { code: 'model' }; continue; }
+    if (res.status === 400 && /web.?search|tool/i.test(msg)) throw { code: 'search_off', message: msg };
     if (res.status === 401 || res.status === 403) throw { code: 'bad_key' };
     if (res.status === 429 || res.status === 529) throw { code: 'rate_limited' };
     if (/credit/i.test(msg)) throw { code: 'no_credit' };
@@ -1334,11 +1343,23 @@ function makeLive() {
   };
   f.json = async function(prompt, opts) {
     var b64 = await photoToBase64(opts.images[0]);
-    var text = await callClaude({ max_tokens: 2500, messages: [{ role: 'user', content: [
+    var body = { max_tokens: 4000, messages: [{ role: 'user', content: [
       { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } },
       { type: 'text', text: prompt }
-    ] }] }, opts.signal);
-    return parseJSON(text);
+    ] }] };
+    var withSearch = !searchOff;
+    // up to two attempts: an incomplete or failed answer is retried once; web search is dropped if the account has it turned off
+    for (var attempt = 0; attempt < 2; attempt++) {
+      var b = Object.assign({}, body);
+      if (withSearch) b.tools = [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }];
+      try {
+        return parseJSON(await callClaude(b, opts.signal));
+      } catch (e) {
+        if (e && e.code === 'search_off' && withSearch) { searchOff = true; withSearch = false; attempt--; continue; }
+        if (attempt === 0 && e && (e.code === 'invalid_json' || e.code === 'upstream_error')) continue;
+        throw e;
+      }
+    }
   };
   return f;
 }
