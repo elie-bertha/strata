@@ -120,6 +120,9 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 .lpin{width:40px;height:40px;border-radius:50%;border:2.5px solid #fff;background:#2C2C2E center/cover;box-shadow:0 2px 8px rgba(0,0,0,.3);position:relative;transition:transform .15s;}
 .lpin.on{transform:scale(1.25);border-color:var(--ink);}
 .lpin span{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--ink);color:#fff;font:600 10px/18px 'DM Sans',sans-serif;text-align:center;}
+.map-cats{display:flex;gap:6px;overflow-x:auto;padding:12px 16px 0;flex-shrink:0;scrollbar-width:none;}
+.map-cats::-webkit-scrollbar{display:none;}
+.map-cats .ts-chip{flex-shrink:0;font-size:12px;padding:7px 12px;}
 .map-list-count{border:none;background:none;font:inherit;font-size:11px;color:var(--muted);padding:0;}
 .map-list-count.link{color:var(--ink);font-weight:600;cursor:pointer;}
 .leaflet-control-attribution{font-size:9px!important;}
@@ -617,6 +620,7 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
     <span class="page-title">Where the originals live</span>
   </div>
   <div class="map-area"><div id="lmap"></div></div>
+  <div class="map-cats" id="mapCats" hidden></div>
   <div class="map-list-hd">
     <div class="map-list-title" id="mapTitle">All places</div>
     <button class="map-list-count" id="mapCount">0 originals</button>
@@ -1662,18 +1666,26 @@ document.getElementById('tsClose').addEventListener('click', closeTagSheet);
 document.getElementById('tsDone').addEventListener('click', closeTagSheet);
 document.getElementById('tagSheet').addEventListener('click', function(e){ if (e.target.id === 'tagSheet') closeTagSheet(); });
 
-var lmap = null, mapLayer = null, mapPlace = null, locating = false;
+var lmap = null, mapLayer = null, mapPlace = null, locating = false, mapCats = [];
 function hasLoc(r) { var l = r.data && r.data.location; return !!(l && isFinite(l.lat) && isFinite(l.lng)); }
 function placeKey(l) { return (l.place || '') + '|' + (l.city || ''); }
 function placeLabel(l) { return [l.place, l.city].filter(Boolean).join(', '); }
 
 function renderMap() {
-  var withLoc = journal.filter(hasLoc), list = document.getElementById('mapList');
+  var located = journal.filter(hasLoc), list = document.getElementById('mapList');
+  // category chips: only categories that have located scans; none selected = all
+  var present = TAG_ORDER.concat(['other']).filter(function(c){ return located.some(function(r){ return scanCats(r).indexOf(c) >= 0; }); });
+  mapCats = mapCats.filter(function(c){ return present.indexOf(c) >= 0; });
+  var mc = document.getElementById('mapCats');
+  mc.hidden = present.length < 2;
+  mc.innerHTML = present.map(function(c){ var on = mapCats.indexOf(c) >= 0; return '<button class="ts-chip' + (on ? ' on' : '') + '" data-cat="' + c + '" aria-pressed="' + on + '">' + TAG_LABEL[c] + '</button>'; }).join('');
+  var withLoc = mapCats.length ? located.filter(function(r){ return scanCats(r).some(function(c){ return mapCats.indexOf(c) >= 0; }); }) : located;
+  if (mapPlace && !withLoc.some(function(r){ return placeKey(r.data.location) === mapPlace; })) mapPlace = null;
   var shown = mapPlace ? withLoc.filter(function(r){ return placeKey(r.data.location) === mapPlace; }) : withLoc;
   document.getElementById('mapTitle').textContent = mapPlace ? placeLabel(shown[0].data.location) : 'All places';
   document.getElementById('mapCount').textContent = mapPlace ? 'Show all' : shown.length + (shown.length === 1 ? ' original' : ' originals');
   document.getElementById('mapCount').classList.toggle('link', !!mapPlace);
-  var missing = journal.length - withLoc.length;
+  var missing = journal.length - located.length;
   list.innerHTML = shown.map(function(r){
     var l = r.data.location;
     return '<div class="map-row" data-scan="' + r.id + '"><div class="map-icon" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;border-radius:10px;"></div><div><div class="map-name">' + esc(r.title) + '</div><div class="map-loc"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + esc(placeLabel(l)) + '</div></div></div>';
@@ -1703,6 +1715,12 @@ function renderMap() {
   else if (pts.length === 1) lmap.setView(pts[0], 12);
   else if (pts.length) lmap.fitBounds(pts, { padding: [36, 36], maxZoom: 12 });
 }
+document.getElementById('mapCats').addEventListener('click', function(e){
+  var chip = e.target.closest('.ts-chip'); if (!chip) return;
+  var c = chip.getAttribute('data-cat'), i = mapCats.indexOf(c);
+  if (i >= 0) mapCats.splice(i, 1); else mapCats.push(c);
+  mapPlace = null; renderMap();
+});
 document.getElementById('mapCount').addEventListener('click', function(){ if (mapPlace) { mapPlace = null; renderMap(); } });
 
 // Scans saved before locations existed: ask Claude once per scan, text only
