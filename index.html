@@ -1779,11 +1779,20 @@ function openDB() {
   });
   return dbp;
 }
+// Some browsers (Safari private windows) refuse to store photos as Blobs: keep them as data URLs instead
+function dbPut(r) {
+  return tx('readwrite', function(s){ return s.put(r); }).catch(async function(e){
+    if (!(r.photo instanceof Blob)) throw e;
+    var c = Object.assign({}, r, { photo: await blobToDataURL(r.photo) });
+    return tx('readwrite', function(s){ return s.put(c); });
+  });
+}
 function tx(mode, fn) {
   return openDB().then(function(db){ return new Promise(function(ok, ko){
     var t = db.transaction(DB_STORE, mode), s = t.objectStore(DB_STORE), out = fn(s);
     t.oncomplete = function(){ ok(out && out.result !== undefined ? out.result : out); };
     t.onerror = function(){ ko(t.error); };
+    t.onabort = function(){ ko(t.error || 'aborted'); };
   }); });
 }
 function resizeBlob(blob, max, quality, asDataURL) {
@@ -1818,6 +1827,7 @@ async function saveScan(d, file) {
 function loadJournal() {
   return tx('readonly', function(s){ return s.getAll(); }).then(function(all){
     journal = (all || []).sort(function(a, b){ return a.created_at < b.created_at ? 1 : -1; });
+    journal.forEach(function(r){ if (typeof r.photo === 'string') r.photo = dataURLToBlob(r.photo) || new Blob([], { type: 'image/jpeg' }); });
     renderJournal();
   }).catch(function(){ journal = []; renderJournal(); });
 }
@@ -2001,7 +2011,7 @@ function renderJournal() {
   var slot = document.getElementById('jEmptySlot');
   slot.innerHTML = n ? '' : '<div class="j-empty" id="jEmpty"><div class="j-empty-t">' + t('Your journal is empty') + '</div><div class="j-empty-s">' + t('Scan a painting, a building or a book cover. It will appear in its category below.') + '</div><button class="j-empty-b" id="jEmptyBtn">' + t('Scan your first artwork') + '</button></div>';
   body.insertBefore(slot, body.firstChild);
-  var eb = document.getElementById('jEmptyBtn'); if (eb) eb.onclick = function(){ show('s-camera'); };
+  var eb = document.getElementById('jEmptyBtn'); if (eb) eb.onclick = function(){ document.getElementById('btn-scan').click(); };
   // Stats
   var c = { art: 0, arch: 0, book: 0, music: 0 };
   journal.forEach(function(r){ var pc = scanCats(r)[0]; if (pc === 'arch') c.arch++; else if (pc === 'book') c.book++; else if (pc === 'music') c.music++; else c.art++; });
@@ -2419,7 +2429,7 @@ function fromRow(row, photo) {
 // Every local change goes through here, so it is marked for upload
 function saveLocal(r) {
   r.dirty = true; r.updated_at = new Date().toISOString();
-  return tx('readwrite', function(s){ return s.put(r); }).then(function(){ scheduleSync(); });
+  return dbPut(r).then(function(){ scheduleSync(); });
 }
 function pendingDeletes() { try { return JSON.parse(localStorage.getItem('strata.pendingDeletes') || '[]'); } catch (e) { return []; } }
 function setPendingDeletes(a) { try { localStorage.setItem('strata.pendingDeletes', JSON.stringify(a)); } catch (e) {} }
@@ -2464,7 +2474,7 @@ async function syncNow(loud) {
       }
       await sb('/rest/v1/scans?on_conflict=user_id,id', { method: 'POST', headers: { 'content-type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify(toRow(r)) });
       r.synced = true; r.dirty = false;
-      await tx('readwrite', function(s){ return s.put(r); });
+      await dbPut(r);
       up++;
     }
     step = 'download';
@@ -2477,7 +2487,7 @@ async function syncNow(loud) {
         try { photo = await (await sb('/storage/v1/object/authenticated/photos/' + rw.photo_path)).blob(); } catch (e) { photo = null; }
       }
       var rec = fromRow(rw, photo || new Blob([], { type: 'image/jpeg' }));
-      await tx('readwrite', function(s){ return s.put(rec); });
+      await dbPut(rec);
       if (ARTS['j_' + rec.id]) delete ARTS['j_' + rec.id];
       down++;
     }
@@ -2532,7 +2542,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.11';
+var APP_VERSION = '0.12';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
