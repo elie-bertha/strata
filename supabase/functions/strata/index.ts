@@ -1,8 +1,9 @@
 // Strata relay · one Supabase Edge Function, named "strata".
 // - signup:  creates an account from an invitation code (public sign-ups can stay off)
 // - claude:  calls Claude with the server key and counts what each friend spends against their credit
-// - invite, me, friends, topup: invitations and credit. Credit is paid by the server key (invitations from the admin)
-//   or by the inviting friend's own Claude key, stored encrypted in Vault (set_key / clear_key).
+// - invite, me, friends, topup, approve, decline: invitations and credit. Credit is always paid by the server key.
+//   Invitations from the admin come with credit; credit offered in a friend's invitation waits for the admin's approval.
+//   No user's own Claude key is ever stored here.
 // Secrets: ANTHROPIC_API_KEY (set in Edge Functions → Secrets). SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are provided by Supabase.
 // Settings: turn OFF "Enforce JWT verification" for this function — it checks the user itself.
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -17,6 +18,7 @@ const SEARCH_MICRO = 10000;            // web search: $10 per 1,000 searches
 const ADMIN_INVITE_CENTS = 200;        // $2 offered with each invitation sent by the admin
 const MAX_TOPUP_CENTS = 2000;
 const MAX_OFFER_CENTS = 2000;
+const MAX_FRIEND_OFFER_CENTS = 500;   // what a friend may ask the admin to offer
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -45,11 +47,10 @@ async function getProfile(user: any) {
   await db.from('profiles').insert(row);
   return { ...row, spent_micro: 0, is_admin: false, invited_by: null };
 }
-const clampCents = (v: any, d: number) => Math.max(0, Math.min(Number.isFinite(Number(v)) ? Math.round(Number(v)) : d, MAX_OFFER_CENTS));
-async function keyFor(prof: any): Promise<{ key: string, own: boolean }> {
-  if (prof.is_admin || prof.server_paid) return { key: ANTHROPIC_KEY, own: false };
-  if (prof.sponsor_id) { const { data } = await db.rpc('strata_get_key', { p_uid: prof.sponsor_id }); return { key: data || '', own: true }; }
-  return { key: '', own: false };
+const clampCents = (v: any, d: number, max = MAX_OFFER_CENTS) => Math.max(0, Math.min(Number.isFinite(Number(v)) ? Math.round(Number(v)) : d, max));
+async function adminName() {
+  const { data } = await db.from('profiles').select('name').eq('is_admin', true).limit(1).maybeSingle();
+  return (data && data.name || '').split(/\s+/)[0];
 }
 async function nameOf(uid: string | null) {
   if (!uid) return '';
@@ -68,7 +69,7 @@ Deno.serve(async (req) => {
   if (action === 'check_invite') {
     const { data: inv } = await db.from('invites').select('*').eq('code', String(body.code || '').toUpperCase()).maybeSingle();
     if (!inv || inv.used_by) return json({ ok: false });
-    return json({ ok: true, from: await nameOf(inv.created_by), credit_cents: inv.credit_cents });
+    return json({ ok: true, from: await nameOf(inv.created_by), credit_cents: inv.credit_cents, needs_approval: inv.credit_cents > 0 && !inv.server_paid, approver: await adminName() });
   }
   if (action === 'signup') {
     const code = String(body.code || '').toUpperCase(), email = String(body.email || '').trim().toLowerCase();
@@ -81,8 +82,10 @@ Deno.serve(async (req) => {
     if (error || !created.user) return json({ error: /already|registered|exists/i.test(error && error.message || '') ? 'email_taken' : 'signup_failed', message: error && error.message }, 400);
     const { data: claimed } = await db.from('invites').update({ used_by: created.user.id, used_at: now }).eq('code', code).is('used_by', null).select();
     if (!claimed || !claimed.length) { await db.auth.admin.deleteUser(created.user.id); return json({ error: 'invite_invalid' }, 400); }
-    await db.from('profiles').insert({ user_id: created.user.id, name, lang, budget_cents: inv.credit_cents, invited_by: inv.created_by, server_paid: !!inv.server_paid, sponsor_id: inv.sponsor_id || null });
-    return json({ ok: true, credit_cents: inv.credit_cents });
+    const approved = !!inv.server_paid;
+    await db.from('profiles').insert({ user_id: created.user.id, name, lang, invited_by: inv.created_by, server_paid: approved || inv.credit_cents > 0,
+      budget_cents: approved ? inv.credit_cents : 0, requested_cents: approved ? 0 : inv.credit_cents });
+    return json({ ok: true, credit_cents: approved ? inv.credit_cents : 0, requested_cents: approved ? 0 : inv.credit_cents });
   }
 
   // ── signed-in users ──
@@ -92,17 +95,19 @@ Deno.serve(async (req) => {
 
   if (action === 'me') {
     const { count: friends } = prof.is_admin
-      ? await db.from('profiles').select('user_id', { count: 'exact', head: true }).eq('server_paid', true)
-      : await db.from('profiles').select('user_id', { count: 'exact', head: true }).eq('sponsor_id', user.id);
-    const payer = prof.sponsor_id ? await nameOf(prof.sponsor_id) : prof.server_paid ? await nameOf(prof.invited_by) : '';
-    return json({ name: prof.name, is_admin: prof.is_admin, budget_cents: prof.budget_cents, spent_micro: prof.spent_micro, remaining_micro: remaining(prof), inviter: await nameOf(prof.invited_by), payer, has_key: !!prof.key_secret_id, key_hint: prof.key_hint || '', friends: friends || 0 });
+      ? await db.from('profiles').select('user_id', { count: 'exact', head: true }).eq('is_admin', false)
+      : await db.from('profiles').select('user_id', { count: 'exact', head: true }).eq('invited_by', user.id);
+    const { count: pending } = prof.is_admin ? await db.from('profiles').select('user_id', { count: 'exact', head: true }).gt('requested_cents', 0) : { count: 0 };
+    const admin = await adminName();
+    return json({ name: prof.name, is_admin: prof.is_admin, budget_cents: prof.budget_cents, spent_micro: prof.spent_micro, remaining_micro: remaining(prof),
+      requested_cents: prof.requested_cents || 0, inviter: await nameOf(prof.invited_by), payer: prof.server_paid ? admin : '', approver: admin, friends: friends || 0, pending: pending || 0 });
   }
 
   if (action === 'claude') {
     const left = remaining(prof);
-    if (left !== null && left <= 0) return json({ error: 'no_budget', remaining_micro: 0 }, 402);
-    const { key: apiKey, own } = await keyFor(prof);
-    if (!apiKey) return json({ error: own ? 'sponsor_key_missing' : (prof.is_admin || prof.server_paid ? 'relay_not_configured' : 'no_budget'), remaining_micro: 0 }, own || !(prof.is_admin || prof.server_paid) ? 402 : 500);
+    if (left !== null && left <= 0) return json({ error: prof.requested_cents > 0 ? 'pending_approval' : 'no_budget', remaining_micro: 0 }, 402);
+    if (!ANTHROPIC_KEY) return json({ error: 'relay_not_configured' }, 500);
+    const apiKey = ANTHROPIC_KEY;
     const b = body.body || {};
     const payload: any = { max_tokens: Math.min(Number(b.max_tokens) || 1000, 4000), messages: b.messages };
     if (b.system) payload.system = b.system;
@@ -121,11 +126,6 @@ Deno.serve(async (req) => {
       if (res.status === 404 || (res.status === 400 && /model/i.test(msg) && /not.*found|invalid/i.test(msg))) continue;
       break;
     }
-    if (own && res && !res.ok) {
-      const msg = (data && data.error && data.error.message) || '';
-      if (res.status === 401 || res.status === 403) return json({ error: 'sponsor_key_invalid' }, 402);
-      if (/credit/i.test(msg)) return json({ error: 'sponsor_no_credit' }, 402);
-    }
     if (res && res.ok && data && data.usage) {
       const u = data.usage, p = PRICE[model] || [3, 15];
       const searches = (u.server_tool_use && u.server_tool_use.web_search_requests) || 0;
@@ -139,57 +139,46 @@ Deno.serve(async (req) => {
   }
 
   if (action === 'invite') {
-    let credit = 0, server_paid = false, sponsor_id: string | null = null;
-    if (prof.is_admin) { credit = clampCents(body.credit_cents, ADMIN_INVITE_CENTS); server_paid = credit > 0; }
-    else if (prof.key_secret_id) { credit = clampCents(body.credit_cents, ADMIN_INVITE_CENTS); sponsor_id = credit > 0 ? user.id : null; }
+    const credit = prof.is_admin ? clampCents(body.credit_cents, ADMIN_INVITE_CENTS) : clampCents(body.credit_cents, ADMIN_INVITE_CENTS, MAX_FRIEND_OFFER_CENTS);
+    const server_paid = prof.is_admin && credit > 0;
     for (let i = 0; i < 4; i++) {
       const code = newCode();
-      const { error } = await db.from('invites').insert({ code, created_by: user.id, credit_cents: credit, server_paid, sponsor_id });
-      if (!error) return json({ code, credit_cents: credit, paid_by: server_paid ? 'server' : sponsor_id ? 'you' : 'none' });
+      const { error } = await db.from('invites').insert({ code, created_by: user.id, credit_cents: credit, server_paid });
+      if (!error) return json({ code, credit_cents: credit, needs_approval: credit > 0 && !server_paid, approver: await adminName() });
     }
     return json({ error: 'invite_failed' }, 500);
   }
 
-  // My own Claude key, kept encrypted so the friends I invite can spend the credit I offer them
-  if (action === 'set_key') {
-    const k = String(body.key || '').trim();
-    if (!/^sk-ant-[A-Za-z0-9_\-]{20,}$/.test(k)) return json({ error: 'bad_key' }, 400);
-    const chk = await fetch('https://api.anthropic.com/v1/models?limit=1', { headers: { 'x-api-key': k, 'anthropic-version': '2023-06-01' } });
-    if (chk.status === 401 || chk.status === 403) return json({ error: 'bad_key' }, 400);
-    const { error } = await db.rpc('strata_set_key', { p_uid: user.id, p_key: k });
-    if (error) return json({ error: 'key_failed', message: error.message }, 500);
-    return json({ ok: true, key_hint: k.slice(-4) });
-  }
-  if (action === 'clear_key') {
-    await db.rpc('strata_clear_key', { p_uid: user.id });
-    return json({ ok: true });
-  }
-
-  // Friends whose credit I pay: everyone the server pays for (admin), or the friends I sponsor with my key
+  // People I invited (everyone, for the admin), with their credit and any request waiting for approval
   if (action === 'friends') {
-    const q = db.from('profiles').select('*').order('created_at', { ascending: false });
-    const { data: rows } = prof.is_admin ? await q.eq('server_paid', true) : await q.eq('sponsor_id', user.id);
-    const { data: list } = await db.auth.admin.listUsers({ page: 1, perPage: 1000 });
+    const q = db.from('profiles').select('*').eq('is_admin', false).order('created_at', { ascending: false });
+    const { data: rows } = prof.is_admin ? await q : await q.eq('invited_by', user.id);
     const emails: Record<string, string> = {};
-    ((list && list.users) || []).forEach((u: any) => { emails[u.id] = u.email; });
+    if (prof.is_admin) {
+      const { data: list } = await db.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      ((list && list.users) || []).forEach((u: any) => { emails[u.id] = u.email; });
+    }
+    const names: Record<string, string> = {};
+    for (const r of rows || []) if (r.invited_by && !(r.invited_by in names)) names[r.invited_by] = await nameOf(r.invited_by);
     const { count } = await db.from('invites').select('code', { count: 'exact', head: true }).eq('created_by', user.id).is('used_by', null);
-    return json({ friends: (rows || []).map((r: any) => ({ id: r.user_id, name: r.name, email: emails[r.user_id] || '', budget_cents: r.budget_cents, spent_micro: r.spent_micro, created_at: r.created_at })), open_invites: count || 0 });
+    return json({ open_invites: count || 0, friends: (rows || []).map((r: any) => ({ id: r.user_id, name: r.name, email: emails[r.user_id] || '', budget_cents: r.budget_cents, spent_micro: r.spent_micro,
+      requested_cents: r.requested_cents || 0, invited_by: names[r.invited_by] || '', created_at: r.created_at })) });
   }
-  if (action === 'topup') {
-    const cents = Math.max(1, Math.min(Number(body.cents) || 100, MAX_TOPUP_CENTS));
-    const { data: row } = await db.from('profiles').select('budget_cents, server_paid, sponsor_id').eq('user_id', body.user_id).maybeSingle();
-    if (!row) return json({ error: 'not_found' }, 404);
-    const mine = prof.is_admin ? row.server_paid : row.sponsor_id === user.id;
-    if (!mine) return json({ error: 'forbidden' }, 403);
-    if (!prof.is_admin && !prof.key_secret_id) return json({ error: 'no_key' }, 400);
-    await db.from('profiles').update({ budget_cents: row.budget_cents + cents }).eq('user_id', body.user_id);
-    return json({ ok: true, budget_cents: row.budget_cents + cents });
+  if (action === 'topup' || action === 'approve' || action === 'decline') {
+    if (!prof.is_admin) return json({ error: 'forbidden' }, 403);
+    const { data: row } = await db.from('profiles').select('budget_cents, requested_cents, is_admin').eq('user_id', body.user_id).maybeSingle();
+    if (!row || row.is_admin) return json({ error: 'not_found' }, 404);
+    let upd: any;
+    if (action === 'topup') upd = { budget_cents: row.budget_cents + Math.max(1, Math.min(Number(body.cents) || 100, MAX_TOPUP_CENTS)), server_paid: true };
+    else if (action === 'approve') upd = { budget_cents: row.budget_cents + (row.requested_cents || 0), requested_cents: 0, server_paid: true };
+    else upd = { requested_cents: 0 };
+    await db.from('profiles').update(upd).eq('user_id', body.user_id);
+    return json({ ok: true, ...upd });
   }
 
-  // Delete my account: photos, cloud journal, credit and usage, open invitations, my saved key, then the account itself
+  // Delete my account: photos, cloud journal, credit and usage, open invitations, then the account itself
   if (action === 'delete_account') {
     if (prof.is_admin) return json({ error: 'admin_cannot_delete' }, 403);
-    await db.rpc('strata_clear_key', { p_uid: user.id });
     const { data: files } = await db.storage.from('photos').list(user.id, { limit: 1000 });
     if (files && files.length) await db.storage.from('photos').remove(files.map((f: any) => user.id + '/' + f.name));
     await db.from('scans').delete().eq('user_id', user.id);
