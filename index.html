@@ -2013,7 +2013,9 @@ function getSession() { try { return JSON.parse(localStorage.getItem(SESSION_STO
 function setSession(s) { window._memSession = s; try { if (s) localStorage.setItem(SESSION_STORE, JSON.stringify(s)); else localStorage.removeItem(SESSION_STORE); } catch (e) {} }
 
 async function sbAuth(grant, body) {
-  var res = await fetch(SB_URL + '/auth/v1/token?grant_type=' + grant, { method: 'POST', headers: { apikey: SB_KEY, 'content-type': 'application/json' }, body: JSON.stringify(body) });
+  var res;
+  try { res = await fetch(SB_URL + '/auth/v1/token?grant_type=' + grant, { method: 'POST', headers: { apikey: SB_KEY, 'content-type': 'application/json' }, body: JSON.stringify(body) }); }
+  catch (e) { throw { code: 'sync_network', message: e && e.message }; }
   var j = await res.json().catch(function(){ return {}; });
   if (!res.ok) throw { code: res.status === 400 || res.status === 401 ? 'bad_login' : 'sync_network', message: j.error_description || j.msg || j.message };
   var s = { access_token: j.access_token, refresh_token: j.refresh_token, expires_at: Date.now() + (j.expires_in || 3600) * 1000, user: { id: j.user && j.user.id, email: j.user && j.user.email } };
@@ -2031,7 +2033,7 @@ async function sb(path, opts) {
   var headers = Object.assign({ apikey: SB_KEY, Authorization: 'Bearer ' + s.access_token }, opts.headers || {});
   var res;
   try { res = await fetch(SB_URL + path, Object.assign({}, opts, { headers: headers })); }
-  catch (e) { throw { code: 'sync_network' }; }
+  catch (e) { throw { code: 'sync_network', message: (e && e.message) + ' · ' + (opts.method || 'GET') + ' ' + path.split('?')[0] }; }
   if (res.status === 401) { setSession(null); renderSync(); throw { code: 'signed_out' }; }
   if (!res.ok) { var txt = await res.text().catch(function(){ return ''; }); throw { code: 'sync_error', message: res.status + ' ' + txt.slice(0, 160) }; }
   return res;
@@ -2067,10 +2069,10 @@ async function syncNow(loud) {
   if (!getSession()) return;
   if (syncing) { syncAgain = true; return; }   // a change arrived mid-sync: run once more at the end
   syncing = true; renderSync(t('Syncing…'));
-  var up = 0, down = 0;
+  var up = 0, down = 0, step = 'login';
   try {
     var uid = (await sbToken()).user.id;
-    // 1. deletions made on this device
+    step = 'deletes';
     var dels = pendingDeletes(), left = [];
     for (var i = 0; i < dels.length; i++) {
       try {
@@ -2079,12 +2081,12 @@ async function syncNow(loud) {
       } catch (e) { if (e.code === 'sync_network') left.push(dels[i]); }
     }
     setPendingDeletes(left);
-    // 2. what the cloud has
+    step = 'read';
     var remote = await (await sb('/rest/v1/scans?select=*&order=created_at.desc')).json();
     var byId = {}; remote.forEach(function(row){ byId[row.id] = row; });
     var local = await tx('readonly', function(s){ return s.getAll(); });
     var localById = {}; local.forEach(function(r){ localById[r.id] = r; });
-    // 3. upload new or changed scans (photo first, then the row)
+    step = 'upload';
     for (var k = 0; k < local.length; k++) {
       var r = local[k], row = byId[r.id];
       if (r.synced && !row) { await tx('readwrite', function(s){ return s.delete(r.id); }); continue; }   // removed on another device
@@ -2099,7 +2101,7 @@ async function syncNow(loud) {
       await tx('readwrite', function(s){ return s.put(r); });
       up++;
     }
-    // 4. bring down scans from other devices, and newer versions of edited ones
+    step = 'download';
     for (var m = 0; m < remote.length; m++) {
       var rw = remote[m], lr = localById[rw.id];
       if (lr && !newer(rw.updated_at, lr.updated_at)) continue;
@@ -2120,7 +2122,10 @@ async function syncNow(loud) {
     if (loud || down) toast(t('Synced · {u} up · {d} down', { u: up, d: down }));
   } catch (e) {
     syncing = false;
-    renderSync(e && e.code === 'signed_out' ? '' : t('Sync failed') + ' [' + ((e && e.code) || 'unknown') + ']');
+    var detail = (e && (e.code || e.name)) || 'unknown';
+    var why = e && (e.message || (e.toString && e.toString())) || '';
+    renderSync(e && e.code === 'signed_out' ? '' : t('Sync failed') + ' [' + step + ' · ' + detail + (why && why !== detail ? ': ' + String(why).slice(0, 140) : '') + ']');
+    if (window.console) console.error('sync', step, e);
     if (loud) toast(t('Sync failed'));
   }
 }
