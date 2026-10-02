@@ -288,6 +288,27 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 @media (prefers-reduced-motion:reduce){.toast.show{animation:none}}
 .cam-close{border:none;cursor:pointer;width:40px;height:40px;}
 .cam-topbar .cam-wordmark{position:absolute;left:50%;transform:translateX(-50%);}
+.c-card{cursor:pointer;}
+.card-zoom{position:absolute;inset:0;z-index:2500;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;}
+.cz-sheet{width:100%;max-height:90%;background:var(--bg);border-radius:24px 24px 0 0;display:flex;flex-direction:column;padding:14px 16px calc(16px + env(safe-area-inset-bottom,0px));animation:czIn .22s ease-out;}
+@keyframes czIn{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.cz-sheet{animation:none}}
+.cz-top{display:flex;align-items:center;justify-content:space-between;padding:0 4px 12px;}
+.cz-dots{display:flex;gap:6px;}
+.cz-x{width:32px;height:32px;border-radius:50%;border:none;background:var(--s3);font-size:20px;line-height:1;color:var(--ink);cursor:pointer;}
+.cz-body{overflow-y:auto;-webkit-overflow-scrolling:touch;min-height:0;}
+.cz-body .c-card{flex:none;width:100%;height:auto;cursor:default;}
+.cz-body .c-inner{overflow:visible;padding:22px 20px;gap:14px;}
+.cz-body .c-head{font-size:24px;}
+.cz-body .c-kick{font-size:11px;}
+.cz-body .c-body{font-size:18px;line-height:1.7;font-weight:400;}
+.cz-body .c-more{display:none;}
+.cz-body .lnk-row{padding:12px 14px;}
+.cz-body .lnk-name{font-size:15px;}
+.cz-body .lnk-url{font-size:12px;}
+.cz-nav{display:flex;justify-content:space-between;padding-top:12px;}
+.cz-btn{width:48px;height:40px;border-radius:12px;border:1px solid var(--s3);background:var(--surface);font-size:22px;color:var(--ink);cursor:pointer;}
+.cz-btn:disabled{opacity:.3;cursor:default;}
 /* SAME ARTIST SECTION */
 .same-artist{background:var(--bg);padding:16px 0 28px;flex-shrink:0;}
 .sa-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px 12px;}
@@ -389,6 +410,13 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 <body>
 <div class="wrapper">
 <div class="phone"><div class="notch"></div>
+<div class="card-zoom" id="cardZoom" hidden>
+  <div class="cz-sheet" role="dialog" aria-label="Card">
+    <div class="cz-top"><div class="cz-dots" id="czDots"></div><button class="cz-x" id="czClose" aria-label="Close">×</button></div>
+    <div class="cz-body" id="czBody"></div>
+    <div class="cz-nav"><button class="cz-btn" id="czPrev" aria-label="Previous card">‹</button><button class="cz-btn" id="czNext" aria-label="Next card">›</button></div>
+  </div>
+</div>
 <div class="toast" id="toast" role="status" hidden></div>
 <div class="key-sheet" id="keySheet" hidden><div class="key-card" role="dialog" aria-labelledby="keyTitle">
   <div class="key-top"><div class="key-title" id="keyTitle">Claude API key</div><button class="key-x" id="keyClose" aria-label="Close">×</button></div>
@@ -845,6 +873,7 @@ function nextFallback() {
 // ─── NAVIGATION ───────────────────────────────
 function show(id) {
   if (id === 's-camera') startCamera(); else stopCamera();
+  var cz = document.getElementById('cardZoom'); if (cz) cz.hidden = true;
   if (id === 's-search-map') setTimeout(function(){ mapPlace = null; renderMap(); backfillLocations(); }, 0);
   document.querySelectorAll('.screen').forEach(s => {
     s.classList.remove('active');
@@ -967,9 +996,11 @@ if (wrap) {
   wrap.addEventListener('mouseleave', endDrag);
 }
 
+var lastDrag = 0;
 function endDrag() {
   if (!isDragging) return;
   isDragging = false;
+  lastDrag = Math.abs(dragDelta);
   if (dragDelta < -40 && currentCard < CARDS-1) currentCard++;
   else if (dragDelta > 40 && currentCard > 0) currentCard--;
   updateCarousel(true);
@@ -1133,12 +1164,21 @@ async function runLiveScan(file) {
   try {
     var d = await live.json(SCAN_PROMPT, { images: [file], signal: liveScanCtl.signal });
     if (!d || typeof d !== 'object' || !d.title) throw { code: 'invalid_json' };
+    var dup = findDuplicate(d);
+    liveScanning = false;
+    if (dup) {
+      // Same work already saved: open the saved entry instead of adding a copy
+      URL.revokeObjectURL(url);
+      markSeen(dup);
+      openScan(dup.id);
+      toast('Already in your journal · first scanned ' + fmtDay(dup.created_at));
+      return;
+    }
     ARTS.live = toArt(d, url);
     saveScan(d, file).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; loadJournal(); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast('Saved to your journal'); })
       .catch(function(){ toast('Could not save this scan on this device'); });
     currentArt = 'live';
     renderedChat = null;
-    liveScanning = false;
     show('s-result');
   } catch (e) {
     liveScanning = false;
@@ -1417,6 +1457,28 @@ function deleteScan(id) {
   });
 }
 
+// Normalised title + creator: accents, case, punctuation and leading articles ignored
+function normName(s) {
+  return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/\(.*?\)/g, ' ').replace(/[^a-z0-9]+/g, ' ').replace(/^(the|la|le|les|el|il|der|die|das) /, '').trim();
+}
+function findDuplicate(d) {
+  if (d.identified === false) return null;          // a "best guess" is never treated as the same work
+  var t = normName(d.title), c = normName(d.creator);
+  if (!t) return null;
+  return journal.find(function(r){
+    if (!r.identified) return false;
+    var rt = normName(r.title), rc = normName(r.creator);
+    var sameTitle = rt === t || (Math.min(rt.length, t.length) >= 8 && (rt.indexOf(t) === 0 || t.indexOf(rt) === 0));
+    var sameCreator = !c || !rc || rc === c || rc.indexOf(c) >= 0 || c.indexOf(rc) >= 0;
+    return sameTitle && sameCreator;
+  }) || null;
+}
+function markSeen(r) {
+  r.seen = (r.seen || 1) + 1; r.last_seen_at = new Date().toISOString();
+  tx('readwrite', function(s){ return s.put(r); }).catch(function(){});
+}
+
 function openScan(id) {
   var rec = journal.find(function(r){ return r.id === id; }); if (!rec) return;
   var key = 'j_' + id;
@@ -1609,6 +1671,40 @@ async function backfillLocations() {
   }
   locating = false; renderMap();
 }
+
+// ─── CARD ZOOM ─────────────────────────────────
+var zoomIdx = 0;
+function openZoom(i) {
+  var cards = document.querySelectorAll('#carTrack .c-card'); if (!cards[i]) return;
+  zoomIdx = i;
+  document.getElementById('czBody').innerHTML = cards[i].outerHTML;
+  document.getElementById('czBody').scrollTop = 0;
+  document.getElementById('czDots').innerHTML = Array.prototype.map.call(cards, function(_, k){ return '<div class="dot' + (k === i ? ' on' : '') + '"></div>'; }).join('');
+  document.getElementById('czPrev').disabled = i === 0;
+  document.getElementById('czNext').disabled = i === cards.length - 1;
+  document.getElementById('cardZoom').hidden = false;
+}
+function closeZoom() {
+  document.getElementById('cardZoom').hidden = true;
+  currentCard = zoomIdx; updateCarousel(false);    // the carousel follows the card you were reading
+}
+document.getElementById('carTrack').addEventListener('click', function(e){
+  if (lastDrag > 10 || e.target.closest('a')) { lastDrag = 0; return; }
+  var card = e.target.closest('.c-card'); if (!card) return;
+  openZoom(Array.prototype.indexOf.call(card.parentNode.children, card));
+});
+document.getElementById('czClose').addEventListener('click', closeZoom);
+document.getElementById('cardZoom').addEventListener('click', function(e){ if (e.target.id === 'cardZoom') closeZoom(); });
+document.getElementById('czPrev').addEventListener('click', function(){ openZoom(zoomIdx - 1); });
+document.getElementById('czNext').addEventListener('click', function(){ openZoom(zoomIdx + 1); });
+(function(){
+  var sx = 0, sy = 0, sheet = document.querySelector('.cz-sheet');
+  sheet.addEventListener('touchstart', function(e){ sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+  sheet.addEventListener('touchend', function(e){
+    var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) openZoom(zoomIdx + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+})();
 
 // ─── INIT ─────────────────────────────────────
 function fitPhone() {
