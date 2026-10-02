@@ -2597,7 +2597,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.18';
+var APP_VERSION = '0.19';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -2742,6 +2742,7 @@ function renderAbout() {
     '<div class="ab-logo" data-logo></div><div class="ab-name" id="aboutTitle">Strata</div>' +
     '<div class="ab-tag">' + t('Every work has layers.') + '</div>' +
     '<div class="ab-ver">' + t('Version {v}', { v: APP_VERSION }) + '</div>' +
+    '<div class="wl-video"><video id="abVideo" muted loop playsinline preload="none" aria-label="' + esc(t('Strata in 25 seconds')) + '"></video></div>' +
     '<p class="ab-p">' + t('Point your phone at a painting, a building, a sculpture or a book cover, and Strata tells you its story. Not a museum label or an encyclopedia entry: the story behind it, told like a curious friend who can’t help sharing the strange part.') + '</p>' +
     '<div class="ab-h">' + t('Four layers per discovery') + '</div>' +
     '<div class="ab-layers">' + L.map(function(x, i){ return '<div class="ab-l"><div class="ab-n">' + (i + 1) + '</div><div><b>' + t(x[0]) + '</b><span>' + t(x[1]) + '</span></div></div>'; }).join('') + '</div>' +
@@ -2754,15 +2755,16 @@ function renderAbout() {
     '<div class="ab-foot">' + t('Made in Barcelona by Elie, for friends.') + '<br>' + t('Stories are written by Claude, Anthropic’s AI. They can contain mistakes: the Deep Dive links are there to check.') + '</div>';
   paintLogos();
 }
-function openAbout() { renderAbout(); document.getElementById('aboutSheet').hidden = false; document.querySelector('#aboutSheet .key-card').scrollTop = 0; }
+function openAbout() { renderAbout(); document.getElementById('aboutSheet').hidden = false; document.querySelector('#aboutSheet .key-card').scrollTop = 0; setDemoVideo('abVideo'); }
+function pauseAboutVideo() { var v = document.getElementById('abVideo'); if (v) { try { v.pause(); } catch (e) {} } }
 
 ['dataSheet', 'profSheet', 'aboutSheet'].forEach(function(id){
   var el = document.getElementById(id);
-  el.addEventListener('click', function(e){ if (e.target === el) el.hidden = true; });
+  el.addEventListener('click', function(e){ if (e.target === el) { el.hidden = true; if (id === 'aboutSheet') pauseAboutVideo(); } });
 });
 document.getElementById('dataClose').addEventListener('click', function(){ document.getElementById('dataSheet').hidden = true; });
 document.getElementById('profClose').addEventListener('click', function(){ document.getElementById('profSheet').hidden = true; });
-document.getElementById('aboutClose').addEventListener('click', function(){ document.getElementById('aboutSheet').hidden = true; });
+document.getElementById('aboutClose').addEventListener('click', function(){ document.getElementById('aboutSheet').hidden = true; pauseAboutVideo(); });
 document.getElementById('btn-profile').addEventListener('click', openProfile);
 document.getElementById('menuProf').addEventListener('click', openProfile);
 document.getElementById('btn-data').addEventListener('click', openDataSheet);
@@ -3159,8 +3161,8 @@ function renderGift() {
   if (m) { inviteCode = m[1].toUpperCase(); try { localStorage.setItem('strata.invite', inviteCode); } catch (e) {} history.replaceState(null, '', location.pathname); }
   else { try { inviteCode = localStorage.getItem('strata.invite'); } catch (e) {} }
 })();
-function setDemoVideo() {
-  var v = document.getElementById('wlVideo'); if (!v) return;
+function setDemoVideo(id) {
+  var v = document.getElementById(id || 'wlVideo'); if (!v) return;
   var l = getLang(), src = 'media/strata-demo-' + l + '.mp4';
   if (v.getAttribute('src') === src) return;
   v.setAttribute('poster', 'media/poster-' + l + '.jpg'); v.setAttribute('src', src); v.preload = 'auto';
@@ -3603,7 +3605,7 @@ function applyLang() {
   renderExportVal();
   renderSync();
   if (typeof renderProfile === 'function') renderProfile();
-  if (document.getElementById('aboutSheet') && !document.getElementById('aboutSheet').hidden) renderAbout();
+  if (document.getElementById('aboutSheet') && !document.getElementById('aboutSheet').hidden) { renderAbout(); setDemoVideo('abVideo'); }
   setMode(!!live);
   if (typeof renderJournal === 'function' && sections) renderJournal();
   var ma = document.getElementById('s-search-map'); if (ma && ma.classList.contains('active')) renderMap();
