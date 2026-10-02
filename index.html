@@ -327,6 +327,8 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
 .seg{display:flex;background:var(--s2);border-radius:12px;padding:3px;gap:3px;}
 .seg-b{flex:1;font:500 14px 'DM Sans',sans-serif;padding:10px 6px;border:none;border-radius:9px;background:transparent;color:var(--ink2);cursor:pointer;}
 .seg-b.on{background:var(--surface);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12);}
+.m-val{margin-left:auto;margin-right:6px;font-size:13px;color:var(--muted);}
+.menu-item .m-lbl{flex:1;}
 /* SAME ARTIST SECTION */
 .same-artist{background:var(--bg);padding:16px 0 28px;flex-shrink:0;}
 .sa-header{display:flex;align-items:center;justify-content:space-between;padding:0 20px 12px;}
@@ -428,6 +430,15 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
 <body>
 <div class="wrapper">
 <div class="phone"><div class="notch"></div>
+<div class="key-sheet" id="langSheet" hidden><div class="key-card" role="dialog" aria-labelledby="langTitle">
+  <div class="key-top"><div class="key-title" id="langTitle">Language</div><button class="key-x" id="langClose" aria-label="Close">×</button></div>
+  <p class="key-p">Choose the language for the app, the stories and the chat.</p>
+  <div class="seg" role="radiogroup" aria-labelledby="langTitle" id="langSeg">
+    <button class="seg-b" role="radio" data-lang="en">English</button><button class="seg-b" role="radio" data-lang="fr">Français</button><button class="seg-b" role="radio" data-lang="es">Español</button>
+  </div>
+  <p class="key-note">Saved scans keep the language they were written in.</p>
+  <button class="key-btn pri" id="langDone">Done</button>
+</div></div>
 <div class="tag-sheet" id="tagSheet" hidden>
   <div class="ts-card" role="dialog" aria-labelledby="tsTitle">
     <div class="ts-top"><div class="ts-title" id="tsTitle">Categories</div><button class="cz-x" id="tsClose" aria-label="Close">×</button></div>
@@ -445,12 +456,7 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
 <div class="key-sheet" id="keySheet" hidden><div class="key-card" role="dialog" aria-labelledby="keyTitle">
-  <div class="key-top"><div class="key-title" id="keyTitle">Preferences</div><button class="key-x" id="keyClose" aria-label="Close">×</button></div>
-  <div class="key-lbl" id="langLbl">Story language</div>
-  <div class="seg" role="radiogroup" aria-labelledby="langLbl" id="langSeg">
-    <button class="seg-b" role="radio" data-lang="en">English</button><button class="seg-b" role="radio" data-lang="fr">Français</button><button class="seg-b" role="radio" data-lang="es">Español</button>
-  </div>
-  <p class="key-note">Cards and chat for new scans are written in this language. Saved scans keep theirs.</p>
+  <div class="key-top"><div class="key-title" id="keyTitle">Settings</div><button class="key-x" id="keyClose" aria-label="Close">×</button></div>
   <label class="key-lbl" for="keyInput">Claude API key</label>
   <p class="key-p">Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.</p>
   <input class="key-in" id="keyInput" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…">
@@ -574,12 +580,12 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
   </div>
   <div style="overflow-y:auto;flex:1;padding-bottom:40px;">
     <div class="menu-avatar">E</div>
-    <div class="menu-uname">Elie Martin</div>
-    <div class="menu-email">elie.martin@email.com</div>
+    <div class="menu-uname">Elie Bertha</div>
     <div class="menu-list">
       <div class="menu-item"><div class="m-ico" style="background:#F0F4FF;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B5BDB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span class="m-lbl">Edit Profile</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="menu-item" id="btn-lang"><div class="m-ico" style="background:#F3F0FF;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6741D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></div><span class="m-lbl">Language</span><span class="m-val" id="langVal">English</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item"><div class="m-ico" style="background:#F0FFF4;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2D7D46" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span class="m-lbl">Share with friends</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
-      <div class="menu-item" id="btn-prefs"><div class="m-ico" style="background:#FFFBF0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div><span class="m-lbl">Preferences</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="menu-item" id="btn-prefs"><div class="m-ico" style="background:#FFFBF0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#B8860B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg></div><span class="m-lbl">Settings</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item"><div class="m-ico" style="background:#F5F5F5;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div><span class="m-lbl">About Strata</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
     </div>
     <div class="menu-signout">Sign out</div>
@@ -860,25 +866,25 @@ function renderArt(key) {
   var bg = document.getElementById('artBg');
   bg.className = 'art-bg' + (a.photo ? ' photo' : '') + (a.live ? ' live' : '');
   bg.style.backgroundImage = a.photo ? 'url(' + (a.img || IMG_ART) + ')' : '';
-  document.querySelector('#s-result .id-chip').lastChild.textContent = a.live && !a.identified ? 'Best guess' : 'Identified';
+  document.querySelector('#s-result .id-chip').lastChild.textContent = a.live && !a.identified ? t('Best guess') : t('Identified');
   document.getElementById('resName').textContent = a.title;
   document.getElementById('resMeta').innerHTML = a.meta.join(' <div class="mdot"></div> ');
   var loc = a.raw && a.raw.location, wh = document.getElementById('resWhere');
   wh.hidden = !(loc && (loc.place || loc.city));
-  if (!wh.hidden) wh.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + (a.raw.category === 'architecture' ? '' : 'Original at ') + esc([loc.place, loc.city].filter(Boolean).join(', '));
+  if (!wh.hidden) wh.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + (a.raw.category === 'architecture' ? esc([loc.place, loc.city].filter(Boolean).join(', ')) : t('Original at {p}', { p: esc([loc.place, loc.city].filter(Boolean).join(', ')) }));
   var links = a.links.map(function(l){ return '<a class="lnk-row" target="_blank" rel="noopener" href="' + (l[3] || 'https://www.google.com/search?q=' + encodeURIComponent((l[1] + ' ' + l[2]).replace(/&amp;/g,'&'))) + '"><div class="lnk-ico" style="background:' + LNK[l[0]][0] + ';">' + LNK[l[0]][1] + '</div><div><div class="lnk-name">' + l[1] + '</div><div class="lnk-url">' + l[2] + '</div></div></a>'; }).join('');
   document.getElementById('carTrack').innerHTML =
-    cardHTML('cc-spark', ICO.spark, 'Spark · 15 sec', a.spark[0], '<div class="c-body">' + a.spark[1] + '</div><div class="c-more" style="color:rgba(255,255,255,.4);">' + ICO.arrow + 'Swipe for more</div>') +
-    cardHTML('cc-story', ICO.story, 'Story · 2 min', a.story[0], '<div class="c-body">' + a.story[1] + '</div>') +
-    cardHTML('cc-surp',  ICO.surp,  'Surprise · Unexpected', a.surp[0], '<div class="c-body">' + a.surp[1] + '</div>') +
-    cardHTML('cc-dive',  ICO.dive,  'Deep Dive · Go further', 'Explore more', '<div class="lnk-list">' + links + '</div>');
-  document.getElementById('saTitle').innerHTML = a.moreLabel || ('More by ' + a.artist);
+    cardHTML('cc-spark', ICO.spark, t('Spark · 15 sec'), a.spark[0], '<div class="c-body">' + a.spark[1] + '</div><div class="c-more" style="color:rgba(255,255,255,.4);">' + ICO.arrow + t('Swipe for more') + '</div>') +
+    cardHTML('cc-story', ICO.story, t('Story · 2 min'), a.story[0], '<div class="c-body">' + a.story[1] + '</div>') +
+    cardHTML('cc-surp',  ICO.surp,  t('Surprise · Unexpected'), a.surp[0], '<div class="c-body">' + a.surp[1] + '</div>') +
+    cardHTML('cc-dive',  ICO.dive,  t('Deep Dive · Go further'), t('Explore more'), '<div class="lnk-list">' + links + '</div>');
+  document.getElementById('saTitle').innerHTML = (a.live && !a.identified) ? t('More like this') : t('More by {a}', { a: a.artist });
   document.getElementById('saScroll').innerHTML = a.more.map(function(m){
     return '<div class="sa-card"><div class="sa-thumb" style="' + m[3] + '"' + (m[4] ? ' data-wiki="' + m[4] + '"' : '') + '></div><div class="sa-name">' + m[0] + '</div><div class="sa-year">' + m[1] + '</div><div class="sa-spark">' + m[2] + '</div></div>';
   }).join('');
   document.getElementById('saScroll').scrollLeft = 0;
   renderTags();
-  var rb = document.getElementById('btnRemove'); rb.hidden = !a.journalId; rb.classList.remove('armed'); rb.textContent = 'Remove from journal';
+  var rb = document.getElementById('btnRemove'); rb.hidden = !a.journalId; rb.classList.remove('armed'); rb.textContent = t('Remove from journal');
   loadThumbs();
 }
 
@@ -887,7 +893,7 @@ function renderChat(key) {
   renderedChat = key; fi = 0;
   var a = ARTS[key];
   document.getElementById('chatTitle').textContent = a.title;
-  document.getElementById('chatSub').textContent = a.chat.sub;
+  document.getElementById('chatSub').textContent = a.live ? a.chat.sub + ' · ' + t('Ask anything') : a.chat.sub;
   document.getElementById('chatBadge').style.backgroundImage = a.badge;
   var c = document.getElementById('chatMsgs');
   c.innerHTML = '';
@@ -913,11 +919,11 @@ function show(id) {
     s.classList.remove('active');
     s.style.display = 'none';
   });
-  var t = document.getElementById(id);
-  if (t) { t.style.display = 'flex'; t.classList.add('active'); }
-  if (id === 's-scanning' && !liveScanning) { scanStatus('Identifying artwork…', 'Demo mode · Hokusai'); setTimeout(function(){ if (!liveScanning) show('s-result'); }, 2200); }
+  var scr = document.getElementById(id);
+  if (scr) { scr.style.display = 'flex'; scr.classList.add('active'); }
+  if (id === 's-scanning' && !liveScanning) { scanStatus(t('Identifying artwork…'), t('Demo mode · Hokusai')); setTimeout(function(){ if (!liveScanning) show('s-result'); }, 2200); }
   if (id === 's-chat' && renderedChat !== currentArt) { chatTurns = []; }
-  if (id === 's-result') { t.scrollTop = 0; renderArt(currentArt); currentCard = 0; updateCarousel(false); }
+  if (id === 's-result') { scr.scrollTop = 0; renderArt(currentArt); currentCard = 0; updateCarousel(false); }
   if (id === 's-chat') { renderChat(currentArt); }
 }
 
@@ -1160,8 +1166,8 @@ function toArt(d, imgURL) {
       return [esc(w.title), esc(w.year), esc(w.hook), bg, esc(w.wiki || '')];
     }),
     chat: {
-      sub: [d.artist_short || d.creator, d.date].filter(Boolean).join(' · ') + ' · Ask anything',
-      intro: esc(d.chat_intro || 'What would you like to know about this one?'),
+      sub: [d.artist_short || d.creator, d.date].filter(Boolean).join(' · '),
+      intro: esc(d.chat_intro || t('What would you like to know about this one?')),
       chips: (Array.isArray(d.questions) ? d.questions.slice(0, 3) : []).map(esc),
       answers: {}, fallback: []
     },
@@ -1177,7 +1183,7 @@ var SCAN_ERR = {
   refused: 'Claude declined this photo. Try a different subject.',
   invalid_json: 'The answer came back incomplete. Try again.',
   search_off: 'Web search is turned off for your API account.',
-  bad_key: 'Your API key was refused. Check it in Preferences.',
+  bad_key: 'Your API key was refused. Check it in Settings.',
   no_credit: 'Your Claude API balance is empty. Add credit at platform.claude.com → Billing.',
   network: 'No connection to Claude. Check your internet and try again.',
   model: 'The Claude model is not available for this key.',
@@ -1196,9 +1202,9 @@ async function runLiveScan(file) {
   var url = URL.createObjectURL(file);
   document.getElementById('scanBg').style.backgroundImage = 'url(' + url + ')';
   liveScanning = true;
-  scanStatus('Identifying artwork…', 'Asking Claude · usually 10–40 seconds');
+  scanStatus(t('Identifying artwork…'), t('Asking Claude · usually 10–40 seconds'));
   show('s-scanning');
-  var t = setTimeout(function(){ if (liveScanning) scanStatus('Checking and writing the story…', 'Claude may search the web to confirm · up to a minute'); }, 9000);
+  var scanTimer = setTimeout(function(){ if (liveScanning) scanStatus(t('Checking and writing the story…'), t('Claude may search the web to confirm · up to a minute')); }, 9000);
   liveScanCtl = new AbortController();
   try {
     var d = await live.json(SCAN_PROMPT + langRule(), { images: [file], signal: liveScanCtl.signal });
@@ -1210,20 +1216,20 @@ async function runLiveScan(file) {
       URL.revokeObjectURL(url);
       markSeen(dup);
       openScan(dup.id);
-      toast('Already in your journal · first scanned ' + fmtDay(dup.created_at));
+      toast(t('Already in your journal · first scanned {d}', { d: fmtDay(dup.created_at) }));
       return;
     }
     ARTS.live = toArt(d, url);
-    saveScan(d, file).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; loadJournal().then(function(){ if (currentArt === 'live') renderTags(); }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast('Saved to your journal'); })
-      .catch(function(){ toast('Could not save this scan on this device'); });
+    saveScan(d, file).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; loadJournal().then(function(){ if (currentArt === 'live') renderTags(); }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
+      .catch(function(){ toast(t('Could not save this scan on this device')); });
     currentArt = 'live';
     renderedChat = null;
     show('s-result');
   } catch (e) {
     liveScanning = false;
     if (e && e.code === 'cancelled') { show('s-camera'); return; }
-    scanStatus('Could not identify this one', (SCAN_ERR[e && e.code] || 'Something went wrong while asking Claude. Try again.') + ' [' + ((e && e.code) || 'unknown') + (e && e.message ? ': ' + String(e.message).slice(0, 120) : '') + ']', true);
-  } finally { clearTimeout(t); }
+    scanStatus(t('Could not identify this one'), (SCAN_ERR[e && e.code] ? t(SCAN_ERR[e.code]) : t('Something went wrong while asking Claude. Try again.')) + ' [' + ((e && e.code) || 'unknown') + (e && e.message ? ': ' + String(e.message).slice(0, 120) : '') + ']', true);
+  } finally { clearTimeout(scanTimer); }
 }
 
 function pickPhoto(withCamera, e) {
@@ -1257,7 +1263,7 @@ function chatRules(a) {
 async function askLive(text) {
   var a = ARTS[currentArt];
   chatTurns.push({ role: 'user', content: text });
-  var bubble = addMsg('ai', 'Thinking…').querySelector('.bubble');
+  var bubble = addMsg('ai', t('Thinking…')).querySelector('.bubble');
   bubble.classList.add('thinking');
   var ctl = new AbortController();
   try {
@@ -1268,7 +1274,7 @@ async function askLive(text) {
     chatTurns.push({ role: 'assistant', content: res.text });
   } catch (e) {
     bubble.classList.remove('thinking');
-    bubble.textContent = (e && e.text ? e.text + ' ' : '') + (SCAN_ERR[e && e.code] ? '(' + SCAN_ERR[e.code] + ')' : '(No answer this time. Try again.)');
+    bubble.textContent = (e && e.text ? e.text + ' ' : '') + (SCAN_ERR[e && e.code] ? '(' + t(SCAN_ERR[e.code]) + ')' : t('(No answer this time. Try again.)'));
   }
 }
 function scrollChat() { var c = document.getElementById('chatMsgs'); c.scrollTop = c.scrollHeight; }
@@ -1287,7 +1293,7 @@ function getLang() {
   try { var s = localStorage.getItem('strata.lang'); if (LANGS[s]) return s; } catch (e) {}
   var n = (navigator.language || 'en').slice(0, 2); return LANGS[n] ? n : 'en';
 }
-function setLang(l) { try { localStorage.setItem('strata.lang', l); } catch (e) {} renderLangSeg(); }
+function setLang(l) { try { localStorage.setItem('strata.lang', l); } catch (e) {} renderLangSeg(); applyLang(); }
 function renderLangSeg() {
   var l = getLang();
   document.querySelectorAll('#langSeg .seg-b').forEach(function(b){ var on = b.getAttribute('data-lang') === l; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
@@ -1415,10 +1421,10 @@ async function startCamera() {
     var v = document.getElementById('camVideo');
     v.srcObject = s; v.hidden = false;
     await v.play().catch(function(){});
-    hint.textContent = 'Point at any art';
+    hint.textContent = t('Point at any art');
   } catch (e) {
     camStream = null;
-    hint.textContent = 'Camera blocked · tap the shutter to take a photo';
+    hint.textContent = t('Camera blocked · tap the shutter to take a photo');
   }
 }
 function stopCamera() {
@@ -1436,15 +1442,14 @@ function captureFrame() {
 
 function setMode(isLive) {
   live = isLive ? makeLive() : null;
-  document.querySelectorAll('.mode-pill').forEach(function(p){ p.textContent = isLive ? 'Live · Claude' : 'Add API key'; p.classList.toggle('on', isLive); });
-  document.getElementById('camStatus').textContent = isLive ? '' : 'Add your Claude API key to scan for real. Tap the shutter.';
+  document.querySelectorAll('.mode-pill').forEach(function(p){ p.textContent = isLive ? t('Live · Claude') : t('Add API key'); p.classList.toggle('on', isLive); });
+  document.getElementById('camStatus').textContent = isLive ? '' : t('Add your Claude API key to scan for real. Tap the shutter.');
   var vf = document.getElementById('camVf');
-  if (isLive) { vf.style.backgroundImage = 'linear-gradient(160deg,#2A2A2E 0%,#121214 100%)'; vf.classList.remove('photo'); document.getElementById('camHint').textContent = 'Tap the shutter to take a photo'; }
-  var lg = document.querySelector('.legend'); if (lg) lg.textContent = isLive ? 'Live: Scan Art → shutter → take a photo' : 'Add your API key in Preferences to scan for real';
+  if (isLive) { vf.style.backgroundImage = 'linear-gradient(160deg,#2A2A2E 0%,#121214 100%)'; vf.classList.remove('photo'); document.getElementById('camHint').textContent = t('Tap the shutter to take a photo'); }
+  var lg = document.querySelector('.legend'); if (lg) lg.textContent = isLive ? 'Live: Scan Art → shutter → take a photo' : 'Add your API key in Settings to scan for real';
 }
 
 function openKeySheet() {
-  renderLangSeg();
   document.getElementById('keyInput').value = getKey();
   document.getElementById('keyMsg').textContent = '';
   document.getElementById('keySheet').hidden = false;
@@ -1452,13 +1457,16 @@ function openKeySheet() {
 function closeKeySheet() { document.getElementById('keySheet').hidden = true; }
 document.getElementById('keySave').addEventListener('click', function(){
   var k = document.getElementById('keyInput').value.trim();
-  if (!/^sk-ant-/.test(k)) { document.getElementById('keyMsg').textContent = 'A Claude API key starts with sk-ant-. Check that you copied all of it.'; return; }
+  if (!/^sk-ant-/.test(k)) { document.getElementById('keyMsg').textContent = t('A Claude API key starts with sk-ant-. Check that you copied all of it.'); return; }
   setKey(k); setMode(true); closeKeySheet();
   if (document.getElementById('s-camera').classList.contains('active')) startCamera();
 });
 document.getElementById('keyRemove').addEventListener('click', function(){ setKey(''); setMode(false); closeKeySheet(); });
 document.getElementById('keyDemo').addEventListener('click', function(){ closeKeySheet(); currentArt = 'hokusai'; show('s-scanning'); });
 document.getElementById('keyClose').addEventListener('click', closeKeySheet);
+document.getElementById('btn-lang').addEventListener('click', function(){ renderLangSeg(); document.getElementById('langSheet').hidden = false; });
+['langClose', 'langDone'].forEach(function(id){ document.getElementById(id).addEventListener('click', function(){ document.getElementById('langSheet').hidden = true; }); });
+document.getElementById('langSheet').addEventListener('click', function(e){ if (e.target.id === 'langSheet') e.target.hidden = true; });
 document.getElementById('langSeg').addEventListener('click', function(e){ var b = e.target.closest('.seg-b'); if (b) setLang(b.getAttribute('data-lang')); });
 document.querySelectorAll('.mode-pill').forEach(function(p){ p.addEventListener('click', openKeySheet); });
 var prefs = document.getElementById('btn-prefs'); if (prefs) prefs.addEventListener('click', openKeySheet);
@@ -1565,7 +1573,7 @@ function openScan(id) {
   show('s-result');
 }
 
-function fmtDay(iso) { return new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }); }
+function fmtDay(iso) { return new Date(iso).toLocaleDateString(LOCALES[getLang()], { day: 'numeric', month: 'long', year: 'numeric' }); }
 function sameDay(a, b) { return a.slice(0, 10) === b.slice(0, 10); }
 
 var SECTION_CATS = { 'Paintings': 'painting', 'Architecture': 'arch', 'Music': 'music', 'Books': 'book', 'Sculptures': 'sculpture', 'Plants': 'plants', 'Stars & Sky': 'stars', 'Mountains': 'mountains', 'More discoveries': 'other' };
@@ -1587,7 +1595,7 @@ function initSections() {
   [['sculpture', 'Sculptures'], ['other', 'More discoveries']].forEach(function(x){
     if (sections[x[0]]) return;
     var sec = document.createElement('div');
-    sec.innerHTML = '<div class="sec-head"><div class="sec-title">' + SECTION_ICON + x[1] + '<span class="sec-badge"></span></div></div><div class="h-strip"></div>';
+    sec.innerHTML = '<div class="sec-head"><div class="sec-title">' + SECTION_ICON + '<span data-i18n="' + x[1] + '">' + t(x[1]) + '</span><span class="sec-badge"></span></div></div><div class="h-strip"></div>';
     sec.hidden = true; sec.dataset.dynamic = '1';
     document.querySelector('#s-home .home-body').appendChild(sec);
     sections[x[0]] = sec;
@@ -1618,7 +1626,7 @@ function renderJournal() {
     .concat(order.filter(function(o){ return !o.n; }))
     .forEach(function(o){ body.appendChild(o.sec); });
   var slot = document.getElementById('jEmptySlot');
-  slot.innerHTML = n ? '' : '<div class="j-empty" id="jEmpty"><div class="j-empty-t">Your journal is empty</div><div class="j-empty-s">Scan a painting, a building or a book cover. It will appear in its category below.</div><button class="j-empty-b" id="jEmptyBtn">Scan your first artwork</button></div>';
+  slot.innerHTML = n ? '' : '<div class="j-empty" id="jEmpty"><div class="j-empty-t">' + t('Your journal is empty') + '</div><div class="j-empty-s">' + t('Scan a painting, a building or a book cover. It will appear in its category below.') + '</div><button class="j-empty-b" id="jEmptyBtn">' + t('Scan your first artwork') + '</button></div>';
   body.insertBefore(slot, body.firstChild);
   var eb = document.getElementById('jEmptyBtn'); if (eb) eb.onclick = function(){ show('s-camera'); };
   // Stats
@@ -1628,14 +1636,14 @@ function renderJournal() {
   if (st.length === 4) { st[0].textContent = c.art; st[1].textContent = 0; st[2].textContent = c.arch; st[3].textContent = c.book; }
   // Search by category
   document.getElementById('jCatRows').innerHTML = journal.map(function(r){
-    return '<div class="cat-row" data-scan="' + r.id + '" data-cat="' + scanCats(r).join(' ') + '"><div class="cat-thumb" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;"></div><div class="cat-body"><div class="cat-type">' + (CAT_LABEL[r.category] || 'Discovery') + ' · ' + fmtDay(r.created_at) + '</div><div class="cat-name">' + esc(r.title) + '</div><div class="cat-meta">' + esc(r.creator) + '</div><div class="cat-spark">' + esc((r.data.spark && r.data.spark.head) || '') + '</div></div></div>';
+    return '<div class="cat-row" data-scan="' + r.id + '" data-cat="' + scanCats(r).join(' ') + '"><div class="cat-thumb" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;"></div><div class="cat-body"><div class="cat-type">' + t(CAT_LABEL[scanCats(r)[0]] || 'Discovery') + ' · ' + fmtDay(r.created_at) + '</div><div class="cat-name">' + esc(r.title) + '</div><div class="cat-meta">' + esc(r.creator) + '</div><div class="cat-spark">' + esc((r.data.spark && r.data.spark.head) || '') + '</div></div></div>';
   }).join('');
   applyCatFilter();
   // Search by date
   var html = '', last = '';
   journal.forEach(function(r){
     if (!sameDay(r.created_at, last)) { html += '<div class="date-lbl">' + fmtDay(r.created_at) + '</div>'; last = r.created_at; }
-    html += '<div class="map-row" data-scan="' + r.id + '"><div class="map-icon" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;border-radius:10px;"></div><div><div class="map-name">' + esc(r.title) + '</div><div class="map-loc">' + esc(r.creator) + ' · ' + new Date(r.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) + '</div></div></div>';
+    html += '<div class="map-row" data-scan="' + r.id + '"><div class="map-icon" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;border-radius:10px;"></div><div><div class="map-name">' + esc(r.title) + '</div><div class="map-loc">' + esc(r.creator) + ' · ' + new Date(r.created_at).toLocaleTimeString(LOCALES[getLang()], { hour: '2-digit', minute: '2-digit' }) + '</div></div></div>';
   });
   document.getElementById('jDateRows').innerHTML = html;
   document.querySelectorAll('.j-none').forEach(function(e){ e.hidden = !!n; });
@@ -1665,8 +1673,8 @@ var rmBtn = document.getElementById('btnRemove'), rmTimer = null;
 rmBtn.addEventListener('click', function(){
   var a = ARTS[currentArt]; if (!a || !a.journalId) return;
   if (!rmBtn.classList.contains('armed')) {
-    rmBtn.classList.add('armed'); rmBtn.textContent = 'Tap again to remove';
-    clearTimeout(rmTimer); rmTimer = setTimeout(function(){ rmBtn.classList.remove('armed'); rmBtn.textContent = 'Remove from journal'; }, 3000);
+    rmBtn.classList.add('armed'); rmBtn.textContent = t('Tap again to remove');
+    clearTimeout(rmTimer); rmTimer = setTimeout(function(){ rmBtn.classList.remove('armed'); rmBtn.textContent = t('Remove from journal'); }, 3000);
     return;
   }
   deleteScan(a.journalId).then(function(){ show('s-home'); });
@@ -1679,8 +1687,7 @@ function toast(msg) {
 }
 
 // Greeting follows the time of day
-(function(){ var h = new Date().getHours(); document.querySelector('.home-greeting').textContent = h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'; })();
-loadJournal();
+
 
 // ─── MAP: where each original lives ─────────────────────────────
 var TAG_ORDER = ['painting', 'arch', 'sculpture', 'book', 'plants', 'stars', 'mountains', 'music'];
@@ -1690,15 +1697,15 @@ function currentRec() { var a = ARTS[currentArt]; return a && a.journalId ? jour
 function renderTags() {
   var el = document.getElementById('resTags'), r = currentRec();
   el.hidden = !r; if (!r) return;
-  el.innerHTML = scanCats(r).map(function(c){ return '<span class="res-tag">' + (TAG_LABEL[c] || c) + '</span>'; }).join('') +
-    '<button class="res-tag" id="tagEdit" aria-label="Edit categories">' + PENCIL + 'Edit</button>';
+  el.innerHTML = scanCats(r).map(function(c){ return '<span class="res-tag">' + t(TAG_LABEL[c] || c) + '</span>'; }).join('') +
+    '<button class="res-tag" id="tagEdit" aria-label="' + t('Edit categories') + '">' + PENCIL + t('Edit') + '</button>';
   document.getElementById('tagEdit').onclick = openTagSheet;
 }
 function openTagSheet() {
   var r = currentRec(); if (!r) return;
   var cats = scanCats(r).filter(function(c){ return c !== 'other'; });
   document.getElementById('tsChips').innerHTML = TAG_ORDER.map(function(c){
-    return '<button class="ts-chip' + (cats.indexOf(c) >= 0 ? ' on' : '') + '" data-cat="' + c + '" aria-pressed="' + (cats.indexOf(c) >= 0) + '">' + TAG_LABEL[c] + '</button>';
+    return '<button class="ts-chip' + (cats.indexOf(c) >= 0 ? ' on' : '') + '" data-cat="' + c + '" aria-pressed="' + (cats.indexOf(c) >= 0) + '">' + t(TAG_LABEL[c]) + '</button>';
   }).join('');
   document.getElementById('tagSheet').hidden = false;
 }
@@ -1708,7 +1715,7 @@ document.getElementById('tsChips').addEventListener('click', function(e){
   var on = !chip.classList.contains('on');
   chip.classList.toggle('on', on); chip.setAttribute('aria-pressed', on);
   r.cats = Array.prototype.map.call(document.querySelectorAll('#tsChips .ts-chip.on'), function(c){ return c.getAttribute('data-cat'); });
-  tx('readwrite', function(s){ return s.put(r); }).then(function(){ renderTags(); renderJournal(); }).catch(function(){ toast('Could not save this change'); });
+  tx('readwrite', function(s){ return s.put(r); }).then(function(){ renderTags(); renderJournal(); }).catch(function(){ toast(t('Could not save this change')); });
 });
 document.getElementById('tsClose').addEventListener('click', closeTagSheet);
 document.getElementById('tsDone').addEventListener('click', closeTagSheet);
@@ -1726,21 +1733,21 @@ function renderMap() {
   mapCats = mapCats.filter(function(c){ return present.indexOf(c) >= 0; });
   var mc = document.getElementById('mapCats');
   mc.hidden = present.length < 2;
-  mc.innerHTML = present.map(function(c){ var on = mapCats.indexOf(c) >= 0; return '<button class="ts-chip' + (on ? ' on' : '') + '" data-cat="' + c + '" aria-pressed="' + on + '">' + TAG_LABEL[c] + '</button>'; }).join('');
+  mc.innerHTML = present.map(function(c){ var on = mapCats.indexOf(c) >= 0; return '<button class="ts-chip' + (on ? ' on' : '') + '" data-cat="' + c + '" aria-pressed="' + on + '">' + t(TAG_LABEL[c]) + '</button>'; }).join('');
   var withLoc = mapCats.length ? located.filter(function(r){ return scanCats(r).some(function(c){ return mapCats.indexOf(c) >= 0; }); }) : located;
   if (mapPlace && !withLoc.some(function(r){ return placeKey(r.data.location) === mapPlace; })) mapPlace = null;
   var shown = mapPlace ? withLoc.filter(function(r){ return placeKey(r.data.location) === mapPlace; }) : withLoc;
-  document.getElementById('mapTitle').textContent = mapPlace ? placeLabel(shown[0].data.location) : 'All places';
-  document.getElementById('mapCount').textContent = mapPlace ? 'Show all' : shown.length + (shown.length === 1 ? ' original' : ' originals');
+  document.getElementById('mapTitle').textContent = mapPlace ? placeLabel(shown[0].data.location) : t('All places');
+  document.getElementById('mapCount').textContent = mapPlace ? t('Show all') : t(shown.length === 1 ? '{n} original' : '{n} originals', { n: shown.length });
   document.getElementById('mapCount').classList.toggle('link', !!mapPlace);
   var missing = journal.length - located.length;
   list.innerHTML = shown.map(function(r){
     var l = r.data.location;
     return '<div class="map-row" data-scan="' + r.id + '"><div class="map-icon" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;border-radius:10px;"></div><div><div class="map-name">' + esc(r.title) + '</div><div class="map-loc"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + esc(placeLabel(l)) + '</div></div></div>';
-  }).join('') + (!journal.length ? '<div class="j-none">No scans yet. Scan an artwork and its museum or site appears here.</div>'
-    : (!mapPlace && missing ? '<div class="j-none">' + (locating ? 'Finding where your earlier scans live…' : missing + (missing === 1 ? ' scan has' : ' scans have') + ' no known original location (a reproduction, a poster, or a private work).') + '</div>' : ''));
+  }).join('') + (!journal.length ? '<div class="j-none">' + t('No scans yet. Scan an artwork and its museum or site appears here.') + '</div>'
+    : (!mapPlace && missing ? '<div class="j-none">' + (locating ? t('Finding where your earlier scans live…') : t(missing === 1 ? '{n} scan has no known original location (a reproduction, a poster, or a private work).' : '{n} scans have no known original location (a reproduction, a poster, or a private work).', { n: missing })) + '</div>' : ''));
 
-  if (!window.L) { document.getElementById('lmap').innerHTML = '<div class="j-none" style="padding:20px">The map could not load. Check your connection.</div>'; return; }
+  if (!window.L) { document.getElementById('lmap').innerHTML = '<div class="j-none" style="padding:20px">' + t('The map could not load. Check your connection.') + '</div>'; return; }
   if (!lmap) {
     lmap = L.map('lmap', { zoomControl: false, attributionControl: true, worldCopyJump: true }).setView([30, 5], 1);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(lmap);
@@ -1825,6 +1832,178 @@ document.getElementById('czNext').addEventListener('click', function(){ openZoom
     if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) openZoom(zoomIdx + (dx < 0 ? 1 : -1));
   }, { passive: true });
 })();
+
+// ─── INTERFACE LANGUAGE ─────────────────────────
+// Keys are the English interface text; French and Spanish below. Missing keys fall back to English.
+var I18N = {
+fr: {
+  "Categories": "Catégories", "Tap to add or remove. Changes are saved right away.": "Touchez pour ajouter ou retirer. Les changements sont enregistrés tout de suite.", "Done": "Terminé",
+  "Settings": "Réglages", "Claude API key": "Clé API Claude",
+  "Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.": "Strata interroge Claude sur chaque photo avec votre propre clé. Elle est enregistrée uniquement dans ce navigateur, sur ce téléphone.",
+  "Save key": "Enregistrer la clé", "Try the demo": "Essayer la démo", "Remove key": "Supprimer la clé",
+  "Create one at platform.claude.com → Settings → API Keys. Set a spend limit in Billing.": "Créez-en une sur platform.claude.com → Settings → API Keys. Fixez une limite de dépense dans Billing.",
+  "Language": "Langue", "Choose the language for the app, the stories and the chat.": "Choisissez la langue de l'app, des récits et du chat.",
+  "Saved scans keep the language they were written in.": "Les scans déjà enregistrés gardent la langue dans laquelle ils ont été écrits.",
+  "Good night": "Bonne nuit", "Good morning": "Bonjour", "Good afternoon": "Bon après-midi", "Good evening": "Bonsoir",
+  "Elie's Discoveries": "Les découvertes d'Elie", "Search discoveries…": "Rechercher dans vos découvertes…",
+  "By Category": "Par catégorie", "By Map": "Par carte", "By Date": "Par date",
+  "Artworks": "Œuvres", "Music": "Musique", "Buildings": "Bâtiments", "Books": "Livres",
+  "Your journal is empty": "Votre journal est vide",
+  "Scan a painting, a building or a book cover. It will appear in its category below.": "Scannez un tableau, un bâtiment ou une couverture de livre. Il apparaîtra dans sa catégorie ci-dessous.",
+  "Scan your first artwork": "Scannez votre première œuvre",
+  "Paintings": "Peintures", "See all": "Tout voir", "Architecture": "Architecture", "Plants": "Plantes", "Stars & Sky": "Étoiles et ciel", "Mountains": "Montagnes", "Sculptures": "Sculptures", "More discoveries": "Autres découvertes",
+  "Listen": "Écouter", "Scan Art": "Scanner",
+  "Account": "Compte", "Edit Profile": "Modifier le profil", "Share with friends": "Partager avec des amis", "About Strata": "À propos de Strata", "Sign out": "Se déconnecter",
+  "Browse by Category": "Parcourir par catégorie", "Filter by type": "Filtrer par type", "All": "Tout", "Stars": "Étoiles",
+  "No scans yet. Tap Scan Art to add your first discovery.": "Aucun scan pour l'instant. Touchez Scanner pour ajouter votre première découverte.",
+  "Where the originals live": "Où sont les originaux", "All places": "Tous les lieux", "Show all": "Tout afficher",
+  "{n} original": "{n} original", "{n} originals": "{n} originaux",
+  "No scans yet. Scan an artwork and its museum or site appears here.": "Aucun scan pour l'instant. Scannez une œuvre et son musée ou son site apparaîtra ici.",
+  "Finding where your earlier scans live…": "Recherche du lieu de vos scans précédents…",
+  "{n} scan has no known original location (a reproduction, a poster, or a private work).": "{n} scan n'a pas de lieu d'original connu (reproduction, poster ou œuvre privée).",
+  "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
+  "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
+  "Browse by Date": "Parcourir par date", "Day": "Jour", "Week": "Semaine", "Month": "Mois", "Year": "Année",
+  "Point at any art": "Visez une œuvre", "Tap the shutter to take a photo": "Touchez le déclencheur pour prendre une photo",
+  "Camera blocked · tap the shutter to take a photo": "Caméra bloquée · touchez le déclencheur pour prendre une photo",
+  "Add your Claude API key to scan for real. Tap the shutter.": "Ajoutez votre clé API Claude pour scanner pour de vrai. Touchez le déclencheur.",
+  "Add API key": "Ajouter la clé", "Live · Claude": "Live · Claude", "Connecting…": "Connexion…", "Visual": "Visuel",
+  "Identifying artwork…": "Identification de l'œuvre…", "Powered by Claude": "Propulsé par Claude", "Cancel": "Annuler", "Back to camera": "Retour à la caméra", "Try again": "Réessayer",
+  "Asking Claude · usually 10–40 seconds": "Claude réfléchit · 10 à 40 secondes en général",
+  "Checking and writing the story…": "Vérification et écriture du récit…", "Claude may search the web to confirm · up to a minute": "Claude peut chercher sur le web pour confirmer · jusqu'à une minute",
+  "Could not identify this one": "Impossible d'identifier cette œuvre", "Something went wrong while asking Claude. Try again.": "Un problème est survenu en interrogeant Claude. Réessayez.",
+  "Demo mode · Hokusai": "Mode démo · Hokusai",
+  "Identified": "Identifiée", "Best guess": "Hypothèse", "Remove from journal": "Retirer du journal", "Tap again to remove": "Touchez encore pour retirer",
+  "Listening…": "Écoute…", "Hold near the music source": "Approchez-vous de la source musicale",
+  "Spark · 15 sec": "Étincelle · 15 s", "Story · 2 min": "Récit · 2 min", "Surprise · Unexpected": "Surprise · Inattendu", "Deep Dive · Go further": "Pour aller plus loin", "Explore more": "Explorer", "Swipe for more": "Glissez pour la suite",
+  "More by {a}": "Autres œuvres de {a}", "More like this": "Dans le même esprit", "Original at {p}": "Original : {p}",
+  "Thinking…": "Réflexion…", "Ask anything…": "Posez une question…", "Ask anything": "Posez vos questions",
+  "What would you like to know about this one?": "Que voulez-vous savoir sur cette œuvre ?", "(No answer this time. Try again.)": "(Pas de réponse cette fois. Réessayez.)",
+  "Saved to your journal": "Enregistré dans votre journal", "Could not save this scan on this device": "Impossible d'enregistrer ce scan sur cet appareil", "Could not save this change": "Impossible d'enregistrer ce changement",
+  "Already in your journal · first scanned {d}": "Déjà dans votre journal · scanné le {d}",
+  "A Claude API key starts with sk-ant-. Check that you copied all of it.": "Une clé API Claude commence par sk-ant-. Vérifiez que vous l'avez copiée en entier.",
+  "Edit": "Modifier", "Discovery": "Découverte", "Painting": "Peinture", "Sculpture": "Sculpture", "Book": "Livre", "Plant": "Plante", "Sky": "Ciel", "Mountain": "Montagne",
+  "Strata needs your permission to ask Claude. Reload the page and allow it when asked.": "Strata a besoin de votre autorisation pour interroger Claude. Rechargez la page et acceptez.",
+  "Claude is busy or your usage limit is reached. Try again in a moment.": "Claude est occupé ou votre limite d'usage est atteinte. Réessayez dans un moment.",
+  "Your Claude session expired. Sign in again, then retry.": "Votre session Claude a expiré. Reconnectez-vous puis réessayez.",
+  "This photo could not be read. Try another one, under 20 MB.": "Cette photo n'a pas pu être lue. Essayez-en une autre, de moins de 20 Mo.",
+  "Claude declined this photo. Try a different subject.": "Claude a refusé cette photo. Essayez un autre sujet.",
+  "The answer came back incomplete. Try again.": "La réponse est incomplète. Réessayez.",
+  "Web search is turned off for your API account.": "La recherche web est désactivée pour votre compte API.",
+  "Your API key was refused. Check it in Settings.": "Votre clé API a été refusée. Vérifiez-la dans les Réglages.",
+  "Your Claude API balance is empty. Add credit at platform.claude.com → Billing.": "Votre solde API Claude est vide. Ajoutez du crédit sur platform.claude.com → Billing.",
+  "No connection to Claude. Check your internet and try again.": "Pas de connexion à Claude. Vérifiez votre connexion internet et réessayez.",
+  "The Claude model is not available for this key.": "Le modèle Claude n'est pas disponible pour cette clé.",
+  "The answer came back empty. Try again.": "La réponse est vide. Réessayez.",
+  "Close": "Fermer", "Card": "Carte", "Previous card": "Carte précédente", "Next card": "Carte suivante", "Back to home": "Retour à l'accueil", "Take a photo": "Prendre une photo",
+  "Choose a photo from your library": "Choisir une photo dans votre photothèque", "Edit categories": "Modifier les catégories"
+},
+es: {
+  "Categories": "Categorías", "Tap to add or remove. Changes are saved right away.": "Toca para añadir o quitar. Los cambios se guardan al momento.", "Done": "Listo",
+  "Settings": "Ajustes", "Claude API key": "Clave API de Claude",
+  "Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.": "Strata consulta a Claude sobre cada foto con tu propia clave. Solo se guarda en este navegador, en este teléfono.",
+  "Save key": "Guardar clave", "Try the demo": "Probar la demo", "Remove key": "Eliminar clave",
+  "Create one at platform.claude.com → Settings → API Keys. Set a spend limit in Billing.": "Crea una en platform.claude.com → Settings → API Keys. Fija un límite de gasto en Billing.",
+  "Language": "Idioma", "Choose the language for the app, the stories and the chat.": "Elige el idioma de la app, de las historias y del chat.",
+  "Saved scans keep the language they were written in.": "Los escaneos guardados conservan el idioma en que se escribieron.",
+  "Good night": "Buenas noches", "Good morning": "Buenos días", "Good afternoon": "Buenas tardes", "Good evening": "Buenas noches",
+  "Elie's Discoveries": "Los descubrimientos de Elie", "Search discoveries…": "Buscar en tus descubrimientos…",
+  "By Category": "Por categoría", "By Map": "Por mapa", "By Date": "Por fecha",
+  "Artworks": "Obras", "Music": "Música", "Buildings": "Edificios", "Books": "Libros",
+  "Your journal is empty": "Tu diario está vacío",
+  "Scan a painting, a building or a book cover. It will appear in its category below.": "Escanea un cuadro, un edificio o la portada de un libro. Aparecerá en su categoría aquí abajo.",
+  "Scan your first artwork": "Escanea tu primera obra",
+  "Paintings": "Pinturas", "See all": "Ver todo", "Architecture": "Arquitectura", "Plants": "Plantas", "Stars & Sky": "Estrellas y cielo", "Mountains": "Montañas", "Sculptures": "Esculturas", "More discoveries": "Otros descubrimientos",
+  "Listen": "Escuchar", "Scan Art": "Escanear",
+  "Account": "Cuenta", "Edit Profile": "Editar perfil", "Share with friends": "Compartir con amigos", "About Strata": "Acerca de Strata", "Sign out": "Cerrar sesión",
+  "Browse by Category": "Explorar por categoría", "Filter by type": "Filtrar por tipo", "All": "Todo", "Stars": "Estrellas",
+  "No scans yet. Tap Scan Art to add your first discovery.": "Aún no hay escaneos. Toca Escanear para añadir tu primer descubrimiento.",
+  "Where the originals live": "Dónde están los originales", "All places": "Todos los lugares", "Show all": "Mostrar todo",
+  "{n} original": "{n} original", "{n} originals": "{n} originales",
+  "No scans yet. Scan an artwork and its museum or site appears here.": "Aún no hay escaneos. Escanea una obra y su museo o lugar aparecerá aquí.",
+  "Finding where your earlier scans live…": "Buscando dónde están tus escaneos anteriores…",
+  "{n} scan has no known original location (a reproduction, a poster, or a private work).": "{n} escaneo no tiene un lugar de original conocido (reproducción, póster u obra privada).",
+  "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
+  "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
+  "Browse by Date": "Explorar por fecha", "Day": "Día", "Week": "Semana", "Month": "Mes", "Year": "Año",
+  "Point at any art": "Apunta a una obra", "Tap the shutter to take a photo": "Toca el disparador para hacer una foto",
+  "Camera blocked · tap the shutter to take a photo": "Cámara bloqueada · toca el disparador para hacer una foto",
+  "Add your Claude API key to scan for real. Tap the shutter.": "Añade tu clave API de Claude para escanear de verdad. Toca el disparador.",
+  "Add API key": "Añadir clave", "Live · Claude": "Live · Claude", "Connecting…": "Conectando…", "Visual": "Visual",
+  "Identifying artwork…": "Identificando la obra…", "Powered by Claude": "Con la tecnología de Claude", "Cancel": "Cancelar", "Back to camera": "Volver a la cámara", "Try again": "Reintentar",
+  "Asking Claude · usually 10–40 seconds": "Consultando a Claude · normalmente de 10 a 40 segundos",
+  "Checking and writing the story…": "Comprobando y escribiendo la historia…", "Claude may search the web to confirm · up to a minute": "Claude puede buscar en la web para confirmar · hasta un minuto",
+  "Could not identify this one": "No se ha podido identificar", "Something went wrong while asking Claude. Try again.": "Algo ha fallado al consultar a Claude. Inténtalo de nuevo.",
+  "Demo mode · Hokusai": "Modo demo · Hokusai",
+  "Identified": "Identificada", "Best guess": "Suposición", "Remove from journal": "Quitar del diario", "Tap again to remove": "Toca otra vez para quitar",
+  "Listening…": "Escuchando…", "Hold near the music source": "Acércate a la fuente de la música",
+  "Spark · 15 sec": "Chispa · 15 s", "Story · 2 min": "Historia · 2 min", "Surprise · Unexpected": "Sorpresa · Inesperado", "Deep Dive · Go further": "Para saber más", "Explore more": "Explorar", "Swipe for more": "Desliza para seguir",
+  "More by {a}": "Más obras de {a}", "More like this": "En la misma línea", "Original at {p}": "Original en {p}",
+  "Thinking…": "Pensando…", "Ask anything…": "Pregunta lo que quieras…", "Ask anything": "Pregunta lo que quieras",
+  "What would you like to know about this one?": "¿Qué te gustaría saber de esta obra?", "(No answer this time. Try again.)": "(Esta vez no hay respuesta. Inténtalo de nuevo.)",
+  "Saved to your journal": "Guardado en tu diario", "Could not save this scan on this device": "No se ha podido guardar este escaneo en este dispositivo", "Could not save this change": "No se ha podido guardar este cambio",
+  "Already in your journal · first scanned {d}": "Ya está en tu diario · escaneado el {d}",
+  "A Claude API key starts with sk-ant-. Check that you copied all of it.": "Una clave API de Claude empieza por sk-ant-. Comprueba que la has copiado entera.",
+  "Edit": "Editar", "Discovery": "Descubrimiento", "Painting": "Pintura", "Sculpture": "Escultura", "Book": "Libro", "Plant": "Planta", "Sky": "Cielo", "Mountain": "Montaña",
+  "Strata needs your permission to ask Claude. Reload the page and allow it when asked.": "Strata necesita tu permiso para consultar a Claude. Recarga la página y acéptalo.",
+  "Claude is busy or your usage limit is reached. Try again in a moment.": "Claude está ocupado o has alcanzado tu límite de uso. Inténtalo en un momento.",
+  "Your Claude session expired. Sign in again, then retry.": "Tu sesión de Claude ha caducado. Vuelve a iniciar sesión y reinténtalo.",
+  "This photo could not be read. Try another one, under 20 MB.": "No se ha podido leer esta foto. Prueba con otra de menos de 20 MB.",
+  "Claude declined this photo. Try a different subject.": "Claude ha rechazado esta foto. Prueba con otro tema.",
+  "The answer came back incomplete. Try again.": "La respuesta ha llegado incompleta. Inténtalo de nuevo.",
+  "Web search is turned off for your API account.": "La búsqueda web está desactivada en tu cuenta de API.",
+  "Your API key was refused. Check it in Settings.": "Tu clave API ha sido rechazada. Revísala en Ajustes.",
+  "Your Claude API balance is empty. Add credit at platform.claude.com → Billing.": "Tu saldo de la API de Claude está vacío. Añade crédito en platform.claude.com → Billing.",
+  "No connection to Claude. Check your internet and try again.": "Sin conexión con Claude. Revisa tu internet e inténtalo de nuevo.",
+  "The Claude model is not available for this key.": "El modelo de Claude no está disponible para esta clave.",
+  "The answer came back empty. Try again.": "La respuesta ha llegado vacía. Inténtalo de nuevo.",
+  "Close": "Cerrar", "Card": "Tarjeta", "Previous card": "Tarjeta anterior", "Next card": "Tarjeta siguiente", "Back to home": "Volver al inicio", "Take a photo": "Hacer una foto",
+  "Choose a photo from your library": "Elegir una foto de tu fototeca", "Edit categories": "Editar categorías"
+}
+};
+var LOCALES = { en: 'en-GB', fr: 'fr-FR', es: 'es-ES' };
+function t(s, v) {
+  var d = typeof I18N !== 'undefined' && I18N ? I18N[getLang()] : null, r = (d && d[s]) || s;   // safe before the dictionary loads
+  if (v) r = r.replace(/\{(\w+)\}/g, function(m, k){ return v[k] != null ? v[k] : m; });
+  return r;
+}
+var i18nNodes = [];
+// Remember every interface text present at load, so it can be switched between languages without a reload
+function captureI18n() {
+  var w = document.createTreeWalker(document.querySelector('.phone'), NodeFilter.SHOW_TEXT, null);
+  while (w.nextNode()) {
+    var n = w.currentNode, k = n.nodeValue.trim().replace(/\s+/g, ' ');
+    if (k && I18N.fr[k]) i18nNodes.push({ node: n, orig: n.nodeValue, key: k });
+  }
+  document.querySelectorAll('.phone [placeholder], .phone [aria-label]').forEach(function(e){
+    ['placeholder', 'aria-label'].forEach(function(a){ var v = e.getAttribute(a); if (v && I18N.fr[v]) i18nNodes.push({ el: e, attr: a, key: v }); });
+  });
+}
+function applyLang() {
+  var l = getLang();
+  document.documentElement.lang = l;
+  i18nNodes.forEach(function(x){
+    if (x.node) x.node.nodeValue = x.orig.replace(x.orig.trim(), t(x.key));
+    else x.el.setAttribute(x.attr, t(x.key));
+  });
+  document.querySelectorAll('[data-i18n]').forEach(function(e){ e.textContent = t(e.getAttribute('data-i18n')); });
+  var lv = document.getElementById('langVal'); if (lv) lv.textContent = { en: 'English', fr: 'Français', es: 'Español' }[l];
+  setGreeting();
+  setMode(!!live);
+  if (typeof renderJournal === 'function' && sections) renderJournal();
+  var ma = document.getElementById('s-search-map'); if (ma && ma.classList.contains('active')) renderMap();
+  var rs = document.getElementById('s-result'); if (rs && rs.classList.contains('active') && ARTS[currentArt]) renderArt(currentArt);
+}
+function setGreeting() {
+  var h = new Date().getHours();
+  document.querySelector('.home-greeting').textContent = t(h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening');
+}
+
+// Start-up: map home sections, translate the interface, then load the journal
+initSections();
+captureI18n();
+applyLang();
+loadJournal();
 
 // ─── INIT ─────────────────────────────────────
 function fitPhone() {
