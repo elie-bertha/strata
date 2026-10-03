@@ -56,6 +56,9 @@ html,body{height:100%;background:#C8C8CC;font-family:'DM Sans',sans-serif;color:
 .stat-num{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink);line-height:1;}
 .stat-label{font-size:10px;color:var(--muted);margin-top:2px;font-weight:500;text-transform:uppercase;letter-spacing:.3px;}
 .home-body{flex:1;overflow-y:auto;padding:20px 16px 110px;display:flex;flex-direction:column;gap:22px;}
+.home-body,.cat-list,.map-list,.date-results{position:relative;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;}
+.home-body::after,.cat-list::after,.map-list::after,.date-results::after{content:'';position:absolute;top:0;left:0;width:1px;height:calc(100% + 1px);pointer-events:none;}
+
 .home-body::-webkit-scrollbar{display:none;}
 .sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .sec-title{font-family:'DM Serif Display',serif;font-size:18px;color:var(--ink);display:flex;align-items:center;gap:8px;}
@@ -289,6 +292,17 @@ label.key-btn{text-align:center;display:block;}
 .mode-pill.on{background:rgba(244,197,66,.18);border-color:rgba(244,197,66,.55);color:#fff;}
 .scan-sub{max-width:260px;text-align:center;line-height:1.5;}
 .scan-actions{display:flex;gap:10px;margin-top:4px;}
+.scan-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px;min-width:240px;max-width:290px;}
+.scan-steps li{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.4);font-size:15px;line-height:1.3;transition:color .25s;}
+.scan-steps li.st-active{color:#fff;font-weight:500;}
+.scan-steps li.st-done{color:rgba(255,255,255,.75);}
+.st-ic{width:22px;height:22px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(255,255,255,.25);box-sizing:border-box;}
+.st-done .st-ic{background:var(--sun);border-color:var(--sun);animation:stPop .3s ease-out;}
+.st-active .st-ic{border-color:rgba(255,255,255,.2);border-top-color:var(--sun);animation:stSpin .8s linear infinite;}
+@keyframes stSpin{to{transform:rotate(360deg)}}
+@keyframes stPop{0%{transform:scale(.6)}70%{transform:scale(1.12)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.st-active .st-ic,.st-done .st-ic{animation:none}}
+
 .scan-btn{font:500 13px 'DM Sans',sans-serif;padding:10px 18px;border-radius:100px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.12);color:#fff;cursor:pointer;}
 .scan-btn.pri{background:#fff;color:#1C1C1E;border-color:#fff;}
 .bubble.thinking{color:var(--muted);font-style:italic;}
@@ -491,6 +505,15 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
 .car-track{display:flex;height:100%;transition:transform .36s cubic-bezier(.4,0,.2,1);padding:0 20px;gap:12px;}
 .c-card{flex:0 0 calc(100% - 52px);border-radius:18px;border:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column;cursor:grab;user-select:none;}
 .c-card:active{cursor:grabbing;}
+.c-card{position:relative;}
+.c-hint{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);z-index:2;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(28,28,30,.72);color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.18);opacity:0;pointer-events:none;transition:opacity .25s;}
+.cc-spark .c-hint{background:rgba(255,255,255,.16);}
+.c-card.has-more .c-hint{opacity:1;animation:hintB 1.6s ease-in-out infinite;}
+.c-card.has-more .c-inner{-webkit-mask-image:linear-gradient(#000 calc(100% - 44px),transparent);mask-image:linear-gradient(#000 calc(100% - 44px),transparent);}
+@keyframes hintB{0%,100%{transform:translate(-50%,0)}50%{transform:translate(-50%,3px)}}
+@media (prefers-reduced-motion:reduce){.c-card.has-more .c-hint{animation:none}}
+.cz-body .c-hint{display:none;}
+
 .c-inner{flex:1;overflow-y:auto;padding:15px 17px;display:flex;flex-direction:column;gap:9px;}
 .c-inner::-webkit-scrollbar{display:none;}
 .c-top{display:flex;align-items:center;gap:10px;}
@@ -672,7 +695,6 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
     <div class="ig-title">Add Strata to your home screen</div>
     <p class="ig-sub">It then opens like a real app: full screen, one tap away.</p>
     <div class="ig-ios">
-      <p class="ig-note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg><span>Opened from WhatsApp or another app? First choose “Open in Safari”.</span></p>
       <div class="ig-step"><i>1</i><div><b>Tap Share</b> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg><span>At the bottom of Safari (top right in Chrome).</span></div></div>
       <div class="ig-step"><i>2</i><div><b>Choose “Add to Home Screen”</b> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>Scroll down the list if you don't see it.</span></div></div>
       <div class="ig-step"><i>3</i><div><b>Open Strata from your home screen</b><span class="ig-after">Your invitation comes with you: create your account there.</span><span class="ig-code" hidden><span class="ig-code-l">Your invitation code</span> <b class="ig-code-v"></b> <button class="ig-copy" type="button">Copy</button></span></div></div>
@@ -742,7 +764,6 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
     <div class="ig-title" id="igSheetTitle">Add Strata to your home screen</div>
     <p class="ig-sub" id="igSheetSub">It then opens like a real app: full screen, one tap away.</p>
     <div class="ig-ios">
-      <p class="ig-note"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg><span>Opened from WhatsApp or another app? First choose “Open in Safari”.</span></p>
       <div class="ig-step"><i>1</i><div><b>Tap Share</b> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg><span>At the bottom of Safari (top right in Chrome).</span></div></div>
       <div class="ig-step"><i>2</i><div><b>Choose “Add to Home Screen”</b> <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg><span>Scroll down the list if you don't see it.</span></div></div>
       <div class="ig-step"><i>3</i><div><b>Open Strata from your home screen</b><span class="ig-after">Your invitation comes with you: create your account there.</span><span class="ig-code" hidden><span class="ig-code-l">Your invitation code</span> <b class="ig-code-v"></b> <button class="ig-copy" type="button">Copy</button></span></div></div>
@@ -1059,7 +1080,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
 <!-- SCANNING -->
 <div class="screen" id="s-scanning">
   <div class="scan-bg" id="scanBg"></div>
-  <div class="scan-wrap"><div class="scan-ring" id="scanRing"><div class="spin"></div><div class="scan-ic scan-logo" data-logo></div></div><div class="scan-lbl" id="scanLbl">Identifying artwork…</div><div class="scan-sub" id="scanSub">Powered by Claude</div><div class="scan-actions"><button class="scan-btn" id="scanCancel">Cancel</button></div><div class="scan-actions" id="scanErr" hidden><button class="scan-btn" id="scanBack">Back to camera</button><button class="scan-btn pri" id="scanRetry">Try again</button></div></div>
+  <div class="scan-wrap"><div class="scan-ring" id="scanRing"><div class="spin"></div><div class="scan-ic scan-logo" data-logo></div></div><div class="scan-lbl" id="scanLbl">Identifying artwork…</div><ul class="scan-steps" id="scanSteps" hidden aria-live="polite"></ul><div class="scan-sub" id="scanSub">Powered by Claude</div><div class="scan-actions"><button class="scan-btn" id="scanCancel">Cancel</button></div><div class="scan-actions" id="scanErr" hidden><button class="scan-btn" id="scanBack">Back to camera</button><button class="scan-btn pri" id="scanOwnKey" hidden>Use my own key</button><button class="scan-btn pri" id="scanRetry">Try again</button></div></div>
 </div>
 
 <!-- RESULT -->
@@ -1086,7 +1107,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
     </div>
     <!-- SAME ARTIST -->
     <div class="same-artist">
-      <div class="sa-header"><div class="sa-title" id="saTitle"></div><button class="sa-more">See all</button></div>
+      <div class="sa-header"><div class="sa-title" id="saTitle"></div></div>
       <div class="sa-scroll" id="saScroll">
       </div>
     </div>
@@ -1213,7 +1234,7 @@ var ARTS = {
 };
 
 function cardHTML(cls, ico, kick, head, inner) {
-  return '<div class="c-card ' + cls + '"><div class="c-inner"><div class="c-top"><div class="c-badge">' + ico + '</div><div><div class="c-kick">' + kick + '</div><div class="c-head">' + head + '</div></div></div>' + inner + '</div></div>';
+  return '<div class="c-card ' + cls + '"><div class="c-hint" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="c-inner"><div class="c-top"><div class="c-badge">' + ico + '</div><div><div class="c-kick">' + kick + '</div><div class="c-head">' + head + '</div></div></div>' + inner + '</div></div>';
 }
 
 function renderArt(key) {
@@ -1241,6 +1262,19 @@ function renderArt(key) {
   renderTags();
   var rb = document.getElementById('btnRemove'); rb.hidden = !a.journalId; rb.classList.remove('armed'); rb.textContent = t('Remove from journal');
   loadThumbs();
+  watchCardHints();
+}
+function updateCardHint(inner) {
+  var card = inner.parentNode, more = inner.scrollHeight - inner.clientHeight - inner.scrollTop > 12;
+  card.classList.toggle('has-more', inner.clientHeight > 0 && more);
+}
+var hintRO = window.ResizeObserver ? new ResizeObserver(function(es){ es.forEach(function(e){ updateCardHint(e.target); }); }) : null;
+function watchCardHints() {
+  document.querySelectorAll('#carTrack .c-inner').forEach(function(inner){
+    inner.addEventListener('scroll', function(){ updateCardHint(inner); }, { passive: true });
+    if (hintRO) hintRO.observe(inner);
+    updateCardHint(inner);
+  });
 }
 
 function renderChat(key) {
@@ -1280,7 +1314,7 @@ function show(id) {
   });
   var scr = document.getElementById(id);
   if (scr) { scr.style.display = 'flex'; scr.classList.add('active'); }
-  if (id === 's-scanning' && !liveScanning) { scanStatus(t('Identifying artwork…'), t('Demo mode · Hokusai')); setTimeout(function(){ if (!liveScanning) show('s-result'); }, 2200); }
+  if (id === 's-scanning' && !liveScanning) { scanStatus(t('Identifying artwork…'), t('Demo mode · Hokusai')); stepsStart(); setTimeout(function(){ if (!liveScanning) stepsPrepared(); }, 350); setTimeout(function(){ if (!liveScanning) { stepSet('recog', 'done'); stepSet('write', 'active'); } }, 1000); setTimeout(function(){ if (!liveScanning) stepsAllDone(); }, 1900); setTimeout(function(){ if (!liveScanning) { stepsStop(); show('s-result'); } }, 2350); }
   if (id === 's-chat' && renderedChat !== currentArt) { chatTurns = []; }
   if (id === 's-result') { scr.scrollTop = 0; renderArt(currentArt); currentCard = 0; updateCarousel(false); }
   if (id === 's-chat') { renderChat(currentArt); }
@@ -1529,11 +1563,35 @@ var SCAN_ERR = {
   no_credit: 'Your Claude API balance is empty. Add credit at platform.claude.com → Billing.',
   no_budget: 'Your Strata credit is used up. Open Settings to ask for more, or use your own Claude key.',
   relay_not_configured: 'The Strata server is not set up yet (missing Claude key).',
-  pending_approval: 'Your credit is waiting for approval. You can scan as soon as it is approved (Settings → Remind).',
+  pending_approval: 'Your credit is waiting for approval. You can scan as soon as it is approved (Settings → Remind). Or connect your own Claude key to start right away.',
   network: 'No connection to Claude. Check your internet and try again.',
   model: 'The Claude model is not available for this key.',
   empty_completion: 'The answer came back empty. Try again.'
 };
+
+
+// Scan progress as a short checklist
+var SCAN_STEPS = [['prep', 'Preparing the photo'], ['recog', 'Recognising the work'], ['search', 'Not sure yet · deeper research on the web'], ['write', 'Writing the story cards']];
+var stepState = {}, stepTimer = null;
+var STEP_ICO = { done: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' };
+function renderSteps() {
+  document.getElementById('scanSteps').innerHTML = SCAN_STEPS.filter(function(s){ return stepState[s[0]] && stepState[s[0]] !== 'hidden'; }).map(function(s){
+    var st = stepState[s[0]];
+    return '<li class="st-' + st + '"><span class="st-ic">' + (st === 'done' ? STEP_ICO.done : '') + '</span><span>' + esc(t(s[1])) + '</span></li>';
+  }).join('');
+}
+function stepSet(k, st) { stepState[k] = st; renderSteps(); }
+function stepsStart() {
+  clearTimeout(stepTimer);
+  stepState = { prep: 'active', recog: 'todo', search: 'hidden', write: 'todo' };
+  document.getElementById('scanLbl').hidden = true; document.getElementById('scanSteps').hidden = false; renderSteps();
+}
+// The recognition and the cards come back in one answer: after a first look, the step moves on to the writing
+function stepsLater(from, ms) { clearTimeout(stepTimer); stepTimer = setTimeout(function(){ if (stepState[from] === 'active') { stepState[from] = 'done'; stepSet('write', 'active'); } }, ms); }
+function stepsPrepared() { stepSet('prep', 'done'); stepSet('recog', 'active'); stepsLater('recog', 6000); }
+function stepsSearching() { clearTimeout(stepTimer); stepState.prep = 'done'; stepState.recog = 'done'; stepState.write = 'todo'; stepSet('search', 'active'); stepsLater('search', 12000); }
+function stepsAllDone() { clearTimeout(stepTimer); Object.keys(stepState).forEach(function(k){ if (stepState[k] !== 'hidden') stepState[k] = 'done'; }); renderSteps(); }
+function stepsStop() { clearTimeout(stepTimer); document.getElementById('scanSteps').hidden = true; document.getElementById('scanLbl').hidden = false; }
 
 function scanStatus(label, sub, isError) {
   document.getElementById('scanLbl').textContent = label;
@@ -1541,18 +1599,22 @@ function scanStatus(label, sub, isError) {
   document.getElementById('scanRing').hidden = !!isError;
   document.getElementById('scanErr').hidden = !isError;
   document.getElementById('scanCancel').hidden = !!isError;
+  if (isError) stepsStop();
+  if (!isError) { document.getElementById('scanOwnKey').hidden = true; document.getElementById('scanRetry').hidden = false; }
 }
 
 async function runLiveScan(file) {
   var url = URL.createObjectURL(file);
   document.getElementById('scanBg').style.backgroundImage = 'url(' + url + ')';
   liveScanning = true;
-  scanStatus(t('Identifying artwork…'), t('Asking Claude · usually 10–40 seconds'));
+  scanStatus(t('Identifying artwork…'), t('Powered by Claude · usually 10–40 seconds'));
+  stepsStart();
   show('s-scanning');
-  var scanTimer = setTimeout(function(){ if (liveScanning) scanStatus(t('Checking and writing the story…'), t('Claude may search the web to confirm · up to a minute')); }, 9000);
+  var scanTimer = null;
   liveScanCtl = new AbortController();
   try {
-    var d = await live.json(SCAN_PROMPT + langRule(), { images: [file], signal: liveScanCtl.signal, searchIfUnsure: true, onSearch: function(){ if (liveScanning) document.getElementById('scanSub').textContent = t('Not sure yet · checking on the web…'); } });
+    var d = await live.json(SCAN_PROMPT + langRule(), { images: [file], signal: liveScanCtl.signal, searchIfUnsure: true, onStage: function(){ if (liveScanning) stepsPrepared(); }, onSearch: function(){ if (liveScanning) { stepsSearching(); document.getElementById('scanSub').textContent = t('Powered by Claude · up to a minute'); } } });
+    stepsAllDone(); await new Promise(function(r){ setTimeout(r, 450); });
     if (!d || typeof d !== 'object' || !d.title) throw { code: 'invalid_json' };
     var dup = findDuplicate(d);
     liveScanning = false;
@@ -1574,8 +1636,11 @@ async function runLiveScan(file) {
   } catch (e) {
     liveScanning = false;
     if (e && e.code === 'cancelled') { show(getCamPref() === 'viewfinder' ? 's-camera' : 's-home'); return; }
-    scanStatus(t('Could not identify this one'), (SCAN_ERR[e && e.code] ? t(SCAN_ERR[e.code]) : t('Something went wrong while asking Claude. Try again.')) + ' [' + ((e && e.code) || 'unknown') + (e && e.message ? ': ' + String(e.message).slice(0, 120) : '') + ']', true);
-  } finally { clearTimeout(scanTimer); }
+    var credErr = e && (e.code === 'pending_approval' || e.code === 'no_budget');
+    scanStatus(credErr ? t('No credit yet') : t('Could not identify this one'), (SCAN_ERR[e && e.code] ? t(SCAN_ERR[e.code]) : t('Something went wrong while asking Claude. Try again.')) + ' [' + ((e && e.code) || 'unknown') + (e && e.message ? ': ' + String(e.message).slice(0, 120) : '') + (credErr ? '' : ']'), true);
+    if (credErr) document.getElementById('scanSub').textContent = t(SCAN_ERR[e.code]);
+    document.getElementById('scanOwnKey').hidden = !credErr; document.getElementById('scanRetry').hidden = credErr;
+  } finally { clearTimeout(scanTimer); stepsStop(); }
 }
 
 function pickPhoto(withCamera, e) {
@@ -1593,6 +1658,7 @@ function pickPhoto(withCamera, e) {
 document.getElementById('btn-shutter').addEventListener('click', function(e){ pickPhoto(true, e); });
 document.getElementById('btn-cam-gallery').addEventListener('click', function(e){ pickPhoto(false, e); });
 document.getElementById('scanCancel').addEventListener('click', function(){ if (liveScanCtl) liveScanCtl.abort(); else show(getCamPref() === 'viewfinder' ? 's-camera' : 's-home'); });
+document.getElementById('scanOwnKey').addEventListener('click', function(){ show('s-home'); openKeySheet(); var o = document.getElementById('ownKey'); if (o) o.open = true; });
 document.getElementById('scanRetry').addEventListener('click', function(){ if (window._lastPhoto) runLiveScan(window._lastPhoto); });
 document.getElementById('scanBack').addEventListener('click', function(){ show(getCamPref() === 'viewfinder' ? 's-camera' : 's-home'); });
 
@@ -1762,6 +1828,7 @@ function makeLive() {
     var content = prompt;
     if (opts.images && opts.images[0]) {
       var b64 = await photoToBase64(opts.images[0]);
+      if (opts.onStage) opts.onStage('prepared');
       content = [{ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } }, { type: 'text', text: prompt }];
     }
     var body = { max_tokens: 4000, messages: [{ role: 'user', content: content }] };
@@ -2671,7 +2738,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.22';
+var APP_VERSION = '0.23';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -3102,7 +3169,7 @@ function renderCredit() {
     bar.style.width = '0%';
   }
   if (me.requested_cents > 0) {
-    document.getElementById('creditNote').textContent = t('{c} of credit is waiting for {a} to approve it.', { c: money(me.requested_cents * 10000), a: me.approver || t('the admin') });
+    document.getElementById('creditNote').textContent = t('{c} of credit is waiting for {a} to approve it.', { c: money(me.requested_cents * 10000), a: me.approver || t('the admin') }) + ' ' + t('Meanwhile, you can use your own Claude key (below) and scan right away.');
     document.getElementById('creditAsk').textContent = t('Remind {n}', { n: me.approver || '' }).trim();
   }
 }
@@ -3631,6 +3698,16 @@ fr: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
   "Browse by Date": "Parcourir par date",
+  "Your credit is waiting for approval. You can scan as soon as it is approved (Settings → Remind). Or connect your own Claude key to start right away.": "Votre crédit attend d'être validé. Vous pourrez scanner dès qu'il le sera (Réglages → Relancer). Ou connectez votre propre clé Claude pour commencer tout de suite.",
+  "Use my own key": "Utiliser ma clé",
+  "No credit yet": "Pas encore de crédit",
+  "Meanwhile, you can use your own Claude key (below) and scan right away.": "En attendant, vous pouvez utiliser votre propre clé Claude (plus bas) et scanner tout de suite.",
+  "Preparing the photo": "Préparation de la photo",
+  "Recognising the work": "Reconnaissance de l'œuvre",
+  "Not sure yet · deeper research on the web": "Pas encore sûr · recherche approfondie sur le web",
+  "Writing the story cards": "Écriture des cartes",
+  "Powered by Claude · usually 10–40 seconds": "Avec Claude · 10 à 40 secondes en général",
+  "Powered by Claude · up to a minute": "Avec Claude · jusqu'à une minute",
   "Your account is ready": "Votre compte est prêt",
   "For the best experience, add Strata to your home screen: it opens like a real app, full screen, one tap away.": "Pour une meilleure expérience, ajoutez Strata à votre écran d'accueil : il s'ouvre comme une vraie app, en plein écran, à portée de doigt.",
   "Then sign in there once, with the email and password you just chose.": "Connectez-vous-y une fois, avec l'e-mail et le mot de passe que vous venez de choisir.",
@@ -3705,6 +3782,16 @@ es: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
   "Browse by Date": "Explorar por fecha",
+  "Your credit is waiting for approval. You can scan as soon as it is approved (Settings → Remind). Or connect your own Claude key to start right away.": "Tu crédito está pendiente de aprobación. Podrás escanear en cuanto se apruebe (Ajustes → Recordar). O conecta tu propia clave de Claude para empezar ya.",
+  "Use my own key": "Usar mi clave",
+  "No credit yet": "Aún sin crédito",
+  "Meanwhile, you can use your own Claude key (below) and scan right away.": "Mientras tanto, puedes usar tu propia clave de Claude (abajo) y escanear ya.",
+  "Preparing the photo": "Preparando la foto",
+  "Recognising the work": "Reconociendo la obra",
+  "Not sure yet · deeper research on the web": "Aún no está claro · búsqueda a fondo en la web",
+  "Writing the story cards": "Escribiendo las tarjetas",
+  "Powered by Claude · usually 10–40 seconds": "Con Claude · normalmente 10–40 segundos",
+  "Powered by Claude · up to a minute": "Con Claude · hasta un minuto",
   "Your account is ready": "Tu cuenta está lista",
   "For the best experience, add Strata to your home screen: it opens like a real app, full screen, one tap away.": "Para una mejor experiencia, añade Strata a tu pantalla de inicio: se abre como una app de verdad, a pantalla completa, a un toque.",
   "Then sign in there once, with the email and password you just chose.": "Luego inicia sesión allí una vez, con el correo y la contraseña que acabas de elegir.",
