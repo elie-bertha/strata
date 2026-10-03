@@ -170,7 +170,7 @@ label.key-btn{text-align:center;display:block;}
 .map-list-count{border:none;background:none;font:inherit;font-size:11px;color:var(--muted);padding:0;}
 .map-list-count.link{color:var(--ink);font-weight:600;cursor:pointer;}
 .leaflet-control-attribution{font-size:9px!important;}
-#lmap .leaflet-tile-pane{filter:grayscale(1) brightness(1.06) contrast(.92);}
+#lmap .leaflet-tile-pane{filter:saturate(.55) brightness(1.05) contrast(.93);}
 .map-bg{position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.6) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.6) 1px,transparent 1px),#DDE4EC;background-size:36px 36px;}
 .map-road-h{position:absolute;left:0;right:0;height:5px;background:white;opacity:.9;}
 .map-road-v{position:absolute;top:0;bottom:0;width:4px;background:white;opacity:.9;}
@@ -544,6 +544,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
 .cc-go .c-badge{background:#EEF7F1;}
 .cc-go .c-head{color:var(--ink);}
 .lnk-btn{border:0;width:100%;text-align:left;font:inherit;}
+.go-entry{font-size:13px;font-weight:500;color:#1F7A4D;margin:0 2px;}
 .go-note{font-size:11px;line-height:1.45;color:var(--muted);margin:2px 2px 0;}
 .res-where[role=button]{cursor:pointer;text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:3px;}
 .mb-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;}
@@ -1119,7 +1120,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
       <div class="dots">
         <div class="dot on" data-i="0"></div><div class="dot" data-i="1"></div><div class="dot" data-i="2"></div><div class="dot" data-i="3"></div>
       </div>
-      <div class="car-acts"><button class="chat-ico-btn" id="btn-narrate" aria-label="Listen to the story"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F4C542" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button><button class="chat-ico-btn" id="btn-chat-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button></div>
+      <div class="car-acts"><button class="chat-ico-btn" id="btn-res-map" aria-label="See it on my Strata map" hidden><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F4C542" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></button><button class="chat-ico-btn" id="btn-narrate" aria-label="Listen to the story"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F4C542" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg></button><button class="chat-ico-btn" id="btn-chat-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></button></div>
     </div>
     <div class="car-wrap" id="carWrap" style="height:250px;flex:0 0 250px;">
       <div class="car-track" id="carTrack">
@@ -1275,9 +1276,7 @@ function bookLinks(q) {
 }
 function mapLinks(place, city, lat, lng) {
   var q = [place, city].filter(Boolean).join(', ');
-  var out = [lnkA('map', t('Directions'), 'Google Maps', 'https://www.google.com/maps/search/?api=1&query=' + enc(q))];
-  if (IS_IOS) out.push(lnkA('map', t('Open in Apple Maps'), t('Apple Maps'), 'https://maps.apple.com/?q=' + enc(q) + (isFinite(lat) && isFinite(lng) && (lat || lng) ? '&ll=' + lat + ',' + lng : '')));
-  return out.join('');
+  return lnkA('map', t('Directions'), 'Google Maps', 'https://www.google.com/maps/search/?api=1&query=' + enc(q));
 }
 function practicalKind(a) {
   var d = a && a.raw; if (!d || d.identified === false) return '';
@@ -1292,14 +1291,21 @@ function practicalCard(a) {
   var d = a.raw;
   if (kind === 'read') return cardHTML('cc-go', ICO.book, t('Read it · Get the book'), t('Find a copy'), '<div class="lnk-list">' + bookLinks(d.title + ' ' + (d.creator || '')) + '</div><p class="go-note">' + t('Links open a search in the store.') + '</p>');
   var loc = d.location, q = [loc.place, loc.city].filter(Boolean).join(' ');
-  var rows = '<div class="go-site" data-wiki="' + esc(d.place_wiki || loc.place) + '"></div>' +
-    lnkA('ticket', t('Tickets & tours'), 'getyourguide.com', 'https://www.getyourguide.com/s/?q=' + enc(q)) +
-    mapLinks(loc.place, loc.city, loc.lat, loc.lng) +
-    (a.journalId && isFinite(loc.lat) ? lnkB('strata', t('See it on my Strata map'), t('Your discoveries around it'), 'strata-map') : '');
+  var rows = (d.entry === 'outside' ? '' : '<div class="go-site" data-wiki="' + esc(d.place_wiki || loc.place) + '"' + (d.entry === 'ticketed' ? ' data-paid="1"' : '') + '></div>') +
+    (d.entry === 'ticketed' ? lnkA('ticket', t('Tickets & tours'), 'getyourguide.com', 'https://www.getyourguide.com/s/?q=' + enc(q)) : '') +
+    mapLinks(loc.place, loc.city);
   var head = kind === 'visit' ? esc(loc.place) : t('Kept at {p}', { p: esc(loc.place) });
+  var entryNote = d.entry === 'free' ? t('Free to visit.') : d.entry === 'outside' ? t('Seen from outside: no visit inside.') : '';
+  if (entryNote) rows = '<p class="go-entry">' + entryNote + '</p>' + rows;
   return cardHTML('cc-go', ICO.go, kind === 'visit' ? t('Visit · Plan it') : t('Where to see it'), head, '<div class="lnk-list">' + rows + '</div>' + (kind === 'see' ? '<p class="go-note">' + t('Works travel and rest in storage: check that it is on display before you go.') + '</p>' : ''));
 }
+function updateMapBtn() {
+  var a = ARTS[currentArt], rec = a && a.journalId && journal.find(function(r){ return r.id === a.journalId; });
+  document.getElementById('btn-res-map').hidden = !(rec && hasLoc(rec));
+}
+document.getElementById('btn-res-map').addEventListener('click', function(){ openOnStrataMap(ARTS[currentArt]); });
 function refreshPracticalCard() {
+  updateMapBtn();
   var old = document.querySelector('#carTrack .cc-go'), a = ARTS[currentArt]; if (!old || !a) return;
   var tmp = document.createElement('div'); tmp.innerHTML = practicalCard(a); if (!tmp.firstChild) return;
   old.replaceWith(tmp.firstChild); loadOfficialSite(); watchCardHints();
@@ -1321,7 +1327,7 @@ function loadOfficialSite() {
     officialSite(el.getAttribute('data-wiki')).then(function(url){
       if (!url || !el.isConnected) return;
       var host = url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0];
-      el.outerHTML = lnkA('site', t('Official website · tickets'), host, url);
+      el.outerHTML = lnkA('site', el.getAttribute('data-paid') ? t('Official website · tickets') : t('Official website'), host, url);
       document.querySelectorAll('#carTrack .c-inner').forEach(function(i){ updateCardHint(i); });
     });
   });
@@ -1330,7 +1336,8 @@ function loadOfficialSite() {
 var mapPreset = null, mapFrom = 's-home';
 function openOnStrataMap(a) {
   var loc = a && a.raw && a.raw.location; if (!loc) return;
-  if (a.journalId && isFinite(loc.lat)) { mapPreset = placeKey(loc); mapFrom = 's-result'; mapCats = []; show('s-search-map'); }
+  var rec = a.journalId && journal.find(function(r){ return r.id === a.journalId; });
+  if (rec && hasLoc(rec)) { mapPreset = placeKey(rec.data.location); mapFrom = 's-result'; mapCats = []; show('s-search-map'); }
   else window.open('https://www.google.com/maps/search/?api=1&query=' + enc([loc.place, loc.city].filter(Boolean).join(', ')), '_blank');
 }
 function handleAct(e) {
@@ -1366,7 +1373,7 @@ function renderArt(key) {
   CARDS = document.querySelectorAll('#carTrack .c-card').length;
   document.querySelector('#s-result .dots').innerHTML = Array.apply(null, Array(CARDS)).map(function(_, i){ return '<div class="dot' + (i ? '' : ' on') + '" data-i="' + i + '"></div>'; }).join('');
   if (currentCard >= CARDS) { currentCard = 0; updateCarousel(false); }
-  loadOfficialSite();
+  loadOfficialSite(); updateMapBtn();
   document.getElementById('saTitle').innerHTML = (a.live && !a.identified) ? t('More like this') : a.nature ? t('Also in {a}', { a: a.artist }) : t('More by {a}', { a: a.artist });
   document.getElementById('saScroll').innerHTML = a.more.map(function(m){
     return '<div class="sa-card"><div class="sa-thumb" style="' + m[3] + '"' + (m[4] ? ' data-wiki="' + m[4] + '"' : '') + ' data-q="' + esc((m[0] + ' ' + (a.nature ? '' : a.artist)).replace(/&amp;/g, '&').replace(/&#39;/g, "'")) + '" data-book="' + (a.category === 'book' ? '1' : '') + '"></div><div class="sa-name">' + m[0] + '</div><div class="sa-year">' + m[1] + '</div><div class="sa-spark">' + m[2] + '</div></div>';
@@ -1611,6 +1618,7 @@ var SCAN_PROMPT = [
   '  "location": { "place": "museum, collection or site where the original is today", "city": "...", "country": "...", "lat": 0.0, "lng": 0.0 },',
   '  (location: ' + LOCATION_RULE + ')',
   '  "place_wiki": "exact English Wikipedia article title of location.place (the museum, building or site), or empty string",',
+  '  "entry": "how visitors get in to location.place: \"ticketed\" (paid entry or tickets needed), \"free\" (free to enter), \"outside\" (only seen from outside: private, closed or a street facade), or \"unknown\"",',
   '  "spark": { "head": "3-6 words", "body": "the 15-second hook: the most surprising way into this work, 40-55 words" },',
   '  "story": { "head": "3-6 words", "body": "the 2-minute story in three short paragraphs separated by a blank line (\\n\\n), 200-260 words in total: first, what was happening in the creator\'s life or world when it was made; then how it was made or received and the people around it; last, what to look for in it now, the details that carry this story. For nature: where it comes from, how people have lived with it, what to notice when you look at it." },',
   '  "surprise": { "head": "3-6 words", "body": "one unexpected, true fact that ends on delight, 35-60 words" },',
@@ -1728,8 +1736,8 @@ async function runLiveScan(file, opts) {
   var scanTimer = null;
   liveScanCtl = new AbortController();
   try {
-    var prompt = SCAN_PROMPT + langRule() + (opts.text ? '\n\nThere is no photo this time: the user tapped a work they want to discover. Write about this work: ' + opts.text + '. Set "identified" to true if you know it.' : '');
-    var d = await live.json(prompt, { images: opts.text ? [] : [file], signal: liveScanCtl.signal, searchIfUnsure: true, onStage: function(){ if (liveScanning) stepsPrepared(); }, onSearch: function(){ if (liveScanning) { stepsSearching(); document.getElementById('scanSub').textContent = t('Powered by Claude · up to a minute'); } } });
+    var prompt = SCAN_PROMPT + langRule() + (opts.text ? '\n\nThere is no photo this time: the user tapped a work they want to discover. Write about this work: ' + opts.text + '. Set "identified" to true if you know it. There is nothing to recognise: "confidence" is only about how well you know this work.' : '');
+    var d = await live.json(prompt, { trusted: !!opts.text, images: opts.text ? [] : [file], signal: liveScanCtl.signal, searchIfUnsure: true, onStage: function(){ if (liveScanning) stepsPrepared(); }, onSearch: function(){ if (liveScanning) { stepsSearching(); document.getElementById('scanSub').textContent = t('Powered by Claude · up to a minute'); } } });
     stepsAllDone(); await new Promise(function(r){ setTimeout(r, 450); });
     if (!d || typeof d !== 'object' || !d.title) throw { code: 'invalid_json' };
     var dup = findDuplicate(d);
@@ -1744,7 +1752,7 @@ async function runLiveScan(file, opts) {
     }
     if (!d.lang) d.lang = getLang();
     ARTS.live = toArt(d, url);
-    saveScan(d, file).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; refreshPracticalCard(); loadJournal().then(function(){ if (currentArt === 'live') renderTags(); }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
+    saveScan(d, file).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; refreshPracticalCard(); loadJournal().then(function(){ if (currentArt === 'live') { renderTags(); updateMapBtn(); } }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
       .catch(function(){ toast(t('Could not save this scan on this device')); });
     currentArt = 'live';
     renderedChat = null;
@@ -1773,7 +1781,7 @@ document.getElementById('saScroll').addEventListener('click', function(e){
   var mt = document.getElementById('mbThumb'); mt.setAttribute('style', th.getAttribute('style') || '');
   var links = '';
   if (mbItem.book) links = bookLinks(mbItem.title + ' ' + mbItem.creator);
-  else if (mbItem.where) links = '<div class="mb-where">' + LNK.map[1] + '<span>' + esc(mbItem.where) + '</span></div>' + mapLinks(mbItem.where, '', NaN, NaN);
+  else if (mbItem.where) links = '<div class="mb-where">' + LNK.map[1] + '<span>' + esc(mbItem.where) + '</span></div>' + mapLinks(mbItem.where, '');
   document.getElementById('mbLinks').innerHTML = links;
   document.getElementById('mbLinks').hidden = !links;
   var can = hasAI();
@@ -1994,7 +2002,7 @@ function makeLive() {
       var c1 = typeof content === 'string' ? content + NO_SEARCH_NOTE : content.slice(0, -1).concat([{ type: 'text', text: prompt + NO_SEARCH_NOTE }]);
       try {
         var d1 = parseJSON(await callClaude({ max_tokens: 4000, messages: [{ role: 'user', content: c1 }] }, opts.signal));
-        if (d1 && d1.identified !== false && d1.confidence === 'high') return d1;
+        if (d1 && d1.identified !== false && (d1.confidence === 'high' || (opts.trusted && d1.confidence !== 'low'))) return d1;
       } catch (e) { if (e && /cancelled|bad_key|no_credit|no_budget|session_expired|network|relay_not_configured/.test(e.code)) throw e; }
       if (opts.onSearch) opts.onSearch();
     }
@@ -2505,7 +2513,7 @@ function renderMap() {
   if (!window.L) { document.getElementById('lmap').innerHTML = '<div class="j-none" style="padding:20px">' + t('The map could not load. Check your connection.') + '</div>'; return; }
   if (!lmap) {
     lmap = L.map('lmap', { zoomControl: false, attributionControl: true, worldCopyJump: true }).setView([30, 5], 1);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 20, subdomains: 'abcd', attribution: '© OpenStreetMap contributors © CARTO' }).addTo(lmap);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(lmap);
     mapLayer = L.layerGroup().addTo(lmap);
     lmap.on('click', function(){ if (mapPlace) { mapPlace = null; renderMap(); } });
   }
@@ -2895,7 +2903,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.24';
+var APP_VERSION = '0.25';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -3768,7 +3776,7 @@ async function runMusic() {
     if (dup) { URL.revokeObjectURL(url); markSeen(dup); openScan(dup.id); toast(t('Already in your journal · first scanned {d}', { d: fmtDay(dup.created_at) })); return; }
     if (!d.lang) d.lang = getLang();
     ARTS.live = toArt(d, url);
-    saveScan(d, img).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; loadJournal().then(function(){ if (currentArt === 'live') renderTags(); }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
+    saveScan(d, img).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; loadJournal().then(function(){ if (currentArt === 'live') { renderTags(); updateMapBtn(); } }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
       .catch(function(){ toast(t('Could not save this scan on this device')); });
     currentArt = 'live'; renderedChat = null;
     show('s-result');
@@ -3858,6 +3866,10 @@ fr: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
   "Browse by Date": "Parcourir par date",
+  "Official website": "Site officiel",
+  "Free to visit.": "Entrée libre.",
+  "Seen from outside: no visit inside.": "Se découvre de l'extérieur : pas de visite intérieure.",
+  "See it on my Strata map": "Voir sur ma carte Strata",
   "Read it · Get the book": "Le lire · Trouver le livre",
   "Find a copy": "Trouver un exemplaire",
   "Links open a search in the store.": "Les liens ouvrent une recherche dans la boutique.",
@@ -3958,6 +3970,10 @@ es: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
   "Browse by Date": "Explorar por fecha",
+  "Official website": "Web oficial",
+  "Free to visit.": "Entrada libre.",
+  "Seen from outside: no visit inside.": "Se ve desde fuera: sin visita interior.",
+  "See it on my Strata map": "Ver en mi mapa de Strata",
   "Read it · Get the book": "Leerlo · Conseguir el libro",
   "Find a copy": "Encontrar un ejemplar",
   "Links open a search in the store.": "Los enlaces abren una búsqueda en la tienda.",
