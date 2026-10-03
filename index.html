@@ -540,6 +540,19 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
 .cc-dive .c-badge{background:#EEF2FF;}
 .cc-dive .c-head{color:var(--ink);}
 .lnk-list{display:flex;flex-direction:column;gap:6px;margin-top:2px;}
+.cc-go{background:var(--surface);}
+.cc-go .c-badge{background:#EEF7F1;}
+.cc-go .c-head{color:var(--ink);}
+.lnk-btn{border:0;width:100%;text-align:left;font:inherit;}
+.go-note{font-size:11px;line-height:1.45;color:var(--muted);margin:2px 2px 0;}
+.res-where[role=button]{cursor:pointer;text-decoration:underline;text-decoration-color:rgba(255,255,255,.35);text-underline-offset:3px;}
+.mb-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;}
+.mb-thumb{width:84px;height:104px;border-radius:12px;flex-shrink:0;background-size:cover!important;background-position:center!important;}
+.mb-title{font-family:'DM Serif Display',serif;font-size:21px;line-height:1.2;color:var(--ink);}
+.mb-year{font-size:12px;color:var(--muted);margin-top:4px;}
+.mb-hook{font-size:14px;line-height:1.5;color:var(--ink2);margin-top:8px;}
+.mb-where{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink2);margin:0 2px 2px;}
+#mbLinks{margin-bottom:14px;}
 .lnk-row{text-decoration:none;color:inherit;display:flex;align-items:center;gap:9px;padding:8px 10px;background:var(--s2);border-radius:10px;cursor:pointer;}
 .lnk-row:active{background:var(--s3);}
 .lnk-ico{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -757,6 +770,13 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
   <input class="key-in" id="delPw" type="password" autocomplete="current-password" placeholder="Password">
   <div class="key-msg" id="delMsg"></div>
   <button class="key-btn danger" id="delGo">Delete my account</button>
+</div></div>
+<div class="key-sheet" id="mbSheet" hidden><div class="key-card" role="dialog" aria-labelledby="mbTitle">
+  <div class="key-top"><span></span><button class="key-x" id="mbClose" aria-label="Close">×</button></div>
+  <div class="mb-head"><div class="mb-thumb" id="mbThumb"></div><div><div class="mb-title" id="mbTitle"></div><div class="mb-year" id="mbYear"></div><div class="mb-hook" id="mbHook"></div></div></div>
+  <div class="lnk-list" id="mbLinks"></div>
+  <button class="key-btn pri" id="mbDiscover">Discover its story</button>
+  <p class="key-note" id="mbCost">Uses your credit, like a scan.</p>
 </div></div>
 <div class="key-sheet" id="installSheet" hidden><div class="key-card" role="dialog" aria-label="Add Strata to your home screen">
   <div class="key-top"><span></span><button class="key-x" id="installClose" aria-label="Close">×</button></div>
@@ -1160,7 +1180,14 @@ var ICO = {
   dive: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B5BDB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
   arrow: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>'
 };
+ICO.go = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1F7A4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>';
+ICO.book = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1F7A4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>';
 var LNK = {
+  site:   ['#EEF7F1','<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1F7A4D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>'],
+  ticket: ['#FFF6DD','<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8B6914" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9a3 3 0 0 0 0 6v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a3 3 0 0 0 0-6V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"/><line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2 2"/></svg>'],
+  map:    ['#EAF2FF','<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1A73E8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>'],
+  strata: ['#16346B','<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F4C542" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>'],
+  buy:    ['#FFF0E6','<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>'],
   museum: ['#F0F0F0','<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>'],
   video:  ['#FFF0F0','<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#E03" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>'],
   read:   ['#F0F4FF','<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#3B5BDB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>']
@@ -1233,6 +1260,86 @@ var ARTS = {
   }
 };
 
+
+// ─── PRACTICAL CARD: visit it, see it, read it ─────
+var IS_IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+function enc(s) { return encodeURIComponent(plain(s)); }
+function lnkA(kind, name, src, url) { return '<a class="lnk-row" target="_blank" rel="noopener" href="' + esc(url) + '"><div class="lnk-ico" style="background:' + LNK[kind][0] + ';">' + LNK[kind][1] + '</div><div><div class="lnk-name">' + name + '</div><div class="lnk-url">' + esc(src) + '</div></div></a>'; }
+function lnkB(kind, name, src, act) { return '<button class="lnk-row lnk-btn" data-act="' + act + '"><div class="lnk-ico" style="background:' + LNK[kind][0] + ';">' + LNK[kind][1] + '</div><div><div class="lnk-name">' + name + '</div><div class="lnk-url">' + esc(src) + '</div></div></button>'; }
+function bookLinks(q) {
+  var l = getLang(), out = [];
+  if (l === 'fr') out.push(lnkA('buy', 'Fnac', 'fnac.com', 'https://www.fnac.com/SearchResult/ResultList.aspx?Search=' + enc(q)), lnkA('buy', 'Amazon', 'amazon.fr', 'https://www.amazon.fr/s?k=' + enc(q) + '&i=stripbooks'));
+  else if (l === 'es') out.push(lnkA('buy', 'Casa del Libro', 'casadellibro.com', 'https://www.google.com/search?q=' + enc('site:casadellibro.com ' + plain(q))), lnkA('buy', 'Amazon', 'amazon.es', 'https://www.amazon.es/s?k=' + enc(q) + '&i=stripbooks'));
+  else out.push(lnkA('buy', 'Amazon', 'amazon.com', 'https://www.amazon.com/s?k=' + enc(q) + '&i=stripbooks'));
+  return out.join('');
+}
+function mapLinks(place, city, lat, lng) {
+  var q = [place, city].filter(Boolean).join(', ');
+  var out = [lnkA('map', t('Directions'), 'Google Maps', 'https://www.google.com/maps/search/?api=1&query=' + enc(q))];
+  if (IS_IOS) out.push(lnkA('map', t('Open in Apple Maps'), t('Apple Maps'), 'https://maps.apple.com/?q=' + enc(q) + (isFinite(lat) && isFinite(lng) && (lat || lng) ? '&ll=' + lat + ',' + lng : '')));
+  return out.join('');
+}
+function practicalKind(a) {
+  var d = a && a.raw; if (!d || d.identified === false) return '';
+  if (d.category === 'book') return 'read';
+  var loc = d.location; if (!loc || !loc.place) return '';
+  if (d.category === 'architecture') return 'visit';
+  if (['painting', 'print', 'sculpture', 'other'].indexOf(d.category) >= 0) return 'see';
+  return '';
+}
+function practicalCard(a) {
+  var kind = practicalKind(a); if (!kind) return '';
+  var d = a.raw;
+  if (kind === 'read') return cardHTML('cc-go', ICO.book, t('Read it · Get the book'), t('Find a copy'), '<div class="lnk-list">' + bookLinks(d.title + ' ' + (d.creator || '')) + '</div><p class="go-note">' + t('Links open a search in the store.') + '</p>');
+  var loc = d.location, q = [loc.place, loc.city].filter(Boolean).join(' ');
+  var rows = '<div class="go-site" data-wiki="' + esc(d.place_wiki || loc.place) + '"></div>' +
+    lnkA('ticket', t('Tickets & tours'), 'getyourguide.com', 'https://www.getyourguide.com/s/?q=' + enc(q)) +
+    mapLinks(loc.place, loc.city, loc.lat, loc.lng) +
+    (a.journalId && isFinite(loc.lat) ? lnkB('strata', t('See it on my Strata map'), t('Your discoveries around it'), 'strata-map') : '');
+  var head = kind === 'visit' ? esc(loc.place) : t('Kept at {p}', { p: esc(loc.place) });
+  return cardHTML('cc-go', ICO.go, kind === 'visit' ? t('Visit · Plan it') : t('Where to see it'), head, '<div class="lnk-list">' + rows + '</div>' + (kind === 'see' ? '<p class="go-note">' + t('Works travel and rest in storage: check that it is on display before you go.') + '</p>' : ''));
+}
+function refreshPracticalCard() {
+  var old = document.querySelector('#carTrack .cc-go'), a = ARTS[currentArt]; if (!old || !a) return;
+  var tmp = document.createElement('div'); tmp.innerHTML = practicalCard(a); if (!tmp.firstChild) return;
+  old.replaceWith(tmp.firstChild); loadOfficialSite(); watchCardHints();
+}
+// Official website, from Wikidata (free, reliable)
+var siteCache = {};
+function officialSite(title) {
+  if (!title) return Promise.resolve(null);
+  if (title in siteCache) return Promise.resolve(siteCache[title]);
+  return jget('https://www.wikidata.org/w/api.php?action=wbgetentities&sites=enwiki&props=claims&format=json&origin=*&titles=' + encodeURIComponent(title)).then(function(j){
+    var url = null;
+    try { var ent = j && j.entities && Object.keys(j.entities).map(function(k){ return j.entities[k]; })[0]; var c = ent && ent.claims && ent.claims.P856; url = c && c[0].mainsnak.datavalue.value; } catch (e) {}
+    if (url && !/^https?:\/\//.test(url)) url = null;
+    siteCache[title] = url; return url;
+  });
+}
+function loadOfficialSite() {
+  document.querySelectorAll('#carTrack .go-site').forEach(function(el){
+    officialSite(el.getAttribute('data-wiki')).then(function(url){
+      if (!url || !el.isConnected) return;
+      var host = url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0];
+      el.outerHTML = lnkA('site', t('Official website · tickets'), host, url);
+      document.querySelectorAll('#carTrack .c-inner').forEach(function(i){ updateCardHint(i); });
+    });
+  });
+}
+// Open the Strata map on this place
+var mapPreset = null, mapFrom = 's-home';
+function openOnStrataMap(a) {
+  var loc = a && a.raw && a.raw.location; if (!loc) return;
+  if (a.journalId && isFinite(loc.lat)) { mapPreset = placeKey(loc); mapFrom = 's-result'; mapCats = []; show('s-search-map'); }
+  else window.open('https://www.google.com/maps/search/?api=1&query=' + enc([loc.place, loc.city].filter(Boolean).join(', ')), '_blank');
+}
+function handleAct(e) {
+  var b = e.target.closest('[data-act]'); if (!b) return false;
+  e.preventDefault(); e.stopPropagation();
+  if (b.getAttribute('data-act') === 'strata-map') { document.getElementById('cardZoom').hidden = true; openOnStrataMap(ARTS[currentArt]); }
+  return true;
+}
+
 function cardHTML(cls, ico, kick, head, inner) {
   return '<div class="c-card ' + cls + '"><div class="c-hint" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></div><div class="c-inner"><div class="c-top"><div class="c-badge">' + ico + '</div><div><div class="c-kick">' + kick + '</div><div class="c-head">' + head + '</div></div></div>' + inner + '</div></div>';
 }
@@ -1247,13 +1354,19 @@ function renderArt(key) {
   document.getElementById('resMeta').innerHTML = a.meta.join(' <div class="mdot"></div> ');
   var loc = a.raw && a.raw.location, wh = document.getElementById('resWhere');
   wh.hidden = !(loc && (loc.place || loc.city));
+  wh.setAttribute('role', 'button'); wh.tabIndex = 0;
   if (!wh.hidden) wh.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + (a.raw.category === 'architecture' ? esc([loc.place, loc.city].filter(Boolean).join(', ')) : t('Original at {p}', { p: esc([loc.place, loc.city].filter(Boolean).join(', ')) }));
   var links = a.links.map(function(l){ return '<a class="lnk-row" target="_blank" rel="noopener" href="' + (l[3] || 'https://www.google.com/search?q=' + encodeURIComponent((l[1] + ' ' + l[2]).replace(/&amp;/g,'&'))) + '"><div class="lnk-ico" style="background:' + LNK[l[0]][0] + ';">' + LNK[l[0]][1] + '</div><div><div class="lnk-name">' + l[1] + '</div><div class="lnk-url">' + l[2] + '</div></div></a>'; }).join('');
   document.getElementById('carTrack').innerHTML =
     cardHTML('cc-spark', ICO.spark, t('Spark · 15 sec'), a.spark[0], '<div class="c-body">' + a.spark[1] + '</div><div class="c-more" style="color:rgba(255,255,255,.4);">' + ICO.arrow + t('Swipe for more') + '</div>') +
     cardHTML('cc-story', ICO.story, t('Story · 2 min'), a.story[0], '<div class="c-body">' + a.story[1] + '</div>') +
     cardHTML('cc-surp',  ICO.surp,  t('Surprise · Unexpected'), a.surp[0], '<div class="c-body">' + a.surp[1] + '</div>') +
-    cardHTML('cc-dive',  ICO.dive,  t('Deep Dive · Go further'), t('Explore more'), '<div class="lnk-list">' + links + '</div>');
+    cardHTML('cc-dive',  ICO.dive,  t('Deep Dive · Go further'), t('Explore more'), '<div class="lnk-list">' + links + '</div>') +
+    practicalCard(a);
+  CARDS = document.querySelectorAll('#carTrack .c-card').length;
+  document.querySelector('#s-result .dots').innerHTML = Array.apply(null, Array(CARDS)).map(function(_, i){ return '<div class="dot' + (i ? '' : ' on') + '" data-i="' + i + '"></div>'; }).join('');
+  if (currentCard >= CARDS) { currentCard = 0; updateCarousel(false); }
+  loadOfficialSite();
   document.getElementById('saTitle').innerHTML = (a.live && !a.identified) ? t('More like this') : a.nature ? t('Also in {a}', { a: a.artist }) : t('More by {a}', { a: a.artist });
   document.getElementById('saScroll').innerHTML = a.more.map(function(m){
     return '<div class="sa-card"><div class="sa-thumb" style="' + m[3] + '"' + (m[4] ? ' data-wiki="' + m[4] + '"' : '') + ' data-q="' + esc((m[0] + ' ' + (a.nature ? '' : a.artist)).replace(/&amp;/g, '&').replace(/&#39;/g, "'")) + '" data-book="' + (a.category === 'book' ? '1' : '') + '"></div><div class="sa-name">' + m[0] + '</div><div class="sa-year">' + m[1] + '</div><div class="sa-spark">' + m[2] + '</div></div>';
@@ -1307,7 +1420,7 @@ function show(id) {
   var cz = document.getElementById('cardZoom'); if (cz) cz.hidden = true;
   var tsh = document.getElementById('tagSheet'); if (tsh) tsh.hidden = true;
   if (id === 's-search-date') renderCal();
-  if (id === 's-search-map') setTimeout(function(){ mapPlace = null; renderMap(); backfillLocations(); }, 0);
+  if (id === 's-search-map') setTimeout(function(){ mapPlace = mapPreset; mapPreset = null; renderMap(); backfillLocations(); }, 0);
   document.querySelectorAll('.screen').forEach(s => {
     s.classList.remove('active');
     s.style.display = 'none';
@@ -1335,9 +1448,10 @@ wire('btn-menu-back',   's-home');
 wire('btn-search-cat',  's-search-cat');
 wire('btn-qs-cat',      's-search-cat');
 wire('btn-qs-map',      's-search-map');
+document.getElementById('btn-qs-map').addEventListener('click', function(){ mapFrom = 's-home'; });
 wire('btn-qs-date',     's-search-date');
 wire('btn-cat-back',    's-home');
-wire('btn-map-back',    's-home');
+document.getElementById('btn-map-back').addEventListener('click', function(){ var to = mapFrom; mapFrom = 's-home'; show(to); });
 wire('btn-date-back',   's-home');
 wireArt('btn-starry', 'starry');
 wireArt('btn-starry2', 'starry');
@@ -1385,16 +1499,15 @@ function updateCarousel(animate) {
   if (!track) return;
   track.style.transition = animate ? 'transform .36s cubic-bezier(.4,0,.2,1)' : 'none';
   track.style.transform = 'translateX(-' + (currentCard * cardWidth()) + 'px)';
-  document.querySelectorAll('.dot').forEach(function(d, i) {
+  document.querySelectorAll('#s-result .dots .dot').forEach(function(d, i) {
     d.classList.toggle('on', i === currentCard);
   });
 }
 
-document.querySelectorAll('.dot').forEach(function(d) {
-  d.addEventListener('click', function() {
-    currentCard = parseInt(d.getAttribute('data-i'));
-    updateCarousel(true);
-  });
+document.querySelector('#s-result .dots').addEventListener('click', function(e) {
+  var d = e.target.closest('.dot'); if (!d) return;
+  currentCard = parseInt(d.getAttribute('data-i'));
+  updateCarousel(true);
 });
 
 var wrap = document.getElementById('carWrap');
@@ -1497,11 +1610,12 @@ var SCAN_PROMPT = [
   '  "medium": "max 3 words, e.g. Woodblock print",',
   '  "location": { "place": "museum, collection or site where the original is today", "city": "...", "country": "...", "lat": 0.0, "lng": 0.0 },',
   '  (location: ' + LOCATION_RULE + ')',
+  '  "place_wiki": "exact English Wikipedia article title of location.place (the museum, building or site), or empty string",',
   '  "spark": { "head": "3-6 words", "body": "the 15-second hook: the most surprising way into this work, 40-55 words" },',
   '  "story": { "head": "3-6 words", "body": "the 2-minute story in three short paragraphs separated by a blank line (\\n\\n), 200-260 words in total: first, what was happening in the creator\'s life or world when it was made; then how it was made or received and the people around it; last, what to look for in it now, the details that carry this story. For nature: where it comes from, how people have lived with it, what to notice when you look at it." },',
   '  "surprise": { "head": "3-6 words", "body": "one unexpected, true fact that ends on delight, 35-60 words" },',
   '  "deep_dive": [ { "title": "a specific resource to go further (museum collection page, documentary, book, archive)", "source": "its website domain, e.g. metmuseum.org", "url": "the exact page URL if it appeared in your search results, otherwise empty string", "kind": "museum" | "video" | "read" } ],',
-  '  "more_by": [ { "title": "another work by the same creator", "year": "year or c. date", "hook": "max 8 words, intriguing", "wiki": "exact English Wikipedia article title of this work, or empty string", "colors": ["#hex", "#hex", "#hex"] } ],',
+  '  "more_by": [ { "title": "another work by the same creator", "year": "year or c. date", "hook": "max 8 words, intriguing", "wiki": "exact English Wikipedia article title of this work, or empty string", "where": "museum or site holding it today, with its city, or empty string if unknown, private or a book", "colors": ["#hex", "#hex", "#hex"] } ],',
   '  "chat_intro": "one or two sentences inviting questions, in the narrator voice",',
   '  "questions": ["three short follow-up questions a curious person would ask about this specific work, max 6 words each"]',
   '}',
@@ -1539,7 +1653,7 @@ function toArt(d, imgURL) {
     more: mb.map(function(w){
       var c = Array.isArray(w.colors) ? w.colors : [];
       var bg = 'background:linear-gradient(180deg,' + hex(c[2], '#D8D2C4') + ' 0 38%,' + hex(c[1], '#6B6B74') + ' 38% 72%,' + hex(c[0], '#2B2B30') + ' 72% 100%);';
-      return [esc(w.title), esc(w.year), esc(w.hook), bg, esc(w.wiki || '')];
+      return [esc(w.title), esc(w.year), esc(w.hook), bg, esc(w.wiki || ''), esc(w.where || '')];
     }),
     chat: {
       sub: [d.artist_short || d.creator, d.date].filter(Boolean).join(' · '),
@@ -1603,7 +1717,8 @@ function scanStatus(label, sub, isError) {
   if (!isError) { document.getElementById('scanOwnKey').hidden = true; document.getElementById('scanRetry').hidden = false; }
 }
 
-async function runLiveScan(file) {
+async function runLiveScan(file, opts) {
+  opts = opts || {};
   var url = URL.createObjectURL(file);
   document.getElementById('scanBg').style.backgroundImage = 'url(' + url + ')';
   liveScanning = true;
@@ -1613,7 +1728,8 @@ async function runLiveScan(file) {
   var scanTimer = null;
   liveScanCtl = new AbortController();
   try {
-    var d = await live.json(SCAN_PROMPT + langRule(), { images: [file], signal: liveScanCtl.signal, searchIfUnsure: true, onStage: function(){ if (liveScanning) stepsPrepared(); }, onSearch: function(){ if (liveScanning) { stepsSearching(); document.getElementById('scanSub').textContent = t('Powered by Claude · up to a minute'); } } });
+    var prompt = SCAN_PROMPT + langRule() + (opts.text ? '\n\nThere is no photo this time: the user tapped a work they want to discover. Write about this work: ' + opts.text + '. Set "identified" to true if you know it.' : '');
+    var d = await live.json(prompt, { images: opts.text ? [] : [file], signal: liveScanCtl.signal, searchIfUnsure: true, onStage: function(){ if (liveScanning) stepsPrepared(); }, onSearch: function(){ if (liveScanning) { stepsSearching(); document.getElementById('scanSub').textContent = t('Powered by Claude · up to a minute'); } } });
     stepsAllDone(); await new Promise(function(r){ setTimeout(r, 450); });
     if (!d || typeof d !== 'object' || !d.title) throw { code: 'invalid_json' };
     var dup = findDuplicate(d);
@@ -1628,7 +1744,7 @@ async function runLiveScan(file) {
     }
     if (!d.lang) d.lang = getLang();
     ARTS.live = toArt(d, url);
-    saveScan(d, file).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; loadJournal().then(function(){ if (currentArt === 'live') renderTags(); }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
+    saveScan(d, file).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; refreshPracticalCard(); loadJournal().then(function(){ if (currentArt === 'live') renderTags(); }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
       .catch(function(){ toast(t('Could not save this scan on this device')); });
     currentArt = 'live';
     renderedChat = null;
@@ -1642,6 +1758,46 @@ async function runLiveScan(file) {
     document.getElementById('scanOwnKey').hidden = !credErr; document.getElementById('scanRetry').hidden = credErr;
   } finally { clearTimeout(scanTimer); stepsStop(); }
 }
+
+
+// ─── MORE BY: tap a work ─────
+var mbItem = null;
+document.getElementById('saScroll').addEventListener('click', function(e){
+  var c = e.target.closest('.sa-card'); if (!c) return;
+  var a = ARTS[currentArt], i = Array.prototype.indexOf.call(c.parentNode.children, c), m = a && a.more[i]; if (!m) return;
+  var th = c.querySelector('.sa-thumb');
+  mbItem = { title: plain(m[0]), year: plain(m[1]), where: plain(m[5] || ''), creator: plain(a.raw ? a.raw.creator : a.artist), book: a.category === 'book' || (a.raw && a.raw.category === 'book'), nature: a.nature, colors: m[3], thumb: th.style.backgroundImage };
+  document.getElementById('mbTitle').textContent = mbItem.title;
+  document.getElementById('mbYear').textContent = [mbItem.year, mbItem.book || mbItem.nature ? '' : mbItem.creator].filter(Boolean).join(' · ');
+  document.getElementById('mbHook').textContent = plain(m[2]);
+  var mt = document.getElementById('mbThumb'); mt.setAttribute('style', th.getAttribute('style') || '');
+  var links = '';
+  if (mbItem.book) links = bookLinks(mbItem.title + ' ' + mbItem.creator);
+  else if (mbItem.where) links = '<div class="mb-where">' + LNK.map[1] + '<span>' + esc(mbItem.where) + '</span></div>' + mapLinks(mbItem.where, '', NaN, NaN);
+  document.getElementById('mbLinks').innerHTML = links;
+  document.getElementById('mbLinks').hidden = !links;
+  var can = hasAI();
+  document.getElementById('mbDiscover').hidden = !can; document.getElementById('mbCost').hidden = !can || !strataMe;
+  document.getElementById('mbSheet').hidden = false;
+});
+document.getElementById('mbClose').addEventListener('click', function(){ document.getElementById('mbSheet').hidden = true; });
+document.getElementById('mbSheet').addEventListener('click', function(e){ if (e.target.id === 'mbSheet') document.getElementById('mbSheet').hidden = true; });
+// Picture for a work discovered by name: its thumbnail if the browser may read it, else its colors
+async function workPicture(item) {
+  var m = /url\(["']?([^"')]+)["']?\)/.exec(item.thumb || '');
+  if (m) { try { var r = await fetch(m[1]); if (r.ok) { var b = await r.blob(); if (/^image\//.test(b.type)) return new File([b], 'work.jpg', { type: b.type }); } } catch (e) {} }
+  var cv = document.createElement('canvas'); cv.width = 720; cv.height = 900; var g = cv.getContext('2d');
+  var cols = (item.colors.match(/#[0-9a-f]{3,8}/gi) || ['#D8D2C4', '#6B6B74', '#2B2B30']).reverse();
+  var gr = g.createLinearGradient(0, 900, 0, 0); cols.forEach(function(c, i){ gr.addColorStop(i / Math.max(1, cols.length - 1), c); });
+  g.fillStyle = gr; g.fillRect(0, 0, 720, 900);
+  return await new Promise(function(res){ cv.toBlob(function(b){ res(new File([b], 'work.jpg', { type: 'image/jpeg' })); }, 'image/jpeg', 0.85); });
+}
+document.getElementById('mbDiscover').addEventListener('click', async function(){
+  if (!mbItem) return;
+  var it = mbItem; document.getElementById('mbSheet').hidden = true;
+  var pic = await workPicture(it);
+  runLiveScan(pic, { text: '"' + it.title + '"' + (it.nature ? '' : ' by ' + it.creator) + (it.year ? ' (' + it.year + ')' : '') + (it.where ? ', kept at ' + it.where : '') });
+});
 
 function pickPhoto(withCamera, e) {
   if (!live) { if (e) e.preventDefault(); openKeySheet(); return; }
@@ -1831,6 +1987,7 @@ function makeLive() {
       if (opts.onStage) opts.onStage('prepared');
       content = [{ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: b64 } }, { type: 'text', text: prompt }];
     }
+    if (!(opts.images && opts.images[0]) && opts.onStage) opts.onStage('prepared');
     var body = { max_tokens: 4000, messages: [{ role: 'user', content: content }] };
     // Pass 1 without web search: most works are recognised straight away, and searching costs about half of a scan
     if (opts.searchIfUnsure && !searchOff) {
@@ -2348,7 +2505,7 @@ function renderMap() {
   if (!window.L) { document.getElementById('lmap').innerHTML = '<div class="j-none" style="padding:20px">' + t('The map could not load. Check your connection.') + '</div>'; return; }
   if (!lmap) {
     lmap = L.map('lmap', { zoomControl: false, attributionControl: true, worldCopyJump: true }).setView([30, 5], 1);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(lmap);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { maxZoom: 20, subdomains: 'abcd', attribution: '© OpenStreetMap contributors © CARTO' }).addTo(lmap);
     mapLayer = L.layerGroup().addTo(lmap);
     lmap.on('click', function(){ if (mapPlace) { mapPlace = null; renderMap(); } });
   }
@@ -2738,7 +2895,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.23';
+var APP_VERSION = '0.24';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -3650,10 +3807,13 @@ function closeZoom() {
   currentCard = zoomIdx; updateCarousel(false);    // the carousel follows the card you were reading
 }
 document.getElementById('carTrack').addEventListener('click', function(e){
+  if (lastDrag <= 10 && handleAct(e)) return;
   if (lastDrag > 10 || e.target.closest('a')) { lastDrag = 0; return; }
   var card = e.target.closest('.c-card'); if (!card) return;
   openZoom(Array.prototype.indexOf.call(card.parentNode.children, card));
 });
+document.getElementById('czBody').addEventListener('click', handleAct);
+document.getElementById('resWhere').addEventListener('click', function(){ openOnStrataMap(ARTS[currentArt]); });
 document.getElementById('czClose').addEventListener('click', closeZoom);
 document.getElementById('cardZoom').addEventListener('click', function(e){ if (e.target.id === 'cardZoom') closeZoom(); });
 document.getElementById('czPrev').addEventListener('click', function(){ openZoom(zoomIdx - 1); });
@@ -3698,6 +3858,22 @@ fr: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
   "Browse by Date": "Parcourir par date",
+  "Read it · Get the book": "Le lire · Trouver le livre",
+  "Find a copy": "Trouver un exemplaire",
+  "Links open a search in the store.": "Les liens ouvrent une recherche dans la boutique.",
+  "Directions": "Itinéraire",
+  "Open in Apple Maps": "Ouvrir dans Plans",
+  "Apple Maps": "Plans",
+  "Tickets & tours": "Billets et visites",
+  "See it on my Strata map": "Voir sur ma carte Strata",
+  "Your discoveries around it": "Vos découvertes autour",
+  "Kept at {p}": "Conservé à : {p}",
+  "Visit · Plan it": "Visiter · Préparer",
+  "Where to see it": "Où le voir",
+  "Works travel and rest in storage: check that it is on display before you go.": "Les œuvres voyagent ou partent en réserve : vérifiez qu'elle est exposée avant d'y aller.",
+  "Official website · tickets": "Site officiel · billets",
+  "Discover its story": "Découvrir son histoire",
+  "Uses your credit, like a scan.": "Utilise votre crédit, comme un scan.",
   "Your credit is waiting for approval. You can scan as soon as it is approved (Settings → Remind). Or connect your own Claude key to start right away.": "Votre crédit attend d'être validé. Vous pourrez scanner dès qu'il le sera (Réglages → Relancer). Ou connectez votre propre clé Claude pour commencer tout de suite.",
   "Use my own key": "Utiliser ma clé",
   "No credit yet": "Pas encore de crédit",
@@ -3782,6 +3958,22 @@ es: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
   "Browse by Date": "Explorar por fecha",
+  "Read it · Get the book": "Leerlo · Conseguir el libro",
+  "Find a copy": "Encontrar un ejemplar",
+  "Links open a search in the store.": "Los enlaces abren una búsqueda en la tienda.",
+  "Directions": "Cómo llegar",
+  "Open in Apple Maps": "Abrir en Mapas",
+  "Apple Maps": "Mapas",
+  "Tickets & tours": "Entradas y visitas",
+  "See it on my Strata map": "Ver en mi mapa de Strata",
+  "Your discoveries around it": "Tus descubrimientos alrededor",
+  "Kept at {p}": "Se conserva en: {p}",
+  "Visit · Plan it": "Visitar · Planificar",
+  "Where to see it": "Dónde verla",
+  "Works travel and rest in storage: check that it is on display before you go.": "Las obras viajan o pasan a reserva: comprueba que está expuesta antes de ir.",
+  "Official website · tickets": "Web oficial · entradas",
+  "Discover its story": "Descubrir su historia",
+  "Uses your credit, like a scan.": "Usa tu crédito, como un escaneo.",
   "Your credit is waiting for approval. You can scan as soon as it is approved (Settings → Remind). Or connect your own Claude key to start right away.": "Tu crédito está pendiente de aprobación. Podrás escanear en cuanto se apruebe (Ajustes → Recordar). O conecta tu propia clave de Claude para empezar ya.",
   "Use my own key": "Usar mi clave",
   "No credit yet": "Aún sin crédito",
