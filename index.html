@@ -3799,7 +3799,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.40';
+var APP_VERSION = '0.41';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -3948,7 +3948,7 @@ function renderAbout() {
     [I('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'), 'Your journal', 'Every discovery is kept, by category, on the map and by date. Search it, rate it with stars, find your favourites. It follows your language: French, Spanish or English.'],
     [I('<path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z"/>'), 'Daily quiz', 'Three questions a day on what you discovered: one easy, one medium, one hard. What you miss comes back sooner, and your streak grows.'],
     [I('<polygon points="3 11 22 2 13 21 11 13 3 11"/>'), 'Around me', 'The artworks, museums and remarkable buildings near you, or in any city you type, with directions.'],
-    [I('<path d="M12 22V12"/><path d="M5 12C5 7 8 3 12 3c4 0 7 4 7 9"/><path d="M5 12c3 0 5-1 7-3"/><path d="M19 12c-3 0-5-1-7-3"/>'), 'Plants and sky on the map', 'Plants and constellations are pinned where you spotted them.'],
+    [I('<polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>'), 'Your map', 'Every discovery finds its place on the map: the museum where the original is kept, the building itself, or the spot where you saw a plant or a constellation. The map icon on a card takes you straight there.'],
     [I('<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>'), 'Share', 'Send a card of any discovery, with its story, on WhatsApp, Messages or AirDrop.'],
     [I('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'), 'Friends and sync', 'Invite friends with a personal link and some credit. Your journal syncs across your devices, and you can export it.']
   ];
@@ -4775,6 +4775,8 @@ fr: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifie ta connexion.",
   "Browse by Date": "Parcourir par date",
+  "Your map": "Ta carte",
+  "Every discovery finds its place on the map: the museum where the original is kept, the building itself, or the spot where you saw a plant or a constellation. The map icon on a card takes you straight there.": "Chaque découverte trouve sa place sur la carte : le musée où l'original est conservé, le bâtiment lui-même, ou l'endroit où tu as repéré une plante ou une constellation. L'icône carte d'une fiche t'y emmène directement.",
   "Visit · See · Read": "Visiter · Voir · Lire",
   "Where to see it, how to visit it, where to find the book.": "Où le voir, comment le visiter, où trouver le livre.",
   "Strata in 40 seconds": "Strata en 40 secondes",
@@ -4998,6 +5000,8 @@ es: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
   "Browse by Date": "Explorar por fecha",
+  "Your map": "Tu mapa",
+  "Every discovery finds its place on the map: the museum where the original is kept, the building itself, or the spot where you saw a plant or a constellation. The map icon on a card takes you straight there.": "Cada descubrimiento tiene su lugar en el mapa: el museo donde se conserva el original, el propio edificio o el sitio donde viste una planta o una constelación. El icono del mapa de una ficha te lleva directamente allí.",
   "Visit · See · Read": "Visitar · Ver · Leer",
   "Where to see it, how to visit it, where to find the book.": "Dónde verla, cómo visitarla, dónde encontrar el libro.",
   "Strata in 40 seconds": "Strata en 40 segundos",
