@@ -210,6 +210,16 @@ label.key-btn{text-align:center;display:block;}
 .nr-tag.mine{color:#1F7A4D;background:#EEF7F1;}
 .nr-px{font-size:15px;line-height:1.55;color:var(--ink2);margin:0;}
 .nr-psrc{font-size:11px;color:var(--muted);margin:4px 0 12px;}
+.nr-cta{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;border:0;background:var(--sun-bg);color:var(--ink);border-radius:16px;padding:14px 16px;font:600 14px 'DM Sans',sans-serif;text-align:left;cursor:pointer;}
+.nr-cta svg{color:var(--sun-ink);flex-shrink:0;}
+.nr-note{font-size:12px;line-height:1.45;color:var(--muted);padding:0 4px 4px;}
+.nr-here{margin:4px 0 14px;}
+.nr-here-h{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.nr-here-s{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+.nr-here-s::-webkit-scrollbar{display:none;}
+.nr-here-c{flex-shrink:0;width:96px;border:0;background:none;padding:0;text-align:left;font:500 12px/1.3 'DM Sans',sans-serif;color:var(--ink);cursor:pointer;display:flex;flex-direction:column;gap:6px;}
+.nr-here-th{width:96px;height:110px;border-radius:12px;background:#D1D1D6 center/cover;}
+.nr-here-c span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
 .nr-go{display:flex;align-items:center;justify-content:center;text-decoration:none;}
 
 /* SEARCH MAP */
@@ -1230,6 +1240,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
   <div class="key-top"><span></span><button class="key-x" id="nrSheetX" aria-label="Close">×</button></div>
   <div class="nr-ph"><div class="nr-pthumb" id="nrPThumb"></div><div class="nr-pmeta"><div class="nr-pk" id="nrPK"></div><div class="nr-pt" id="nrPT"></div><div class="nr-pd" id="nrPD"></div><div class="nr-ptags" id="nrPTags"></div></div></div>
   <p class="nr-px" id="nrPX"></p>
+  <div class="nr-here" id="nrHere" hidden><div class="nr-here-h">To see here</div><div class="nr-here-s" id="nrHereS"></div></div>
   <div class="nr-psrc" id="nrPSrc">From Wikipedia</div>
   <button class="key-btn pri nr-disc" id="nrDisc">Discover its story</button>
   <div class="key-row"><a class="key-btn nr-go" id="nrGo" target="_blank" rel="noopener" href="#">Directions</a><button class="key-btn" id="nrScan">There? Scan it</button></div>
@@ -2959,7 +2970,7 @@ document.getElementById('qzClose').addEventListener('click', function(){
 
 
 // ─── AROUND ME: artworks, museums and architecture nearby, from Wikipedia and Wikidata (free) ─────
-var NR = { pos: null, city: '', places: [], cat: 'all', map: null, layer: null, me: null, busy: false, radius: 2000 };
+var NR = { pos: null, city: '', places: [], works: [], cat: 'all', map: null, layer: null, me: null, busy: false, radius: 2000 };
 var NR_TYPES = {
   art: ['Q3305213', 'Q860861', 'Q179700', 'Q557141', 'Q219423', 'Q1144915', 'Q241045', 'Q245117', 'Q838948', 'Q4502142', 'Q483453', 'Q4989906', 'Q5003624', 'Q575759'],
   museum: ['Q33506', 'Q207694', 'Q1007870', 'Q16735822', 'Q3329412', 'Q2668072', 'Q17431399', 'Q1060829'],
@@ -3018,12 +3029,55 @@ async function nrSearch(pos) {
       var q = p.pageprops && p.pageprops.wikibase_item, ent = q && ents[q], kind = nrKind(p, ent && ent.claims);
       if (!kind) return null;
       var at = { lat: c.lat, lng: c.lon }, d = distM(pos, at), fame = ent && ent.sitelinks ? Object.keys(ent.sitelinks).length : 1;
-      return { id: p.pageid, title: p.title, desc: p.description || '', extract: p.extract || '', thumb: p.thumbnail && p.thumbnail.source || '', lat: at.lat, lng: at.lng, dist: d, kind: kind, fame: fame, lang: res.lang,
-        score: Math.log(1 + fame) * 2.2 - d / Math.max(600, radius / 4) };
+      return { id: p.pageid, qid: q || '', title: p.title, desc: p.description || '', extract: p.extract || '', thumb: p.thumbnail && p.thumbnail.source || '', lat: at.lat, lng: at.lng, dist: d, kind: kind, fame: fame, lang: res.lang,
+        score: Math.log(1 + fame) * 2.2 - d / Math.max(600, radius / 4) + (kind === 'museum' ? 1.5 : 0) };
     }).filter(Boolean);
-    if (places.length >= 5 || step === 2) { NR.radius = radius; return places.sort(function(a, b){ return b.score - a.score; }).slice(0, 30); }
+    if (places.length >= 5 || step === 2) {
+      NR.radius = radius;
+      var out = places.sort(function(a, b){ return b.score - a.score; }).slice(0, 30);
+      if (radius < 5000 && out.filter(function(x){ return x.kind === 'museum'; }).length < 3) {
+        var more = await nrMuseums(lang, pos, 5000);
+        more.forEach(function(m){ if (!out.some(function(x){ return x.id === m.id || (m.qid && x.qid === m.qid); })) out.push(m); });
+      }
+      return out;
+    }
   }
   return [];
+}
+// Museums a little further away, so their works can be listed
+async function nrMuseums(lang, pos, radius) {
+  var res = await nrFetch(lang, pos, radius);
+  var ids = res.pages.map(function(p){ return p.pageprops && p.pageprops.wikibase_item; }).filter(Boolean), ents = {};
+  for (var i = 0; i < ids.length; i += 50) {
+    var w = await jget('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&origin=*&props=claims%7Csitelinks&ids=' + ids.slice(i, i + 50).join('%7C'));
+    Object.assign(ents, (w && w.entities) || {});
+  }
+  return res.pages.map(function(p){
+    var c = p.coordinates && p.coordinates[0], q = p.pageprops && p.pageprops.wikibase_item, ent = q && ents[q];
+    if (!c || nrKind(p, ent && ent.claims) !== 'museum') return null;
+    var at = { lat: c.lat, lng: c.lon }, fame = ent && ent.sitelinks ? Object.keys(ent.sitelinks).length : 1;
+    return { id: p.pageid, qid: q, title: p.title, desc: p.description || '', extract: p.extract || '', thumb: p.thumbnail && p.thumbnail.source || '', lat: at.lat, lng: at.lng, dist: distM(pos, at), kind: 'museum', fame: fame, lang: res.lang, score: 0 };
+  }).filter(Boolean).sort(function(a, b){ return b.fame - a.fame; }).slice(0, 6);
+}
+// Paintings and sculptures that the nearby museums hold, from Wikidata, most famous first
+async function nrWorks(museums) {
+  var qs = museums.filter(function(m){ return m.qid; }).slice(0, 12); if (!qs.length) return [];
+  var lang = wikiLang();
+  var q = 'SELECT ?item ?itemLabel ?museum ?img ?creatorLabel ?kind ?n WHERE { VALUES ?museum { ' + qs.map(function(m){ return 'wd:' + m.qid; }).join(' ') + ' } ' +
+    '?item wdt:P195 ?museum . { ?item wdt:P31 wd:Q3305213 . BIND("painting" AS ?kind) } UNION { ?item wdt:P31 wd:Q860861 . BIND("sculpture" AS ?kind) } ' +
+    '?item wikibase:sitelinks ?n . FILTER(?n > 1) OPTIONAL { ?item wdt:P18 ?img } OPTIONAL { ?item wdt:P170 ?creator } ' +
+    'SERVICE wikibase:label { bd:serviceParam wikibase:language "' + lang + ',en". } } ORDER BY DESC(?n) LIMIT 120';
+  var j = await jget('https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(q));
+  var rows = (j && j.results && j.results.bindings) || [], seen = {}, out = [];
+  rows.forEach(function(b){
+    var id = b.item.value.split('/').pop(); if (seen[id]) return;
+    var title = b.itemLabel && b.itemLabel.value; if (!title || /^Q\d+$/.test(title)) return;
+    var mq = b.museum.value.split('/').pop(), museum = qs.filter(function(m){ return m.qid === mq; })[0]; if (!museum) return;
+    seen[id] = 1;
+    out.push({ qid: id, title: title, creator: b.creatorLabel && !/^Q\d+$/.test(b.creatorLabel.value) ? b.creatorLabel.value : '', kind: b.kind.value,
+      thumb: b.img ? b.img.value.replace(/^http:/, 'https:') + '?width=400' : '', museum: museum, dist: museum.dist, fame: +(b.n && b.n.value) || 0 });
+  });
+  return out.slice(0, 60);
 }
 function nrInJournal(pl) {
   var n = normName(pl.title);
@@ -3034,7 +3088,8 @@ function nrInJournal(pl) {
     return [a, b, c].some(function(x){ return x && n && (x.indexOf(n) >= 0 || n.indexOf(x) >= 0); });
   }) || null;
 }
-var NR_LABEL = { art: 'Artworks & sculptures', museum: 'Museums', arch: 'Architecture' };
+var NR_LABEL = { works: 'Paintings to see', art: 'Artworks & sculptures', museum: 'Museums', arch: 'Architecture' };
+function nrWorkMine(w) { var n = normName(w.title); return journal.find(function(r){ var a = normName(rTitle(r)), b = normName(r.data && r.data.title_en || r.title); return n && (a === n || b === n); }) || null; }
 var NR_KICK = { art: 'Artwork', museum: 'Museum', arch: 'Architecture' };
 function openNear() {
   show('s-near');
@@ -3075,12 +3130,16 @@ async function nrCity(q) {
 async function nrLoad(pos) {
   NR.pos = pos; NR.busy = true; NR.places = []; NR.cat = 'all';
   renderNear(t('Looking for what is worth seeing…'));
+  NR.works = [];
   try { NR.places = await nrSearch(pos); } catch (e) { NR.places = []; }
   NR.busy = false; renderNear();
+  try { NR.works = await nrWorks(NR.places.filter(function(p){ return p.kind === 'museum'; })); } catch (e) { NR.works = []; }
+  if (NR.pos === pos) renderNear();
 }
 function renderNear(status) {
-  var shown = NR.cat === 'all' ? NR.places : NR.places.filter(function(p){ return p.kind === NR.cat; });
-  var kinds = ['art', 'museum', 'arch'].filter(function(k){ return NR.places.some(function(p){ return p.kind === k; }); });
+  var worksView = NR.cat === 'works';
+  var shown = worksView ? NR.places.filter(function(p){ return p.kind === 'museum' && NR.works.some(function(w){ return w.museum === p; }); }) : NR.cat === 'all' ? NR.places : NR.places.filter(function(p){ return p.kind === NR.cat; });
+  var kinds = (NR.works.length ? ['works'] : []).concat(['art', 'museum', 'arch'].filter(function(k){ return NR.places.some(function(p){ return p.kind === k; }); }));
   document.getElementById('nrCats').innerHTML = NR.places.length ? ['all'].concat(kinds).map(function(k){ var on = NR.cat === k; return '<button class="ts-chip' + (on ? ' on' : '') + '" data-k="' + k + '" aria-pressed="' + on + '">' + t(k === 'all' ? 'All' : NR_LABEL[k]) + '</button>'; }).join('') : '';
   document.getElementById('nrCats').hidden = !NR.places.length;
   document.getElementById('nrSub').textContent = status ? '' : NR.pos ? (NR.city ? NR.city + ' · ' : '') + t(NR.places.length === 1 ? '1 place within {r}' : '{n} places within {r}', { n: NR.places.length, r: fmtDist(NR.radius) }) : '';
@@ -3088,7 +3147,12 @@ function renderNear(status) {
   if (status) list.innerHTML = '<div class="j-none nr-status">' + (NR.busy ? '<span class="nr-spin"></span>' : '') + esc(status) + '</div>';
   else if (!NR.pos) list.innerHTML = '<div class="j-none">' + t('Allow your position or type a city to see what is around.') + '</div>';
   else if (!NR.places.length) list.innerHTML = '<div class="j-none">' + t('Nothing remarkable found within 10 km. Try a city nearby.') + '</div>';
-  else list.innerHTML = shown.map(function(p){
+  else if (worksView) list.innerHTML = '<div class="nr-note">' + t('In the collections of the museums around you. Check that a work is on display before you go.') + '</div>' + NR.works.map(function(w, i){
+    var mine = nrWorkMine(w);
+    return '<button class="nr-row" data-w="' + i + '"><div class="nr-th" style="background-image:url(\'' + esc(w.thumb) + '\')">' + (mine ? '<span class="nr-num mine">' + CHECK + '</span>' : '') + '</div>' +
+      '<div class="nr-tx"><b>' + esc(w.title) + '</b><span>' + esc([w.creator, w.museum.title].filter(Boolean).join(' · ')) + '</span><em' + (mine ? ' class="nr-mine"' : '') + '>' + esc(mine ? t('In your journal') : fmtDist(w.dist)) + '</em></div></button>';
+  }).join('');
+  else list.innerHTML = (NR.cat === 'all' && NR.works.length ? '<button class="nr-cta" data-k="works"><span>' + esc(t(NR.works.length === 1 ? '1 painting or sculpture to see in the museums around you' : '{n} paintings and sculptures to see in the museums around you', { n: NR.works.length })) + '</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>' : '') + shown.map(function(p){
     var k = NR.places.indexOf(p) + 1, mine = nrInJournal(p), w = walkTxt(p.dist);
     return '<button class="nr-row" data-i="' + (k - 1) + '"><div class="nr-th" style="background-image:url(\'' + esc(p.thumb) + '\')"><span class="nr-num' + (mine ? ' mine' : '') + '">' + (mine ? CHECK : k) + '</span></div>' +
       '<div class="nr-tx"><b>' + esc(p.title) + '</b><span>' + esc([t(NR_KICK[p.kind]), fmtDist(p.dist), w].filter(Boolean).join(' · ')) + '</span>' +
@@ -3133,8 +3197,40 @@ function nrOpen(i) {
   disc.hidden = !mine && !hasAI();
   disc.dataset.mine = mine ? mine.id : '';
   document.getElementById('nrCost').hidden = !!mine || !hasAI() || !strataMe;
+  var here = NR.works.filter(function(w){ return w.museum === p; }).slice(0, 10);
+  document.getElementById('nrHere').hidden = !here.length;
+  document.getElementById('nrHereS').innerHTML = here.map(function(w){ return '<button class="nr-here-c" data-wq="' + w.qid + '"><div class="nr-here-th" style="background-image:url(\'' + esc(w.thumb) + '\')"></div><span>' + esc(w.title) + '</span></button>'; }).join('');
+  document.getElementById('nrPSrc').textContent = t('From Wikipedia');
+  document.getElementById('nrScan').hidden = false;
+  nrWork = null;
   document.getElementById('nrSheet').hidden = false;
 }
+var nrWork = null;
+function nrOpenWork(w) {
+  if (!w) return; nrWork = w; nrCur = w.museum;
+  var mine = nrWorkMine(w);
+  document.getElementById('nrPThumb').style.backgroundImage = w.thumb ? 'url("' + w.thumb + '")' : '';
+  document.getElementById('nrPK').textContent = t(w.kind === 'sculpture' ? 'A sculpture' : 'A painting') + ' · ' + fmtDist(w.dist);
+  document.getElementById('nrPT').textContent = w.title;
+  document.getElementById('nrPD').textContent = w.creator;
+  document.getElementById('nrPTags').innerHTML = '<span class="nr-tag walk">' + esc(w.museum.title) + '</span>' + (mine ? '<span class="nr-tag mine">' + t('In your journal') + '</span>' : '');
+  document.getElementById('nrPX').textContent = t('Part of the collection of {m}. Works travel and rest in storage: check that it is on display before you go.', { m: w.museum.title });
+  document.getElementById('nrPX').hidden = false;
+  document.getElementById('nrPSrc').textContent = t('From Wikidata');
+  document.getElementById('nrPSrc').hidden = false;
+  document.getElementById('nrHere').hidden = true;
+  document.getElementById('nrGo').href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(w.museum.title + (NR.city ? ', ' + NR.city : ''));
+  var disc = document.getElementById('nrDisc');
+  disc.textContent = mine ? t('Open in my journal') : t('Discover its story');
+  disc.hidden = !mine && !hasAI();
+  disc.dataset.mine = mine ? mine.id : '';
+  document.getElementById('nrCost').hidden = !!mine || !hasAI() || !strataMe;
+  document.getElementById('nrSheet').hidden = false;
+}
+document.getElementById('nrHereS').addEventListener('click', function(e){
+  var c = e.target.closest('[data-wq]'); if (!c) return;
+  var w = NR.works.filter(function(x){ return x.qid === c.getAttribute('data-wq'); })[0]; nrOpenWork(w);
+});
 document.getElementById('btn-qs-near').addEventListener('click', openNear);
 document.getElementById('btn-near-back').addEventListener('click', function(){ show('s-home'); });
 document.getElementById('nrCityBtn').addEventListener('click', function(){ document.getElementById('nrIntroMsg').textContent = ''; document.getElementById('nrIntro').hidden = false; });
@@ -3143,7 +3239,11 @@ document.getElementById('nrUseLoc').addEventListener('click', function(){ nrIntr
 document.getElementById('nrCityGo').addEventListener('click', function(){ nrCity(document.getElementById('nrCityIn').value); });
 document.getElementById('nrCityIn').addEventListener('keydown', function(e){ if (e.key === 'Enter') { e.preventDefault(); nrCity(this.value); } });
 document.getElementById('nrCats').addEventListener('click', function(e){ var c = e.target.closest('[data-k]'); if (!c) return; NR.cat = c.getAttribute('data-k'); renderNear(); });
-document.getElementById('nrList').addEventListener('click', function(e){ var r = e.target.closest('.nr-row'); if (r) nrOpen(+r.getAttribute('data-i')); });
+document.getElementById('nrList').addEventListener('click', function(e){
+  var c = e.target.closest('.nr-cta'); if (c) { NR.cat = 'works'; renderNear(); document.getElementById('nrList').scrollTop = 0; return; }
+  var r = e.target.closest('.nr-row'); if (!r) return;
+  if (r.hasAttribute('data-w')) nrOpenWork(NR.works[+r.getAttribute('data-w')]); else nrOpen(+r.getAttribute('data-i'));
+});
 document.getElementById('nrSheetX').addEventListener('click', function(){ document.getElementById('nrSheet').hidden = true; });
 document.getElementById('nrSheet').addEventListener('click', function(e){ if (e.target.id === 'nrSheet') document.getElementById('nrSheet').hidden = true; });
 document.getElementById('nrScan').addEventListener('click', function(){ document.getElementById('nrSheet').hidden = true; document.getElementById('btn-scan').click(); });
@@ -3151,6 +3251,11 @@ document.getElementById('nrDisc').addEventListener('click', async function(){
   var p = nrCur; if (!p) return;
   document.getElementById('nrSheet').hidden = true;
   if (this.dataset.mine) { openScan(this.dataset.mine); return; }
+  if (nrWork) {
+    var w = nrWork, wpic = await workPicture({ thumb: w.thumb ? 'url("' + w.thumb + '")' : '', colors: '#3A3A3C #6B6B74 #B9B9C0' });
+    runLiveScan(wpic, { text: '"' + w.title + '"' + (w.creator ? ' by ' + w.creator : '') + ', kept at ' + w.museum.title });
+    return;
+  }
   var pic = await workPicture({ thumb: p.thumb ? 'url("' + p.thumb + '")' : '', colors: '#3A3A3C #6B6B74 #B9B9C0' });
   runLiveScan(pic, { text: '"' + p.title + '"' + (p.desc ? ' (' + p.desc + ')' : '') + ', at ' + p.lat.toFixed(4) + ',' + p.lng.toFixed(4) });
 });
@@ -3677,7 +3782,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.35';
+var APP_VERSION = '0.36';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -4641,6 +4746,15 @@ fr: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
   "Browse by Date": "Parcourir par date",
+  "Paintings to see": "Tableaux",
+  "In the collections of the museums around you. Check that a work is on display before you go.": "Dans les collections des musées autour de toi. Vérifie qu'une œuvre est exposée avant d'y aller.",
+  "1 painting or sculpture to see in the museums around you": "1 tableau ou sculpture à voir dans les musées autour de toi",
+  "{n} paintings and sculptures to see in the museums around you": "{n} tableaux et sculptures à voir dans les musées autour de toi",
+  "To see here": "À voir ici",
+  "A sculpture": "Sculpture",
+  "A painting": "Tableau",
+  "Part of the collection of {m}. Works travel and rest in storage: check that it is on display before you go.": "Fait partie de la collection de {m}. Les œuvres voyagent ou partent en réserve : vérifie qu'elle est exposée avant d'y aller.",
+  "From Wikidata": "D'après Wikidata",
   "Spotted here · {d}": "Repérée ici · {d}",
   "I am still here: place it here": "Je suis encore là : placer ici",
   "Saved where you spotted it": "Lieu enregistré",
@@ -4830,6 +4944,15 @@ es: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
   "Browse by Date": "Explorar por fecha",
+  "Paintings to see": "Cuadros",
+  "In the collections of the museums around you. Check that a work is on display before you go.": "En las colecciones de los museos a tu alrededor. Comprueba que la obra está expuesta antes de ir.",
+  "1 painting or sculpture to see in the museums around you": "1 cuadro o escultura para ver en los museos cercanos",
+  "{n} paintings and sculptures to see in the museums around you": "{n} cuadros y esculturas para ver en los museos cercanos",
+  "To see here": "Para ver aquí",
+  "A sculpture": "Escultura",
+  "A painting": "Cuadro",
+  "Part of the collection of {m}. Works travel and rest in storage: check that it is on display before you go.": "Forma parte de la colección de {m}. Las obras viajan o pasan a reserva: comprueba que está expuesta antes de ir.",
+  "From Wikidata": "Según Wikidata",
   "Spotted here · {d}": "Vista aquí · {d}",
   "I am still here: place it here": "Sigo aquí: situarla aquí",
   "Saved where you spotted it": "Lugar guardado",
