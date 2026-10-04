@@ -124,6 +124,11 @@ label.key-btn{text-align:center;display:block;}
 .ab-p{font-size:14px;line-height:1.6;color:var(--ink2);margin:0 0 14px;}
 .ab-h{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin:8px 0 10px;}
 .ab-layers{display:flex;flex-direction:column;gap:10px;margin:0 0 18px;}
+.ab-feats{display:flex;flex-direction:column;gap:12px;margin:0 0 20px;}
+.ab-f{display:flex;gap:12px;align-items:flex-start;}
+.ab-fi{width:36px;height:36px;border-radius:11px;background:var(--sun-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ab-f b{display:block;font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px;}
+.ab-f span{display:block;font-size:13px;line-height:1.5;color:var(--ink2);}
 .ab-l{display:flex;gap:12px;align-items:flex-start;}
 .ab-n{width:22px;height:22px;border-radius:6px;background:var(--sun);color:var(--night);font:700 11px 'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
 .ab-l b{font-family:'DM Serif Display',serif;font-weight:400;font-size:15px;color:var(--ink);}
@@ -864,7 +869,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
   <div class="wl-logo" data-logo></div>
   <div class="wl-name">Strata</div>
   <div class="wl-tag">Every work has layers.</div>
-  <div class="wl-video"><video id="wlVideo" muted loop playsinline preload="none" aria-label="Strata in 25 seconds"></video></div>
+  <div class="wl-video"><video id="wlVideo" muted loop playsinline preload="none" aria-label="Strata in 40 seconds"></video></div>
   <div class="seg" role="radiogroup" aria-label="Language" id="wlLang">
     <button class="seg-b" role="radio" data-lang="en">English</button><button class="seg-b" role="radio" data-lang="fr">Français</button><button class="seg-b" role="radio" data-lang="es">Español</button>
   </div>
@@ -3794,7 +3799,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.38';
+var APP_VERSION = '0.39';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -3935,16 +3940,28 @@ document.getElementById('profGoSync').addEventListener('click', function(){ docu
 function openDataSheet() { renderSync(); renderExportVal(); document.getElementById('dataSheet').hidden = false; }
 
 function renderAbout() {
-  var L = [['Spark', 'The hook, in fifteen seconds.'], ['Story', 'What was happening in the artist’s life.'], ['Surprise', 'The detail nobody tells you. Always last.'], ['Deep Dive', 'A few good places to go further.']];
+  var L = [['Spark', 'The hook, in fifteen seconds.'], ['Story', 'What was happening in the artist’s life.'], ['Surprise', 'The detail nobody tells you. Always last.'], ['Deep Dive', 'A few good places to go further.'], ['Visit · See · Read', 'Where to see it, how to visit it, where to find the book.']];
+  var I = function(d){ return '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + d + '</svg>'; };
+  var F = [
+    [I('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>'), 'Scan anything', 'A painting, a building, a sculpture, a book, a plant, the night sky or a mountain. With the camera, or a photo from your gallery.'],
+    [I('<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/>'), 'Listen and ask', 'Have the story read aloud, then ask anything in the chat: Strata remembers what you are looking at.'],
+    [I('<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>'), 'Your journal', 'Every discovery is kept, by category, on the map and by date. Search it, rate it with stars, find your favourites. It follows your language: French, Spanish or English.'],
+    [I('<path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z"/>'), 'Daily quiz', 'Three questions a day on what you discovered: one easy, one medium, one hard. What you miss comes back sooner, and your streak grows.'],
+    [I('<polygon points="3 11 22 2 13 21 11 13 3 11"/>'), 'Around me', 'The artworks, museums and remarkable buildings near you, or in any city you type, with directions.'],
+    [I('<path d="M12 22V12"/><path d="M5 12C5 7 8 3 12 3c4 0 7 4 7 9"/><path d="M5 12c3 0 5-1 7-3"/><path d="M19 12c-3 0-5-1-7-3"/>'), 'Plants and sky on the map', 'Plants and constellations are pinned where you spotted them.'],
+    [I('<path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/>'), 'Share', 'Send a card of any discovery, with its story, on WhatsApp, Messages or AirDrop.'],
+    [I('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'), 'Friends and sync', 'Invite friends with a personal link and some credit. Your journal syncs across your devices, and you can export it.']
+  ];
   document.getElementById('aboutBody').innerHTML =
     '<div class="ab-logo" data-logo></div><div class="ab-name" id="aboutTitle">Strata</div>' +
     '<div class="ab-tag">' + t('Every work has layers.') + '</div>' +
     '<div class="ab-ver">' + t('Version {v}', { v: APP_VERSION }) + '</div>' +
-    '<div class="wl-video"><video id="abVideo" muted loop playsinline preload="none" aria-label="' + esc(t('Strata in 25 seconds')) + '"></video></div>' +
+    '<div class="wl-video"><video id="abVideo" muted loop playsinline preload="none" aria-label="' + esc(t('Strata in 40 seconds')) + '"></video></div>' +
     '<p class="ab-p">' + t('Point your phone at a painting, a building, a sculpture or a book cover, and Strata tells you its story. Not a museum label or an encyclopedia entry: the story behind it, told like a curious friend who can’t help sharing the strange part.') + '</p>' +
-    '<div class="ab-h">' + t('Four layers per discovery') + '</div>' +
+    '<div class="ab-h">' + t('Five layers per discovery') + '</div>' +
     '<div class="ab-layers">' + L.map(function(x, i){ return '<div class="ab-l"><div class="ab-n">' + (i + 1) + '</div><div><b>' + t(x[0]) + '</b><span>' + t(x[1]) + '</span></div></div>'; }).join('') + '</div>' +
-    '<p class="ab-p">' + t('Then keep the conversation going in the chat. Everything you scan is kept in your journal: by category, on the map where the original lives, and by date.') + '</p>' +
+    '<div class="ab-h">' + t('What you can do') + '</div>' +
+    '<div class="ab-feats">' + F.map(function(f){ return '<div class="ab-f"><div class="ab-fi">' + f[0] + '</div><div><b>' + t(f[1]) + '</b><span>' + t(f[2]) + '</span></div></div>'; }).join('') + '</div>' +
     '<div class="ab-h">' + t('The name') + '</div>' +
     '<p class="ab-p">' + t('Strata are the layers of rock that hold the history of a landscape. Every artwork, building and book has them too: the life of its maker, its time, the accidents that shaped it.') + '</p>' +
     '<div class="ab-h">' + t('The logo') + '</div>' +
@@ -4419,9 +4436,9 @@ function renderGift() {
 })();
 function setDemoVideo(id) {
   var v = document.getElementById(id || 'wlVideo'); if (!v) return;
-  var l = getLang(), src = 'media/strata-demo-' + l + '.mp4';
+  var l = getLang(), src = 'media/strata-demo2-' + l + '.mp4';
   if (v.getAttribute('src') === src) return;
-  v.setAttribute('poster', 'media/poster-' + l + '.jpg'); v.setAttribute('src', src); v.preload = 'auto';
+  v.setAttribute('poster', 'media/poster2-' + l + '.jpg'); v.setAttribute('src', src); v.preload = 'auto';
   try { v.load(); var pr = v.play(); if (pr && pr.catch) pr.catch(function(){}); } catch (e) {}
 }
 function renderWlLang() {
@@ -4758,6 +4775,27 @@ fr: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
   "Browse by Date": "Parcourir par date",
+  "Visit · See · Read": "Visiter · Voir · Lire",
+  "Where to see it, how to visit it, where to find the book.": "Où le voir, comment le visiter, où trouver le livre.",
+  "Strata in 40 seconds": "Strata en 40 secondes",
+  "Five layers per discovery": "Cinq strates par découverte",
+  "What you can do": "Ce que tu peux faire",
+  "Scan anything": "Tout scanner",
+  "A painting, a building, a sculpture, a book, a plant, the night sky or a mountain. With the camera, or a photo from your gallery.": "Un tableau, un bâtiment, une sculpture, un livre, une plante, le ciel ou une montagne. Avec l'appareil photo, ou une photo de ta galerie.",
+  "Listen and ask": "Écouter et demander",
+  "Have the story read aloud, then ask anything in the chat: Strata remembers what you are looking at.": "Fais-toi lire l'histoire à voix haute, puis pose toutes tes questions dans le chat : Strata sait ce que tu regardes.",
+  "Your journal": "Ton journal",
+  "Every discovery is kept, by category, on the map and by date. Search it, rate it with stars, find your favourites. It follows your language: French, Spanish or English.": "Chaque découverte est gardée, par catégorie, sur la carte et par date. Cherche dedans, note avec des étoiles, retrouve tes coups de cœur. Il suit ta langue : français, espagnol ou anglais.",
+  "Daily quiz": "Quiz du jour",
+  "Three questions a day on what you discovered: one easy, one medium, one hard. What you miss comes back sooner, and your streak grows.": "Trois questions par jour sur tes découvertes : une facile, une moyenne, une difficile. Ce que tu rates revient plus vite, et ta série de jours grandit.",
+  "Around me": "Autour de moi",
+  "The artworks, museums and remarkable buildings near you, or in any city you type, with directions.": "Les œuvres, musées et bâtiments remarquables près de toi, ou dans la ville de ton choix, avec l'itinéraire.",
+  "Plants and sky on the map": "Plantes et ciel sur la carte",
+  "Plants and constellations are pinned where you spotted them.": "Les plantes et les constellations sont placées là où tu les as repérées.",
+  "Share": "Partager",
+  "Send a card of any discovery, with its story, on WhatsApp, Messages or AirDrop.": "Envoie la carte d'une découverte, avec son histoire, sur WhatsApp, Messages ou AirDrop.",
+  "Friends and sync": "Amis et synchro",
+  "Invite friends with a personal link and some credit. Your journal syncs across your devices, and you can export it.": "Invite tes amis avec un lien personnel et un peu de crédit. Ton journal se synchronise sur tous tes appareils, et tu peux l'exporter.",
   "Outdoors": "En plein air",
   "Works in museums are part of their collections: check that a work is on display before you go.": "Les œuvres des musées font partie de leurs collections : vérifie qu'une œuvre est exposée avant d'y aller.",
   "1 work of art to see around you": "1 œuvre à voir autour de toi",
@@ -4960,6 +4998,27 @@ es: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
   "Browse by Date": "Explorar por fecha",
+  "Visit · See · Read": "Visitar · Ver · Leer",
+  "Where to see it, how to visit it, where to find the book.": "Dónde verla, cómo visitarla, dónde encontrar el libro.",
+  "Strata in 40 seconds": "Strata en 40 segundos",
+  "Five layers per discovery": "Cinco capas por descubrimiento",
+  "What you can do": "Lo que puedes hacer",
+  "Scan anything": "Escanéalo todo",
+  "A painting, a building, a sculpture, a book, a plant, the night sky or a mountain. With the camera, or a photo from your gallery.": "Un cuadro, un edificio, una escultura, un libro, una planta, el cielo o una montaña. Con la cámara o con una foto de tu galería.",
+  "Listen and ask": "Escucha y pregunta",
+  "Have the story read aloud, then ask anything in the chat: Strata remembers what you are looking at.": "Escucha la historia en voz alta y luego pregunta lo que quieras en el chat: Strata sabe lo que estás mirando.",
+  "Your journal": "Tu diario",
+  "Every discovery is kept, by category, on the map and by date. Search it, rate it with stars, find your favourites. It follows your language: French, Spanish or English.": "Cada descubrimiento se guarda, por categoría, en el mapa y por fecha. Busca, puntúa con estrellas, encuentra tus favoritos. Sigue tu idioma: francés, español o inglés.",
+  "Daily quiz": "Quiz del día",
+  "Three questions a day on what you discovered: one easy, one medium, one hard. What you miss comes back sooner, and your streak grows.": "Tres preguntas al día sobre lo que descubriste: una fácil, una media, una difícil. Lo que fallas vuelve antes, y tu racha crece.",
+  "Around me": "Cerca de mí",
+  "The artworks, museums and remarkable buildings near you, or in any city you type, with directions.": "Las obras, museos y edificios notables cerca de ti, o en la ciudad que elijas, con indicaciones.",
+  "Plants and sky on the map": "Plantas y cielo en el mapa",
+  "Plants and constellations are pinned where you spotted them.": "Las plantas y constelaciones se sitúan donde las viste.",
+  "Share": "Compartir",
+  "Send a card of any discovery, with its story, on WhatsApp, Messages or AirDrop.": "Envía la tarjeta de un descubrimiento, con su historia, por WhatsApp, Mensajes o AirDrop.",
+  "Friends and sync": "Amigos y sincronización",
+  "Invite friends with a personal link and some credit. Your journal syncs across your devices, and you can export it.": "Invita a tus amigos con un enlace personal y algo de crédito. Tu diario se sincroniza en todos tus dispositivos y puedes exportarlo.",
   "Outdoors": "Al aire libre",
   "Works in museums are part of their collections: check that a work is on display before you go.": "Las obras de los museos forman parte de sus colecciones: comprueba que la obra está expuesta antes de ir.",
   "1 work of art to see around you": "1 obra para ver a tu alrededor",
