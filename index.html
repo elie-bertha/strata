@@ -3000,64 +3000,60 @@ function distM(a, b) {
 function fmtDist(m) { return m < 1000 ? Math.round(m / 10) * 10 + ' m' : (m / 1000).toLocaleString(LOCALES[getLang()], { maximumFractionDigits: 1 }) + ' km'; }
 function walkTxt(m) { var mn = Math.max(1, Math.round(m / 80)); return mn > 90 ? '' : t('{n} min walk', { n: mn }); }
 function wikiLang() { return ['fr', 'es', 'en'].indexOf(getLang()) >= 0 ? getLang() : 'en'; }
-async function nrFetch(lang, pos, radius) {
-  var u = 'https://' + lang + '.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=geosearch&ggscoord=' + pos.lat + '%7C' + pos.lng +
-    '&ggsradius=' + radius + '&ggslimit=60&prop=coordinates%7Cpageimages%7Cdescription%7Cpageprops%7Cextracts&piprop=thumbnail&pithumbsize=480&ppprop=wikibase_item&exintro=1&explaintext=1&exsentences=3&exlimit=20';
-  var j = await jget(u); var pages = j && j.query && j.query.pages ? Object.keys(j.query.pages).map(function(k){ return j.query.pages[k]; }) : [];
-  // the extracts come 20 at a time: fetch the rest
-  var missing = pages.filter(function(p){ return !p.extract; }).map(function(p){ return p.pageid; });
-  for (var i = 0; i < missing.length; i += 20) {
-    var e = await jget('https://' + lang + '.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=extracts&exintro=1&explaintext=1&exsentences=3&exlimit=20&pageids=' + missing.slice(i, i + 20).join('%7C'));
-    var ep = e && e.query && e.query.pages || {};
-    pages.forEach(function(p){ if (ep[p.pageid] && ep[p.pageid].extract) p.extract = ep[p.pageid].extract; });
-  }
-  return { lang: lang, pages: pages };
+// One Wikidata query: museums, buildings and artworks around a point, the most famous first
+function nrClass(types) {
+  if (types.some(function(q){ return NR_TYPES.museum.indexOf(q) >= 0; })) return 'museum';
+  if (types.some(function(q){ return NR_TYPES.art.indexOf(q) >= 0; })) return 'art';
+  return 'arch';
+}
+async function nrQuery(pos, km) {
+  var lang = wikiLang(), all = NR_TYPES.art.concat(NR_TYPES.museum, NR_TYPES.arch);
+  var q = 'SELECT ?item ?itemLabel ?itemDescription ?loc ?img ?n ?type ?heritage ?article WHERE { ' +
+    'SERVICE wikibase:around { ?item wdt:P625 ?loc . bd:serviceParam wikibase:center "Point(' + pos.lng + ' ' + pos.lat + ')"^^geo:wktLiteral . bd:serviceParam wikibase:radius "' + km + '" . } ' +
+    '{ VALUES ?type { ' + all.map(function(x){ return 'wd:' + x; }).join(' ') + ' } ?item wdt:P31 ?type . } UNION { ?item wdt:P1435 ?h . BIND(1 AS ?heritage) } ' +
+    '?item wikibase:sitelinks ?n . FILTER(?n > 0) OPTIONAL { ?item wdt:P18 ?img } ' +
+    'OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://' + lang + '.wikipedia.org/> . } ' +
+    'SERVICE wikibase:label { bd:serviceParam wikibase:language "' + lang + ',en". } } ORDER BY DESC(?n) LIMIT 500';
+  var j = await jget('https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(q));
+  var rows = (j && j.results && j.results.bindings) || [], by = {};
+  rows.forEach(function(b){
+    var id = b.item.value.split('/').pop(), x = by[id];
+    if (!x) {
+      var m = /Point\(([-\d.]+) ([-\d.]+)\)/.exec(b.loc && b.loc.value || ''); if (!m) return;
+      var title = b.itemLabel && b.itemLabel.value; if (!title || /^Q\d+$/.test(title)) return;
+      x = by[id] = { qid: id, title: title, desc: b.itemDescription ? b.itemDescription.value : '', lat: +m[2], lng: +m[1], fame: +(b.n && b.n.value) || 0,
+        thumb: b.img ? b.img.value.replace(/^http:/, 'https:') + '?width=480' : '', article: b.article ? decodeURIComponent(b.article.value.split('/wiki/').pop()).replace(/_/g, ' ') : '', types: [], heritage: false };
+    }
+    if (b.type) { var tq = b.type.value.split('/').pop(); if (x.types.indexOf(tq) < 0) x.types.push(tq); }
+    if (b.heritage) x.heritage = true;
+    if (!x.thumb && b.img) x.thumb = b.img.value.replace(/^http:/, 'https:') + '?width=480';
+  });
+  return Object.keys(by).map(function(k){ return by[k]; }).filter(function(x){
+    return x.types.length || !NR_SKIP.test(x.desc + ' ' + x.title);   // a protected station or street is still a station or a street
+  });
 }
 async function nrSearch(pos) {
-  var lang = wikiLang(), res = null, radius = 2000;
-  for (var step = 0; step < 3; step++) {
-    radius = [2000, 5000, 10000][step];
-    res = await nrFetch(lang, pos, radius);
-    if (res.pages.length < 8 && lang !== 'en') { var en = await nrFetch('en', pos, radius); if (en.pages.length > res.pages.length) res = en; }
-    var ids = res.pages.map(function(p){ return p.pageprops && p.pageprops.wikibase_item; }).filter(Boolean), ents = {};
-    for (var i = 0; i < ids.length; i += 50) {
-      var w = await jget('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&origin=*&props=claims%7Csitelinks&ids=' + ids.slice(i, i + 50).join('%7C'));
-      Object.assign(ents, (w && w.entities) || {});
-    }
-    var places = res.pages.map(function(p){
-      var c = p.coordinates && p.coordinates[0]; if (!c) return null;
-      var q = p.pageprops && p.pageprops.wikibase_item, ent = q && ents[q], kind = nrKind(p, ent && ent.claims);
-      if (!kind) return null;
-      var at = { lat: c.lat, lng: c.lon }, d = distM(pos, at), fame = ent && ent.sitelinks ? Object.keys(ent.sitelinks).length : 1;
-      return { id: p.pageid, qid: q || '', title: p.title, desc: p.description || '', extract: p.extract || '', thumb: p.thumbnail && p.thumbnail.source || '', lat: at.lat, lng: at.lng, dist: d, kind: kind, fame: fame, lang: res.lang,
-        score: Math.log(1 + fame) * 2.2 - d / Math.max(600, radius / 4) + (kind === 'museum' ? 1.5 : 0) };
-    }).filter(Boolean);
-    if (places.length >= 5 || step === 2) {
-      NR.radius = radius;
-      var out = places.sort(function(a, b){ return b.score - a.score; }).slice(0, 30);
-      if (radius < 5000 && out.filter(function(x){ return x.kind === 'museum'; }).length < 3) {
-        var more = await nrMuseums(lang, pos, 5000);
-        more.forEach(function(m){ if (!out.some(function(x){ return x.id === m.id || (m.qid && x.qid === m.qid); })) out.push(m); });
-      }
-      return out;
+  var radii = [3, 6, 10], lang = wikiLang();
+  for (var i = 0; i < radii.length; i++) {
+    var items = await nrQuery(pos, radii[i]);
+    if (items.length >= 15 || i === radii.length - 1) {
+      NR.radius = radii[i] * 1000;
+      return items.map(function(x, k){
+        var at = { lat: x.lat, lng: x.lng }, d = distM(pos, at), kind = nrClass(x.types);
+        return { id: x.qid, qid: x.qid, title: x.title, desc: x.desc, extract: '', article: x.article, thumb: x.thumb, lat: x.lat, lng: x.lng, dist: d, kind: kind, fame: x.fame, lang: lang,
+          score: Math.log(1 + x.fame) * 2.2 - d / 900 + (kind === 'museum' ? 1.5 : 0) + (x.heritage ? 0.3 : 0) };
+      }).sort(function(a, b){ return b.score - a.score; }).slice(0, 40);
     }
   }
   return [];
 }
-// Museums a little further away, so their works can be listed
-async function nrMuseums(lang, pos, radius) {
-  var res = await nrFetch(lang, pos, radius);
-  var ids = res.pages.map(function(p){ return p.pageprops && p.pageprops.wikibase_item; }).filter(Boolean), ents = {};
-  for (var i = 0; i < ids.length; i += 50) {
-    var w = await jget('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&origin=*&props=claims%7Csitelinks&ids=' + ids.slice(i, i + 50).join('%7C'));
-    Object.assign(ents, (w && w.entities) || {});
-  }
-  return res.pages.map(function(p){
-    var c = p.coordinates && p.coordinates[0], q = p.pageprops && p.pageprops.wikibase_item, ent = q && ents[q];
-    if (!c || nrKind(p, ent && ent.claims) !== 'museum') return null;
-    var at = { lat: c.lat, lng: c.lon }, fame = ent && ent.sitelinks ? Object.keys(ent.sitelinks).length : 1;
-    return { id: p.pageid, qid: q, title: p.title, desc: p.description || '', extract: p.extract || '', thumb: p.thumbnail && p.thumbnail.source || '', lat: at.lat, lng: at.lng, dist: distM(pos, at), kind: 'museum', fame: fame, lang: res.lang, score: 0 };
-  }).filter(Boolean).sort(function(a, b){ return b.fame - a.fame; }).slice(0, 6);
+// The Wikipedia summary, loaded when a place is opened
+async function nrExtract(p) {
+  if (p.extract || !p.article) return p.extract;
+  var j = await jget('https://' + p.lang + '.wikipedia.org/w/api.php?action=query&format=json&origin=*&prop=extracts&exintro=1&explaintext=1&exsentences=3&redirects=1&titles=' + encodeURIComponent(p.article));
+  var pages = j && j.query && j.query.pages; if (!pages) return '';
+  var pg = pages[Object.keys(pages)[0]]; p.extract = (pg && pg.extract) || '';
+  return p.extract;
 }
 // Paintings and sculptures that the nearby museums hold, from Wikidata, most famous first
 async function nrWorks(museums) {
@@ -3191,7 +3187,9 @@ function nrOpen(i) {
   document.getElementById('nrPTags').innerHTML = (w ? '<span class="nr-tag walk">' + esc(w) + '</span>' : '') + (mine ? '<span class="nr-tag mine">' + t('In your journal') + '</span>' : '');
   document.getElementById('nrPX').textContent = p.extract;
   document.getElementById('nrPX').hidden = document.getElementById('nrPSrc').hidden = !p.extract;
+  if (!p.extract && p.article) nrExtract(p).then(function(x){ if (nrCur === p && !nrWork && x) { document.getElementById('nrPX').textContent = x; document.getElementById('nrPX').hidden = document.getElementById('nrPSrc').hidden = false; } }).catch(function(){});
   document.getElementById('nrGo').href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(p.title + (NR.city ? ', ' + NR.city : ''));
+  nrWork = null;
   var disc = document.getElementById('nrDisc');
   disc.textContent = mine ? t('Open in my journal') : t('Discover its story');
   disc.hidden = !mine && !hasAI();
@@ -3782,7 +3780,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.36';
+var APP_VERSION = '0.37';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
