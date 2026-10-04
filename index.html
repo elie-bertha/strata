@@ -1294,10 +1294,10 @@ function practicalCard(a) {
   var rows = (d.entry === 'outside' ? '' : '<div class="go-site" data-wiki="' + esc(d.place_wiki || loc.place) + '"' + (d.entry === 'ticketed' ? ' data-paid="1"' : '') + '></div>') +
     (d.entry === 'ticketed' ? lnkA('ticket', t('Tickets & tours'), 'getyourguide.com', 'https://www.getyourguide.com/s/?q=' + enc(q)) : '') +
     mapLinks(loc.place, loc.city);
-  var head = kind === 'visit' ? esc(loc.place) : t('Kept at {p}', { p: esc(loc.place) });
+  var head = kind === 'visit' ? esc(loc.place) : t(loc.multiple ? 'One original at {p}' : 'Kept at {p}', { p: esc(loc.place) });
   var entryNote = d.entry === 'free' ? t('Free to visit.') : d.entry === 'outside' ? t('Seen from outside: no visit inside.') : '';
   if (entryNote) rows = '<p class="go-entry">' + entryNote + '</p>' + rows;
-  return cardHTML('cc-go', ICO.go, kind === 'visit' ? t('Visit · Plan it') : t('Where to see it'), head, '<div class="lnk-list">' + rows + '</div>' + (kind === 'see' ? '<p class="go-note">' + t('Works travel and rest in storage: check that it is on display before you go.') + '</p>' : ''));
+  return cardHTML('cc-go', ICO.go, kind === 'visit' ? t('Visit · Plan it') : t('Where to see it'), head, '<div class="lnk-list">' + rows + '</div>' + (kind === 'see' ? '<p class="go-note">' + (loc.multiple ? t('Several originals exist, in other museums too.') + ' ' : '') + t('Works travel and rest in storage: check that it is on display before you go.') + '</p>' : ''));
 }
 function updateMapBtn() {
   var a = ARTS[currentArt], rec = a && a.journalId && journal.find(function(r){ return r.id === a.journalId; });
@@ -1362,7 +1362,7 @@ function renderArt(key) {
   var loc = a.raw && a.raw.location, wh = document.getElementById('resWhere');
   wh.hidden = !(loc && (loc.place || loc.city));
   wh.setAttribute('role', 'button'); wh.tabIndex = 0;
-  if (!wh.hidden) wh.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + (a.raw.category === 'architecture' ? esc([loc.place, loc.city].filter(Boolean).join(', ')) : t('Original at {p}', { p: esc([loc.place, loc.city].filter(Boolean).join(', ')) }));
+  if (!wh.hidden) wh.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + (a.raw.category === 'architecture' ? esc([loc.place, loc.city].filter(Boolean).join(', ')) : t(loc.multiple ? 'One original at {p}' : 'Original at {p}', { p: esc([loc.place, loc.city].filter(Boolean).join(', ')) }));
   var links = a.links.map(function(l){ return '<a class="lnk-row" target="_blank" rel="noopener" href="' + (l[3] || 'https://www.google.com/search?q=' + encodeURIComponent((l[1] + ' ' + l[2]).replace(/&amp;/g,'&'))) + '"><div class="lnk-ico" style="background:' + LNK[l[0]][0] + ';">' + LNK[l[0]][1] + '</div><div><div class="lnk-name">' + l[1] + '</div><div class="lnk-url">' + l[2] + '</div></div></a>'; }).join('');
   document.getElementById('carTrack').innerHTML =
     cardHTML('cc-spark', ICO.spark, t('Spark · 15 sec'), a.spark[0], '<div class="c-body">' + a.spark[1] + '</div><div class="c-more" style="color:rgba(255,255,255,.4);">' + ICO.arrow + t('Swipe for more') + '</div>') +
@@ -1589,7 +1589,7 @@ var liveScanCtl = null;     // AbortController for the scan in flight
 var liveScanning = false;
 var chatTurns = [];         // the conversation the page keeps for the current artwork
 
-var LOCATION_RULE = 'For a building or monument, its own site. For an artwork, the museum or collection holding the original. Coordinates of that place, accurate to the city at least. Use null if you are not confident, if the original is lost or private, or if this is a poster, reproduction or mass-produced object with no single original.';
+var LOCATION_RULE = 'For a building or monument, its own site. For an artwork, the museum or collection holding the original. For a work that exists in several originals (a woodblock print, an etching, a photograph, a cast sculpture), give the most famous public museum that holds one and add "multiple": true. Coordinates of that place, accurate to the city at least. Use null only if the original is lost or private, if you really do not know, or if this is a poster or mass-produced object with no original.';
 var SCAN_PROMPT = [
   'You are the narrator of Strata, a personal app that tells the story behind artworks, buildings, sculptures, books and natural wonders.',
   'Voice: a knowledgeable friend who finds everything slightly fascinating and cannot help sharing the strange part. Warm, vivid, precise. Never Wikipedia tone. No markdown.',
@@ -1751,6 +1751,7 @@ async function runLiveScan(file, opts) {
       return;
     }
     if (!d.lang) d.lang = getLang();
+    d.loc_v = 2;
     ARTS.live = toArt(d, url);
     saveScan(d, file).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; refreshPracticalCard(); loadJournal().then(function(){ if (currentArt === 'live') { renderTags(); updateMapBtn(); } }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
       .catch(function(){ toast(t('Could not save this scan on this device')); });
@@ -2543,22 +2544,24 @@ document.getElementById('mapCats').addEventListener('click', function(e){
 document.getElementById('mapCount').addEventListener('click', function(){ if (mapPlace) { mapPlace = null; renderMap(); } });
 
 // Scans saved before locations existed: ask Claude once per scan, text only
+function needsLocate(r) { return r.data && r.identified && (!('location' in r.data) || (r.data.location === null && r.data.loc_v !== 2)); }
 async function locateRec(r) {
   var text = await callClaude({ max_tokens: 300, messages: [{ role: 'user', content:
     'Where is the original of "' + r.title + '" by ' + (r.creator || 'an unknown creator') + ' kept or located today? ' + LOCATION_RULE +
     '\nAlso say how visitors get in: "ticketed", "free", "outside" (only seen from outside) or "unknown".' +
-    '\nReply with only JSON: {"location": {"place": "...", "city": "...", "country": "...", "lat": 0, "lng": 0} or null, "entry": "...", "place_wiki": "exact English Wikipedia title of the place, or empty"}' }] });
+    '\nReply with only JSON: {"location": {"place": "...", "city": "...", "country": "...", "lat": 0, "lng": 0, "multiple": false} or null, "entry": "...", "place_wiki": "exact English Wikipedia title of the place, or empty"}' }] });
   var j = parseJSON(text);
   r.data.location = j && j.location && isFinite(j.location.lat) && j.location.lat !== null ? j.location : null;
   if (j && j.entry && !r.data.entry) r.data.entry = j.entry;
   if (j && j.place_wiki && !r.data.place_wiki) r.data.place_wiki = j.place_wiki;
+  r.data.loc_v = 2;
   await saveLocal(r).catch(function(){});
 }
 // Opening an older scan: find its place in the background, then show the map button and the practical card
 var locatingOne = {};
 function locateOnOpen(id) {
   var r = journal.find(function(x){ return x.id === id; });
-  if (!r || !r.data || ('location' in r.data) || !r.identified || !live || locatingOne[id] || locating) return;
+  if (!r || !needsLocate(r) || !live || locatingOne[id] || locating) return;
   locatingOne[id] = true;
   locateRec(r).then(function(){
     delete ARTS['j_' + id];
@@ -2575,7 +2578,7 @@ function openScanQuiet(id) {
 }
 async function backfillLocations() {
   if (!live || locating) return;
-  var todo = journal.filter(function(r){ return r.data && !('location' in r.data) && r.identified; });
+  var todo = journal.filter(needsLocate);
   if (!todo.length) return;
   locating = true; renderMap();
   for (var i = 0; i < todo.length; i++) {
@@ -2928,7 +2931,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.26';
+var APP_VERSION = '0.27';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -3800,6 +3803,7 @@ async function runMusic() {
     var dup = findDuplicate(d);
     if (dup) { URL.revokeObjectURL(url); markSeen(dup); openScan(dup.id); toast(t('Already in your journal · first scanned {d}', { d: fmtDay(dup.created_at) })); return; }
     if (!d.lang) d.lang = getLang();
+    d.loc_v = 2;
     ARTS.live = toArt(d, url);
     saveScan(d, img).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; loadJournal().then(function(){ if (currentArt === 'live') { renderTags(); updateMapBtn(); } }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
       .catch(function(){ toast(t('Could not save this scan on this device')); });
@@ -3891,6 +3895,8 @@ fr: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
   "Browse by Date": "Parcourir par date",
+  "One original at {p}": "Un original : {p}",
+  "Several originals exist, in other museums too.": "Il existe plusieurs originaux, dans d'autres musées aussi.",
   "Official website": "Site officiel",
   "Free to visit.": "Entrée libre.",
   "Seen from outside: no visit inside.": "Se découvre de l'extérieur : pas de visite intérieure.",
@@ -3995,6 +4001,8 @@ es: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
   "Browse by Date": "Explorar por fecha",
+  "One original at {p}": "Un original en {p}",
+  "Several originals exist, in other museums too.": "Existen varios originales, también en otros museos.",
   "Official website": "Web oficial",
   "Free to visit.": "Entrada libre.",
   "Seen from outside: no visit inside.": "Se ve desde fuera: sin visita interior.",
