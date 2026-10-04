@@ -8,7 +8,7 @@ class H(http.server.SimpleHTTPRequestHandler):
     def translate_path(self, path):
         if path.startswith('/__fonts/'): return os.path.join(HERE, path.split('/')[-1])
         return os.path.join(APP, path.lstrip('/').split('?')[0] or 'index.html')
-srv = http.server.ThreadingHTTPServer(('127.0.0.1', 8795), H); threading.Thread(target=srv.serve_forever, daemon=True).start()
+srv = http.server.ThreadingHTTPServer(('127.0.0.1', 8797), H); threading.Thread(target=srv.serve_forever, daemon=True).start()
 FONT_CSS = """
 @font-face{font-family:'DM Serif Display';src:url(/__fonts/Lora-Variable.ttf);font-weight:100 900;font-style:normal}
 @font-face{font-family:'DM Serif Display';src:url(/__fonts/Lora-Italic-Variable.ttf);font-weight:100 900;font-style:italic}
@@ -20,10 +20,10 @@ L = json.load(open(os.path.join(HERE, 'langs.json')))
 OVERLAY_CSS = """
 #camStatus,.mode-pill,.legend{display:none!important}
 #vcap{position:absolute;left:50%;top:118px;transform:translate(-50%,-8px);z-index:9000;opacity:0;transition:opacity .35s,transform .35s;
- background:rgba(16,42,92,.92);color:#fff;font:500 15px 'DM Sans',sans-serif;padding:10px 16px 10px 12px;border-radius:100px;white-space:nowrap;display:flex;gap:9px;align-items:center;box-shadow:0 6px 22px rgba(0,0,0,.28)}
+ background:rgba(16,42,92,.94);color:#fff;font:600 19px/1.25 'DM Sans',sans-serif;padding:12px 20px 12px 14px;border-radius:100px;white-space:nowrap;max-width:360px;display:flex;gap:11px;align-items:center;box-shadow:0 6px 22px rgba(0,0,0,.28)}
 #vcap.on{opacity:1;transform:translate(-50%,0)}
 #vcap.low{top:auto;bottom:118px}
-#vcap i{font-style:normal;width:22px;height:22px;border-radius:7px;background:#F4C542;color:#16346B;font:700 12px 'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center}
+#vcap i{font-style:normal;width:28px;height:28px;flex-shrink:0;border-radius:9px;background:#F4C542;color:#16346B;font:700 15px 'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center}
 .vtap{position:absolute;z-index:9001;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(244,197,66,.55);border:2px solid #fff;pointer-events:none;animation:vtap .65s ease-out forwards}
 @keyframes vtap{0%{transform:scale(.4);opacity:0}25%{opacity:1}100%{transform:scale(1.25);opacity:0}}
 #vend{position:absolute;inset:0;z-index:9500;background:radial-gradient(ellipse 80% 55% at 50% 40%,#1E4F99,#102A5C 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;opacity:0;transition:opacity .6s}
@@ -44,7 +44,7 @@ def run(lang):
         pg.route('https://fonts.googleapis.com/**', lambda r: r.fulfill(status=200, content_type='text/css', body=FONT_CSS))
         for pat in ['https://cdnjs.cloudflare.com/**', 'https://*.wikipedia.org/**', 'https://*.supabase.co/**', 'https://commons.wikimedia.org/**', 'https://openlibrary.org/**']:
             pg.route(pat, lambda r: r.fulfill(status=404, body=''))
-        pg.goto('http://127.0.0.1:8795/'); pg.wait_for_timeout(1200)
+        pg.goto('http://127.0.0.1:8797/'); pg.wait_for_timeout(1200)
         pg.evaluate("document.fonts.ready")
         # demo content in this language, overlays
         pg.evaluate("""([css, d]) => {
@@ -101,10 +101,10 @@ def run(lang):
         listing.append("file '%s'\nduration %.4f" % (fn, max(0.001, nxt - ts)))
     listing.append("file '%s'" % fn)
     lst = os.path.join(outdir, 'list.txt'); open(lst, 'w').write('\n'.join(listing))
-    out = os.path.join(HERE, 'strata-demo-%s.mp4' % lang)
+    out = os.path.join(HERE, 'strata-demo3-%s.mp4' % lang)
     subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'concat', '-safe', '0', '-i', lst, '-vf', 'fps=30,scale=600:-2:flags=lanczos,format=yuv420p',
                     '-c:v', 'libx264', '-preset', 'slow', '-crf', '27', '-movflags', '+faststart', '-an', out], check=True)
-    poster = os.path.join(HERE, 'strata-demo-poster.jpg')
+    poster = os.path.join(HERE, 'poster3-%s.jpg' % lang)
     subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-ss', '4.9', '-i', out, '-frames:v', '1', '-q:v', '4', poster], check=True)
     print(lang, len(frames), 'frames', round(frames[-1][0] - t0, 1), 's', os.path.getsize(out) // 1024, 'KB')
 for lang in (sys.argv[1:] or ['en']): run(lang)

@@ -1,48 +1,159 @@
 {
  "en": {
-  "cap": ["Point at any work", "Strata recognises it", "Its story, in layers", "Ask anything", "Share it with friends", "Kept in your journal"],
+  "cap": [
+   "Point at any work",
+   "Strata recognises it",
+   "Its story, in layers",
+   "Ask anything",
+   "Share it with friends",
+   "Kept in your journal"
+  ],
   "powered": "Powered by Claude",
   "title": "Kajikazawa in Kai Province",
   "medium": "Woodblock print",
-  "spark": ["The quick story", "Look at the fisherman. He leans out over the rapids and his lines fan down into the water — together they form a triangle, the exact shape of Mount Fuji floating pale in the distance. The mountain is tiny. Its echo is everywhere."],
-  "story": ["Hokusai at seventy", "Around 1830 Hokusai was about seventy, recovering from a stroke and weighed down by a grandson's debts. Then a publisher asked him for a series on Mount Fuji. He later wrote that nothing he drew before seventy was worth noticing. This is from that series — Thirty-six Views of Mount Fuji."],
-  "surp": ["It was meant to be blue", "The earliest impressions of this print were made almost entirely in shades of blue, using Prussian blue — a pigment just arriving in Japan. The red coat and green rock you are looking at come from later editions."],
-  "more": [["The Great Wave off Kanagawa", "Fuji is the small detail."], ["Fine Wind, Clear Morning", "Fuji, red at a late-summer dawn."], ["Amida Falls", "The river begins as a perfect circle."], ["Tiger in the Snow", "Painted at 89, the year he died."]],
+  "spark": [
+   "The quick story",
+   "Look at the fisherman. He leans out over the rapids and his lines fan down into the water — together they form a triangle, the exact shape of Mount Fuji floating pale in the distance. The mountain is tiny. Its echo is everywhere."
+  ],
+  "story": [
+   "Hokusai at seventy",
+   "Around 1830 Hokusai was about seventy, recovering from a stroke and weighed down by a grandson's debts. Then a publisher asked him for a series on Mount Fuji. He later wrote that nothing he drew before seventy was worth noticing. This is from that series — Thirty-six Views of Mount Fuji."
+  ],
+  "surp": [
+   "It was meant to be blue",
+   "The earliest impressions of this print were made almost entirely in shades of blue, using Prussian blue — a pigment just arriving in Japan. The red coat and green rock you are looking at come from later editions."
+  ],
+  "more": [
+   [
+    "The Great Wave off Kanagawa",
+    "Fuji is the small detail."
+   ],
+   [
+    "Fine Wind, Clear Morning",
+    "Fuji, red at a late-summer dawn."
+   ],
+   [
+    "Amida Falls",
+    "The river begins as a perfect circle."
+   ],
+   [
+    "Tiger in the Snow",
+    "Painted at 89, the year he died."
+   ]
+  ],
   "chat_sub": "Hokusai · c. 1830 · Ask anything",
   "chat_intro": "I'm your guide to Kajikazawa. Curious about the fisherman, the place, or why Fuji is barely there?",
-  "chips": ["Why is Fuji so small?", "Who is the boy?", "Where is this place?"],
+  "chips": [
+   "Why is Fuji so small?",
+   "Who is the boy?",
+   "Where is this place?"
+  ],
   "answer": "That is the whole idea of the series. In Thirty-six Views of Mount Fuji the mountain is rarely the subject — it is a constant presence behind ordinary people at work. Here the fisherman's straining body takes the foreground, and his pose quietly repeats Fuji's triangle.",
   "end_tag": "Every work has layers.",
   "end_sub": "Point at a painting, a building, a plant or a book. Discover its story."
  },
  "fr": {
-  "cap": ["Visez une œuvre", "Strata la reconnaît", "Son histoire, par strates", "Posez vos questions", "Partagez-la avec vos amis", "Gardée dans votre journal"],
+  "cap": [
+   "Vise une œuvre",
+   "Strata la reconnaît",
+   "Son histoire, par strates",
+   "Pose tes questions",
+   "Partage-la avec tes amis",
+   "Gardée dans ton journal"
+  ],
   "powered": "Avec Claude",
   "title": "Kajikazawa dans la province de Kai",
   "medium": "Estampe sur bois",
-  "spark": ["L'histoire en bref", "Regardez le pêcheur. Penché au-dessus des rapides, il déploie ses lignes dans l'eau : ensemble, elles forment un triangle, la forme exacte du mont Fuji qui flotte, pâle, au loin. La montagne est minuscule. Son écho est partout."],
-  "story": ["Hokusai à soixante-dix ans", "Vers 1830, Hokusai a environ soixante-dix ans. Il se remet d'une attaque et croule sous les dettes d'un petit-fils. Un éditeur lui commande alors une série sur le mont Fuji. Il écrira plus tard que rien de ce qu'il avait dessiné avant soixante-dix ans ne valait la peine. Cette estampe en fait partie : les Trente-six vues du mont Fuji."],
-  "surp": ["Elle devait être bleue", "Les premiers tirages de cette estampe étaient presque entièrement bleus, imprimés au bleu de Prusse, un pigment qui venait d'arriver au Japon. Le manteau rouge et le rocher vert que vous voyez viennent d'éditions plus tardives."],
-  "more": [["La Grande Vague de Kanagawa", "Le Fuji est le petit détail."], ["Vent du sud, ciel clair", "Le Fuji, rouge à l'aube d'été."], ["La Cascade d'Amida", "La rivière naît d'un cercle parfait."], ["Tigre dans la neige", "Peint à 89 ans, l'année de sa mort."]],
-  "chat_sub": "Hokusai · v. 1830 · Posez vos questions",
-  "chat_intro": "Je suis votre guide pour Kajikazawa. Le pêcheur, le lieu, ou pourquoi le Fuji est à peine visible ?",
-  "chips": ["Pourquoi le Fuji est-il si petit ?", "Qui est l'enfant ?", "Où est cet endroit ?"],
+  "spark": [
+   "L'histoire en bref",
+   "Regarde le pêcheur. Penché au-dessus des rapides, il déploie ses lignes dans l'eau : ensemble, elles forment un triangle, la forme exacte du mont Fuji qui flotte, pâle, au loin. La montagne est minuscule. Son écho est partout."
+  ],
+  "story": [
+   "Hokusai à soixante-dix ans",
+   "Vers 1830, Hokusai a environ soixante-dix ans. Il se remet d'une attaque et croule sous les dettes d'un petit-fils. Un éditeur lui commande alors une série sur le mont Fuji. Il écrira plus tard que rien de ce qu'il avait dessiné avant soixante-dix ans ne valait la peine. Cette estampe en fait partie : les Trente-six vues du mont Fuji."
+  ],
+  "surp": [
+   "Elle devait être bleue",
+   "Les premiers tirages de cette estampe étaient presque entièrement bleus, imprimés au bleu de Prusse, un pigment qui venait d'arriver au Japon. Le manteau rouge et le rocher vert que tu vois viennent d'éditions plus tardives."
+  ],
+  "more": [
+   [
+    "La Grande Vague de Kanagawa",
+    "Le Fuji est le petit détail."
+   ],
+   [
+    "Vent du sud, ciel clair",
+    "Le Fuji, rouge à l'aube d'été."
+   ],
+   [
+    "La Cascade d'Amida",
+    "La rivière naît d'un cercle parfait."
+   ],
+   [
+    "Tigre dans la neige",
+    "Peint à 89 ans, l'année de sa mort."
+   ]
+  ],
+  "chat_sub": "Hokusai · v. 1830 · Pose tes questions",
+  "chat_intro": "Je suis ton guide pour Kajikazawa. Le pêcheur, le lieu, ou pourquoi le Fuji est à peine visible ?",
+  "chips": [
+   "Pourquoi le Fuji est-il si petit ?",
+   "Qui est l'enfant ?",
+   "Où est cet endroit ?"
+  ],
   "answer": "C'est toute l'idée de la série. Dans les Trente-six vues du mont Fuji, la montagne est rarement le sujet : c'est une présence constante derrière des gens ordinaires au travail. Ici, le corps tendu du pêcheur occupe le premier plan, et sa pose reprend discrètement le triangle du Fuji.",
   "end_tag": "Chaque œuvre a ses strates.",
-  "end_sub": "Visez un tableau, un bâtiment, une plante ou un livre. Découvrez son histoire."
+  "end_sub": "Vise un tableau, un bâtiment, une plante ou un livre. Découvre son histoire."
  },
  "es": {
-  "cap": ["Apunta a una obra", "Strata la reconoce", "Su historia, por capas", "Pregunta lo que quieras", "Compártela con tus amigos", "Guardada en tu diario"],
+  "cap": [
+   "Apunta a una obra",
+   "Strata la reconoce",
+   "Su historia, por capas",
+   "Pregunta lo que quieras",
+   "Compártela con tus amigos",
+   "Guardada en tu diario"
+  ],
   "powered": "Con Claude",
   "title": "Kajikazawa en la provincia de Kai",
   "medium": "Xilografía",
-  "spark": ["La historia en breve", "Mira al pescador. Inclinado sobre los rápidos, despliega sus sedales en el agua: juntos forman un triángulo, la forma exacta del monte Fuji que flota, pálido, a lo lejos. La montaña es diminuta. Su eco está por todas partes."],
-  "story": ["Hokusai a los setenta", "Hacia 1830, Hokusai tenía unos setenta años. Se recuperaba de un derrame y cargaba con las deudas de un nieto. Entonces un editor le encargó una serie sobre el monte Fuji. Más tarde escribió que nada de lo que dibujó antes de los setenta merecía atención. Esta estampa es de esa serie: las Treinta y seis vistas del monte Fuji."],
-  "surp": ["Iba a ser azul", "Las primeras tiradas de esta estampa eran casi enteramente azules, impresas con azul de Prusia, un pigmento que acababa de llegar a Japón. El abrigo rojo y la roca verde que ves proceden de ediciones posteriores."],
-  "more": [["La gran ola de Kanagawa", "El Fuji es el pequeño detalle."], ["Viento del sur, cielo despejado", "El Fuji, rojo en un amanecer de verano."], ["La cascada de Amida", "El río nace de un círculo perfecto."], ["Tigre en la nieve", "Pintado a los 89, el año de su muerte."]],
+  "spark": [
+   "La historia en breve",
+   "Mira al pescador. Inclinado sobre los rápidos, despliega sus sedales en el agua: juntos forman un triángulo, la forma exacta del monte Fuji que flota, pálido, a lo lejos. La montaña es diminuta. Su eco está por todas partes."
+  ],
+  "story": [
+   "Hokusai a los setenta",
+   "Hacia 1830, Hokusai tenía unos setenta años. Se recuperaba de un derrame y cargaba con las deudas de un nieto. Entonces un editor le encargó una serie sobre el monte Fuji. Más tarde escribió que nada de lo que dibujó antes de los setenta merecía atención. Esta estampa es de esa serie: las Treinta y seis vistas del monte Fuji."
+  ],
+  "surp": [
+   "Iba a ser azul",
+   "Las primeras tiradas de esta estampa eran casi enteramente azules, impresas con azul de Prusia, un pigmento que acababa de llegar a Japón. El abrigo rojo y la roca verde que ves proceden de ediciones posteriores."
+  ],
+  "more": [
+   [
+    "La gran ola de Kanagawa",
+    "El Fuji es el pequeño detalle."
+   ],
+   [
+    "Viento del sur, cielo despejado",
+    "El Fuji, rojo en un amanecer de verano."
+   ],
+   [
+    "La cascada de Amida",
+    "El río nace de un círculo perfecto."
+   ],
+   [
+    "Tigre en la nieve",
+    "Pintado a los 89, el año de su muerte."
+   ]
+  ],
   "chat_sub": "Hokusai · c. 1830 · Pregunta lo que quieras",
   "chat_intro": "Soy tu guía para Kajikazawa. ¿El pescador, el lugar, o por qué el Fuji apenas se ve?",
-  "chips": ["¿Por qué el Fuji es tan pequeño?", "¿Quién es el niño?", "¿Dónde está este lugar?"],
+  "chips": [
+   "¿Por qué el Fuji es tan pequeño?",
+   "¿Quién es el niño?",
+   "¿Dónde está este lugar?"
+  ],
   "answer": "Esa es toda la idea de la serie. En las Treinta y seis vistas del monte Fuji, la montaña casi nunca es el tema: es una presencia constante detrás de gente corriente trabajando. Aquí el cuerpo tenso del pescador ocupa el primer plano, y su postura repite en silencio el triángulo del Fuji.",
   "end_tag": "Cada obra tiene sus capas.",
   "end_sub": "Apunta a un cuadro, un edificio, una planta o un libro. Descubre su historia."
