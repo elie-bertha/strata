@@ -413,10 +413,14 @@ label.key-btn{text-align:center;display:block;}
 .qz-seg.on{background:var(--sun);}
 .qz-count{font-size:13px;font-weight:600;color:var(--muted);min-width:24px;text-align:right;}
 .qz-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:230px;}
-.qz-photo{height:200px;background:#2C2C2E center/cover no-repeat;position:relative;}
+.qz-photo{height:200px;background-color:#2C2C2E;background-position:center;background-size:cover;background-repeat:no-repeat;position:relative;}
 .qz-photo.big{height:290px;}
 .qz-cap{position:absolute;left:14px;bottom:12px;background:rgba(0,0,0,.5);color:#fff;font-size:12px;padding:5px 10px;border-radius:100px;}
 .qz-main{padding:20px 18px 0;display:flex;flex-direction:column;gap:16px;}
+.qz-lvl{align-self:flex-start;font-size:11px;font-weight:600;letter-spacing:.5px;padding:4px 10px;border-radius:100px;margin-bottom:-6px;}
+.lv-easy{background:#EEF7F1;color:#1F7A4D;}
+.lv-medium{background:#FFF6DD;color:#8B6914;}
+.lv-hard{background:#FFF1EB;color:#9A3412;}
 .qz-kick{font-size:11px;font-weight:600;letter-spacing:.9px;text-transform:uppercase;color:var(--sun-ink);}
 .qz-q{font-family:'DM Serif Display',serif;font-size:23px;line-height:1.22;margin-top:-8px;}
 .qz-opts{display:flex;flex-direction:column;gap:10px;}
@@ -1696,7 +1700,7 @@ var liveScanning = false;
 var chatTurns = [];         // the conversation the page keeps for the current artwork
 
 var LOCATION_RULE = 'For a building or monument, its own site. For an artwork, the museum or collection holding the original. For a work that exists in several originals (a woodblock print, an etching, a photograph, a cast sculpture), give the most famous public museum that holds one and add "multiple": true. Coordinates of that place, accurate to the city at least. Use null only if the original is lost or private, if you really do not know, or if this is a poster or mass-produced object with no original.';
-var QUIZ_RULE = 'Quiz: write exactly 3 multiple-choice questions that help the user remember this work later. Each has "q" (max 16 words, never giving the answer away), "options" (4 short answers, max 6 words each, all plausible and of the same kind), "answer" (index 0-3 of the right option; vary its position), "explain" (one or two sentences in the narrator voice, max 35 words, that teach why) and "visual" (true only if the answer can be seen in a photo of the work). Use only facts stated in the cards, so the user can have learned them. Mix the angles: a detail to look for, its story or maker, the surprise or where it is. For a book, never ask about its cover.';
+var QUIZ_RULE = 'Quiz: write exactly 3 multiple-choice questions that help the user remember this work later, in this order of difficulty: "easy" (the essential, what anyone remembers from the hook: who made it, what it shows or is), "medium" (a fact from its story: the context, a person, why it was made), "hard" (a precise detail: a date, the surprising fact, a detail to spot in the work; its wrong options must be close to the right one: same period, same place, same kind). Each has "level" ("easy", "medium" or "hard"), "q" (max 16 words, never giving the answer away), "options" (4 short answers, max 6 words each, all plausible and of the same kind; no joke options), "answer" (index 0-3 of the right option; vary its position), "explain" (one or two sentences in the narrator voice, max 35 words, that teach why) and "visual" (true only if the answer can be seen in a photo of the work). Use only facts stated in the cards, so the user can have learned them. For a book, never ask about its cover.';
 var SCAN_PROMPT = [
   'You are the narrator of Strata, a personal app that tells the story behind artworks, buildings, sculptures, books and natural wonders.',
   'Voice: a knowledgeable friend who finds everything slightly fascinating and cannot help sharing the strange part. Warm, vivid, precise. Never Wikipedia tone. No markdown.',
@@ -1733,7 +1737,7 @@ var SCAN_PROMPT = [
   '  "more_by": [ { "title": "another work by the same creator", "year": "year or c. date", "hook": "max 8 words, intriguing", "wiki": "exact English Wikipedia article title of this work, or empty string", "where": "museum or site holding it today, with its city, or empty string if unknown, private or a book", "colors": ["#hex", "#hex", "#hex"] } ],',
   '  "chat_intro": "one or two sentences inviting questions, in the narrator voice",',
   '  "questions": ["three short follow-up questions a curious person would ask about this specific work, max 6 words each"],',
-  '  "quiz": [ { "q": "...", "options": ["...", "...", "...", "..."], "answer": 0, "explain": "...", "visual": false } ]',
+  '  "quiz": [ { "level": "easy", "q": "...", "options": ["...", "...", "...", "..."], "answer": 0, "explain": "...", "visual": false }, { "level": "medium", ... }, { "level": "hard", ... } ]',
   '}',
   QUIZ_RULE + ' If "identified" is false, "quiz" is an empty array.',
   'deep_dive: exactly 3 items. more_by: exactly 4 well-known works, not this one; colors are the 3 dominant colors of each work, from dark to light.'
@@ -2610,7 +2614,7 @@ function renderTags() {
 }
 
 // ─── QUIZ: three questions a day on what you scanned, with spaced repetition ─────
-var QZ_GAPS = [1, 7, 30, 90], QZ_MIN = 3, QZ_GEN_MAX = 5;
+var QZ_GAPS = [1, 7, 30, 90], QZ_MIN = 3, QZ_GEN_MAX = 40, QZ_LEVELS = ['easy', 'medium', 'hard'];
 var qz = { session: null, last: [] };
 var FLAME = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z"/></svg>';
 var CHECK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
@@ -2634,11 +2638,13 @@ function quizFor(r, lang) {
   });
   return null;
 }
+function quizOld(r) { var d = r.data || {}, b = cleanQuiz(d.quiz); if (b.length) return !b[0].level; var o = d.quizTr ? cleanQuiz(d.quizTr[getLang()]) : []; return o.length > 0 && !o[0].level; }
 function qzState(r) { return r.data.qz || { box: 0, due: addDays(dayStr(new Date(r.created_at)), 1), n: 0 }; }
 // Older scans (or a new language): questions made once, in the background, from the saved cards
 var qzGen = { busy: false, done: 0, tried: {} };
 async function makeQuiz(r, lang) {
-  var d = r.data, base = cleanQuiz(d.quiz), name = LANGS[lang], prompt;
+  var d = r.data, base = cleanQuiz(d.quiz), name = LANGS[lang], prompt, regen = quizOld(r);
+  if (regen) base = [];
   if (base.length) prompt = 'Translate every string value of this JSON into ' + name + '. Keep the keys, the order and the "answer" numbers. Reply with only the JSON.\n\n' + JSON.stringify({ quiz: base });
   else {
     var v = langView(d, lang);
@@ -2647,13 +2653,16 @@ async function makeQuiz(r, lang) {
   }
   var j = parseJSON(await callClaude({ max_tokens: 1400, messages: [{ role: 'user', content: prompt }] }));
   var q = cleanQuiz(j && j.quiz); if (q.length < 2) throw { code: 'invalid_json' };
-  if (!base.length && (!d.lang || d.lang === lang)) d.quiz = q; else { d.quizTr = d.quizTr || {}; d.quizTr[lang] = q; }
+  if (regen) {   // fresh questions: older translations of the quiz no longer match
+    delete d.quizTr; if (d.tr) Object.keys(d.tr).forEach(function(l){ if (d.tr[l]) delete d.tr[l].quiz; });
+    if (!d.lang || d.lang === lang) d.quiz = q; else { delete d.quiz; d.quizTr = {}; d.quizTr[lang] = q; }
+  } else if (!base.length && (!d.lang || d.lang === lang)) d.quiz = q; else { d.quizTr = d.quizTr || {}; d.quizTr[lang] = q; }
   await saveLocal(r);
 }
 async function prepareQuizzes() {
   if (qzGen.busy || !hasAI() || qzGen.done >= QZ_GEN_MAX) return;
   var lang = getLang();
-  var todo = journal.filter(function(r){ return quizEligible(r) && !quizFor(r, lang) && !qzGen.tried[r.id + lang] && !(cleanQuiz(r.data.quiz).length && needsTr(r, lang) && trJobs[r.id + ':' + lang]); })
+  var todo = journal.filter(function(r){ return quizEligible(r) && (!quizFor(r, lang) || quizOld(r)) && !qzGen.tried[r.id + lang] && !(cleanQuiz(r.data.quiz).length && !quizOld(r) && needsTr(r, lang) && trJobs[r.id + ':' + lang]); })
     .sort(function(a, b){ return rating(b) - rating(a) || (a.created_at < b.created_at ? 1 : -1); });
   if (!todo.length) return;
   qzGen.busy = true;
@@ -2711,7 +2720,7 @@ function renderQuizCard() {
   if (!el) { el = document.createElement('div'); el.id = 'quizCard'; el.addEventListener('click', onQuizCard); }
   var fav = favSection(); if (el.nextSibling !== fav) body.insertBefore(el, fav.parentNode === body ? fav : body.firstChild);
   var lang = getLang(), pool = quizPool(), eligible = journal.filter(quizEligible).length, st = quizStats(), s = qz.session;
-  if (eligible > pool.length) setTimeout(prepareQuizzes, 400);
+  if (eligible > pool.length || journal.some(quizOld)) setTimeout(prepareQuizzes, 400);
   if (pool.length < QZ_MIN && !(s && !s.finished)) { el.hidden = true; return; }
   el.hidden = false;
   if (s && !s.finished) {
@@ -2740,9 +2749,11 @@ function startQuiz(extra) {
   var pool = quizPool(extra ? qz.last : null);
   if (!pool.length) pool = quizPool();
   if (!pool.length) { toast(t('Scan a few works first: the quiz is made from them.')); return; }
-  var items = pool.slice(0, 3).map(function(r){
-    var qs = quizFor(r), st = qzState(r), q = qs[(st.n || 0) % qs.length], order = shuffled(q.options.length);
-    return { id: r.id, q: { q: q.q, explain: q.explain || '', visual: !!q.visual, options: order.map(function(i){ return q.options[i]; }), answer: order.indexOf(q.answer) } };
+  var picked = pool.slice(0, 3).sort(function(a, b){ return (qzState(a).box || 0) - (qzState(b).box || 0); });
+  var items = picked.map(function(r, slot){
+    var qs = quizFor(r), lv = QZ_LEVELS[slot + (3 - picked.length)] || 'medium';
+    var q = qs.filter(function(x){ return x.level === lv; })[0] || qs[Math.min(QZ_LEVELS.indexOf(lv), qs.length - 1)], order = shuffled(q.options.length);
+    return { id: r.id, level: lv, q: { q: q.q, explain: q.explain || '', visual: !!q.visual, options: order.map(function(i){ return q.options[i]; }), answer: order.indexOf(q.answer) } };
   });
   qz.session = { items: items, i: 0, score: 0, answered: false, extra: !!extra, finished: false, results: [] };
   show('s-quiz'); renderQuiz();
@@ -2758,8 +2769,8 @@ function renderQuiz() {
   var it = s.items[s.i], r = qzRec(it); if (!r) { s.i++; return s.i < n ? renderQuiz() : finishQuiz(); }
   var v = rView(r);
   document.getElementById('qzBody').innerHTML =
-    '<div class="qz-photo' + (it.q.visual ? ' big' : '') + '" style="background-image:url(\'' + recPhoto(r) + '\')"><span class="qz-cap">' + esc(t('Your photo · scanned {d}', { d: fmtDay(r.created_at) })) + '</span></div>' +
-    '<div class="qz-main"><div class="qz-kick">' + esc([v.title || r.title, v.artist_short || r.artist_short].filter(Boolean).join(' · ')) + '</div>' +
+    '<div class="qz-photo' + (it.q.visual ? ' big' : '') + '" style="background-image:url(\'' + recPhoto(r) + '\'), url(\'' + (r.thumb || '') + '\')"><span class="qz-cap">' + esc(t('Your photo · scanned {d}', { d: fmtDay(r.created_at) })) + '</span></div>' +
+    '<div class="qz-main"><div class="qz-lvl lv-' + it.level + '">' + t({ easy: 'Easy', medium: 'Medium', hard: 'Hard' }[it.level] || 'Medium') + '</div><div class="qz-kick">' + esc([v.title || r.title, v.artist_short || r.artist_short].filter(Boolean).join(' · ')) + '</div>' +
     '<div class="qz-q">' + esc(it.q.q) + '</div>' +
     '<div class="qz-opts">' + it.q.options.map(function(o, k){ return '<button class="qz-opt" data-o="' + k + '"><span>' + esc(o) + '</span></button>'; }).join('') + '</div></div>';
   document.getElementById('qzBody').scrollTop = 0;
@@ -3343,7 +3354,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.32';
+var APP_VERSION = '0.33';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -4307,6 +4318,9 @@ fr: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
   "Browse by Date": "Parcourir par date",
+  "Easy": "Facile",
+  "Medium": "Moyen",
+  "Hard": "Difficile",
   "Close quiz": "Fermer le quiz",
   "1 day in a row": "1 jour d'affilée",
   "{n} days in a row": "{n} jours d'affilée",
@@ -4456,6 +4470,9 @@ es: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
   "Browse by Date": "Explorar por fecha",
+  "Easy": "Fácil",
+  "Medium": "Medio",
+  "Hard": "Difícil",
   "Close quiz": "Cerrar el quiz",
   "1 day in a row": "1 día seguido",
   "{n} days in a row": "{n} días seguidos",
