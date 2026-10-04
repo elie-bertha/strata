@@ -385,6 +385,81 @@ label.key-btn{text-align:center;display:block;}
 .cz-nav{display:flex;justify-content:space-between;padding-top:12px;}
 .cz-btn{width:48px;height:40px;border-radius:12px;border:1px solid var(--s3);background:var(--surface);font-size:22px;color:var(--ink);cursor:pointer;}
 .cz-btn:disabled{opacity:.3;cursor:default;}
+
+/* Quiz */
+#quizCard .qzc{background:var(--night);border-radius:20px;padding:18px;color:#fff;display:flex;flex-direction:column;gap:12px;}
+.qzc-head{display:flex;justify-content:space-between;align-items:center;}
+.qzc-k{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--sun);}
+.qzc-st{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--sun);}
+.qzc-t{font-family:'DM Serif Display',serif;font-size:22px;line-height:1.2;}
+.qzc-s{font-size:13px;line-height:1.5;color:rgba(255,255,255,.72);}
+.qzc-week{display:flex;gap:4px;}
+.qzc-day{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10px;color:rgba(255,255,255,.55);text-transform:uppercase;}
+.qzc-dot{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.14);box-sizing:border-box;}
+.qzc-dot.on{background:var(--sun);}
+.qzc-dot.today{background:none;border:2px dashed var(--sun);}
+.qzc-go{height:46px;border:0;border-radius:14px;background:var(--sun);color:var(--night);font:600 15px 'DM Sans',sans-serif;cursor:pointer;}
+#quizCard .qzc-mini{flex-direction:row;align-items:center;gap:12px;padding:13px 14px;border:0;width:100%;text-align:left;font:inherit;color:#fff;cursor:pointer;}
+.qzc-ic{width:38px;height:38px;border-radius:12px;background:rgba(244,197,66,.18);color:var(--sun);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.qzc-mt{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;}
+.qzc-mt b{font-size:15px;font-weight:600;}
+.qzc-mt span{font-size:12px;color:rgba(255,255,255,.7);line-height:1.35;}
+.qzc-more{flex-shrink:0;border:1px solid rgba(244,197,66,.5);background:none;color:var(--sun);font:600 12px 'DM Sans',sans-serif;padding:8px 11px;border-radius:100px;cursor:pointer;}
+#s-quiz{background:var(--bg);}
+.qz-top{display:flex;align-items:center;gap:12px;padding:calc(14px + env(safe-area-inset-top,0px)) 16px 12px;background:var(--surface);flex-shrink:0;}
+.qz-x{width:40px;height:40px;border-radius:50%;border:0;background:var(--s2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+.qz-prog{flex:1;display:flex;gap:6px;}
+.qz-seg{flex:1;height:6px;border-radius:3px;background:var(--s3);transition:background .25s;}
+.qz-seg.on{background:var(--sun);}
+.qz-count{font-size:13px;font-weight:600;color:var(--muted);min-width:24px;text-align:right;}
+.qz-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:230px;}
+.qz-photo{height:200px;background:#2C2C2E center/cover no-repeat;position:relative;}
+.qz-photo.big{height:290px;}
+.qz-cap{position:absolute;left:14px;bottom:12px;background:rgba(0,0,0,.5);color:#fff;font-size:12px;padding:5px 10px;border-radius:100px;}
+.qz-main{padding:20px 18px 0;display:flex;flex-direction:column;gap:16px;}
+.qz-kick{font-size:11px;font-weight:600;letter-spacing:.9px;text-transform:uppercase;color:var(--sun-ink);}
+.qz-q{font-family:'DM Serif Display',serif;font-size:23px;line-height:1.22;margin-top:-8px;}
+.qz-opts{display:flex;flex-direction:column;gap:10px;}
+.qz-opt{min-height:52px;border-radius:14px;border:1.5px solid var(--border);background:var(--surface);font:500 16px 'DM Sans',sans-serif;color:var(--ink);text-align:left;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;transition:all .2s;}
+.qz-opt:active{transform:scale(.98);}
+.qz-opt.ok{border:2px solid #1F7A4D;background:#EEF7F1;color:#1F7A4D;font-weight:600;}
+.qz-opt.ko{border:2px solid #C2410C;background:#FFF1EB;color:#9A3412;}
+.qz-opt.dim{color:var(--muted);}
+.qz-opt:disabled{cursor:default;}
+.qz-fb{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-radius:24px 24px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.1);padding:20px 18px calc(22px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:10px;animation:czIn .22s ease-out;z-index:5;}
+.qz-fb-h{display:flex;align-items:center;gap:10px;font-family:'DM Serif Display',serif;font-size:23px;}
+.qz-fb-ic{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.qz-fb-ic.ok{background:var(--sun);color:var(--night);}
+.qz-fb-ic.ko{background:#FFF1EB;color:#C2410C;}
+.qz-fb-a{font-size:15px;font-weight:600;color:var(--ink);}
+.qz-fb-p{font-size:15px;line-height:1.55;color:var(--ink2);margin:0;}
+.qz-fb-b{display:flex;gap:10px;margin-top:4px;}
+.qz-b1{flex:1.3;height:50px;border-radius:14px;border:0;background:var(--night);color:#fff;font:600 15px 'DM Sans',sans-serif;cursor:pointer;}
+.qz-b1.wide{width:100%;flex:none;}
+.qz-b2{flex:1;height:50px;border-radius:14px;border:1.5px solid rgba(0,0,0,.1);background:var(--surface);color:var(--ink);font:600 15px 'DM Sans',sans-serif;cursor:pointer;}
+.qz-link{background:none;border:0;color:var(--night);font:600 14px 'DM Sans',sans-serif;padding:12px;cursor:pointer;}
+.qzr-hero{background:var(--night);color:#fff;padding:28px 20px 26px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;}
+.qzr-k{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--sun);}
+.qzr-score{font-family:'DM Serif Display',serif;font-size:60px;line-height:1;}
+.qzr-msg{font-size:15px;color:rgba(255,255,255,.78);}
+.qzr-st{margin-top:10px;display:inline-flex;align-items:center;gap:7px;background:rgba(244,197,66,.16);color:var(--sun);padding:8px 14px;border-radius:100px;font-size:14px;font-weight:600;}
+.qzr-main{padding:20px 16px 0;display:flex;flex-direction:column;gap:12px;}
+.qzr-lbl{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);}
+.qzr-list{background:var(--surface);border-radius:16px;overflow:hidden;}
+.qzr-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--border);}
+.qzr-row:last-child{border-bottom:0;}
+.qzr-th{width:44px;height:44px;border-radius:10px;background:#2C2C2E center/cover;flex-shrink:0;}
+.qzr-tx{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0;}
+.qzr-tx b{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.qzr-tx span{font-size:12px;color:var(--muted);}
+.qzr-ok{color:#1F7A4D;}
+.qzr-ko{color:#C2410C;}
+.qzr-go{background:var(--sun-bg);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:8px;}
+.qzr-gk{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--sun-ink);}
+.qzr-gt{font-family:'DM Serif Display',serif;font-size:18px;line-height:1.3;}
+.qzr-gb{align-self:flex-start;background:var(--night);color:#fff;border:0;border-radius:100px;font:600 14px 'DM Sans',sans-serif;padding:10px 16px;cursor:pointer;}
+.qzr-gn{font-size:11px;color:var(--muted);}
+.qzr-actions{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:6px;}
 .res-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
 .res-stars{display:flex;gap:2px;margin-top:10px;margin-left:-4px;}
 .rs-star{background:none;border:0;padding:4px;cursor:pointer;line-height:0;-webkit-tap-highlight-color:transparent;}
@@ -1160,6 +1235,13 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
   </div>
 </div>
 
+<!-- QUIZ -->
+<div class="screen" id="s-quiz">
+  <div class="qz-top"><button class="qz-x" id="qzClose" aria-label="Close quiz"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button><div class="qz-prog" id="qzProg"></div><div class="qz-count" id="qzCount"></div></div>
+  <div class="qz-body" id="qzBody"></div>
+  <div class="qz-fb" id="qzFb" hidden></div>
+</div>
+
 <!-- CHAT -->
 <div class="screen" id="s-chat">
   <div class="chat-hd">
@@ -1614,6 +1696,7 @@ var liveScanning = false;
 var chatTurns = [];         // the conversation the page keeps for the current artwork
 
 var LOCATION_RULE = 'For a building or monument, its own site. For an artwork, the museum or collection holding the original. For a work that exists in several originals (a woodblock print, an etching, a photograph, a cast sculpture), give the most famous public museum that holds one and add "multiple": true. Coordinates of that place, accurate to the city at least. Use null only if the original is lost or private, if you really do not know, or if this is a poster or mass-produced object with no original.';
+var QUIZ_RULE = 'Quiz: write exactly 3 multiple-choice questions that help the user remember this work later. Each has "q" (max 16 words, never giving the answer away), "options" (4 short answers, max 6 words each, all plausible and of the same kind), "answer" (index 0-3 of the right option; vary its position), "explain" (one or two sentences in the narrator voice, max 35 words, that teach why) and "visual" (true only if the answer can be seen in a photo of the work). Use only facts stated in the cards, so the user can have learned them. Mix the angles: a detail to look for, its story or maker, the surprise or where it is. For a book, never ask about its cover.';
 var SCAN_PROMPT = [
   'You are the narrator of Strata, a personal app that tells the story behind artworks, buildings, sculptures, books and natural wonders.',
   'Voice: a knowledgeable friend who finds everything slightly fascinating and cannot help sharing the strange part. Warm, vivid, precise. Never Wikipedia tone. No markdown.',
@@ -1649,8 +1732,10 @@ var SCAN_PROMPT = [
   '  "deep_dive": [ { "title": "a specific resource to go further (museum collection page, documentary, book, archive)", "source": "its website domain, e.g. metmuseum.org", "url": "the exact page URL if it appeared in your search results, otherwise empty string", "kind": "museum" | "video" | "read" } ],',
   '  "more_by": [ { "title": "another work by the same creator", "year": "year or c. date", "hook": "max 8 words, intriguing", "wiki": "exact English Wikipedia article title of this work, or empty string", "where": "museum or site holding it today, with its city, or empty string if unknown, private or a book", "colors": ["#hex", "#hex", "#hex"] } ],',
   '  "chat_intro": "one or two sentences inviting questions, in the narrator voice",',
-  '  "questions": ["three short follow-up questions a curious person would ask about this specific work, max 6 words each"]',
+  '  "questions": ["three short follow-up questions a curious person would ask about this specific work, max 6 words each"],',
+  '  "quiz": [ { "q": "...", "options": ["...", "...", "...", "..."], "answer": 0, "explain": "...", "visual": false } ]',
   '}',
+  QUIZ_RULE + ' If "identified" is false, "quiz" is an empty array.',
   'deep_dive: exactly 3 items. more_by: exactly 4 well-known works, not this one; colors are the 3 dominant colors of each work, from dark to light.'
 ].join('\n');
 
@@ -1911,7 +1996,7 @@ function renderLangSeg() {
 }
 function langRule() {
   var l = getLang(), name = LANGS[l];
-  return '\n\nLanguage: write every text value in ' + name + ' (title, medium, heads, bodies, hooks, more_by titles, deep_dive titles, chat_intro, questions, place). ' +
+  return '\n\nLanguage: write every text value in ' + name + ' (title, medium, heads, bodies, hooks, more_by titles, deep_dive titles, chat_intro, questions, quiz questions, options and explanations, place). ' +
     'Use the title the work is usually known by in ' + name + ' (e.g. "' + LANG_EX[l] + '"). Keep JSON keys, category values and "kind" values in English. ' +
     'Also add "title_en": the usual English title, used to recognise the same work across languages.';
 }
@@ -2271,7 +2356,8 @@ function trPick(d) {
     spark: d.spark || {}, story: d.story || {}, surprise: d.surprise || {},
     deep_dive: (d.deep_dive || []).map(function(x){ return { title: x.title || '' }; }),
     more_by: (d.more_by || []).map(function(x){ return { title: x.title || '', hook: x.hook || '' }; }),
-    chat_intro: d.chat_intro || '', questions: d.questions || [], place: (d.location && d.location.place) || '' };
+    chat_intro: d.chat_intro || '', questions: d.questions || [], place: (d.location && d.location.place) || '',
+    quiz: (Array.isArray(d.quiz) ? d.quiz : []).map(function(q){ return { q: q.q || '', options: q.options || [], explain: q.explain || '' }; }) };
 }
 function langView(d, lang) {
   lang = lang || getLang();
@@ -2431,6 +2517,7 @@ function renderJournal() {
   applyCatFilter();
   renderCal();
   document.querySelectorAll('.j-none[data-for]').forEach(function(e){ e.hidden = !!n; });
+  renderQuizCard();
 }
 
 (function(){
@@ -2521,6 +2608,252 @@ function renderTags() {
   document.getElementById('tagEdit').onclick = openTagSheet;
   renderStars();
 }
+
+// ─── QUIZ: three questions a day on what you scanned, with spaced repetition ─────
+var QZ_GAPS = [1, 7, 30, 90], QZ_MIN = 3, QZ_GEN_MAX = 5;
+var qz = { session: null, last: [] };
+var FLAME = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 4 5 6 5 11a5 5 0 0 1-10 0c0-2 1-3.5 2-4.5 0 2 1 3 2 3 0-3-1-6 1-9.5z"/></svg>';
+var CHECK = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+function dayStr(d) { d = d || new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function addDays(ds, n) { var p = ds.split('-'); return dayStr(new Date(+p[0], +p[1] - 1, +p[2] + n)); }
+function daysBetween(a, b) { var pa = a.split('-'), pb = b.split('-'); return Math.round((new Date(+pb[0], +pb[1] - 1, +pb[2]) - new Date(+pa[0], +pa[1] - 1, +pa[2])) / 864e5); }
+function cleanQuiz(arr) {
+  return (Array.isArray(arr) ? arr : []).filter(function(q){ return q && q.q && Array.isArray(q.options) && q.options.length >= 2 && q.options.length <= 5 && q.answer >= 0 && q.answer < q.options.length; }).slice(0, 3);
+}
+function quizEligible(r) { return !!(r && r.identified && r.data && r.data.identified !== false); }
+// The questions in the current language: the scan's own, a full translation, or a quiz made for this language
+function quizFor(r, lang) {
+  lang = lang || getLang(); var d = r.data; if (!d) return null;
+  var base = cleanQuiz(d.quiz), own = d.quizTr ? cleanQuiz(d.quizTr[lang]) : [];
+  if (!d.lang || d.lang === lang) return base.length ? base : own.length ? own : null;
+  if (own.length) return own;
+  var tr = d.tr && d.tr[lang] && d.tr[lang].quiz;
+  if (base.length && Array.isArray(tr) && tr.length === base.length) return base.map(function(q, i){
+    var x = tr[i] || {};
+    return Object.assign({}, q, { q: x.q || q.q, options: Array.isArray(x.options) && x.options.length === q.options.length ? x.options : q.options, explain: x.explain || q.explain });
+  });
+  return null;
+}
+function qzState(r) { return r.data.qz || { box: 0, due: addDays(dayStr(new Date(r.created_at)), 1), n: 0 }; }
+// Older scans (or a new language): questions made once, in the background, from the saved cards
+var qzGen = { busy: false, done: 0, tried: {} };
+async function makeQuiz(r, lang) {
+  var d = r.data, base = cleanQuiz(d.quiz), name = LANGS[lang], prompt;
+  if (base.length) prompt = 'Translate every string value of this JSON into ' + name + '. Keep the keys, the order and the "answer" numbers. Reply with only the JSON.\n\n' + JSON.stringify({ quiz: base });
+  else {
+    var v = langView(d, lang);
+    prompt = QUIZ_RULE + '\n\nWrite them in ' + name + ', using only facts from these cards:\n' + JSON.stringify({ title: v.title, creator: d.creator, date: d.date, category: d.category,
+      spark: v.spark && v.spark.body, story: v.story && v.story.body, surprise: v.surprise && v.surprise.body, place: v.location && v.location.place }) + '\n\nReply with only JSON: {"quiz": [...]}';
+  }
+  var j = parseJSON(await callClaude({ max_tokens: 1400, messages: [{ role: 'user', content: prompt }] }));
+  var q = cleanQuiz(j && j.quiz); if (q.length < 2) throw { code: 'invalid_json' };
+  if (!base.length && (!d.lang || d.lang === lang)) d.quiz = q; else { d.quizTr = d.quizTr || {}; d.quizTr[lang] = q; }
+  await saveLocal(r);
+}
+async function prepareQuizzes() {
+  if (qzGen.busy || !hasAI() || qzGen.done >= QZ_GEN_MAX) return;
+  var lang = getLang();
+  var todo = journal.filter(function(r){ return quizEligible(r) && !quizFor(r, lang) && !qzGen.tried[r.id + lang] && !(cleanQuiz(r.data.quiz).length && needsTr(r, lang) && trJobs[r.id + ':' + lang]); })
+    .sort(function(a, b){ return rating(b) - rating(a) || (a.created_at < b.created_at ? 1 : -1); });
+  if (!todo.length) return;
+  qzGen.busy = true;
+  for (var i = 0; i < todo.length && qzGen.done < QZ_GEN_MAX; i++) {
+    var r = todo[i]; qzGen.tried[r.id + lang] = 1;
+    try { await makeQuiz(r, lang); qzGen.done++; renderQuizCard(); }
+    catch (e) { if (e && /bad_key|no_credit|no_budget|pending_approval|network|session_expired|relay_not_configured/.test(e.code)) break; }
+  }
+  qzGen.busy = false;
+}
+function quizPool(exclude) {
+  var lang = getLang(), today = dayStr();
+  return journal.filter(function(r){ return quizEligible(r) && quizFor(r, lang) && (!exclude || exclude.indexOf(r.id) < 0); }).sort(function(a, b){
+    var sa = qzState(a), sb = qzState(b), da = sa.due <= today, db = sb.due <= today;
+    if (da !== db) return da ? -1 : 1;
+    if (!!sa.wrong !== !!sb.wrong) return sa.wrong ? -1 : 1;
+    var ra = rating(a), rb = rating(b); if (ra !== rb) return rb - ra;
+    return sa.due < sb.due ? -1 : sa.due > sb.due ? 1 : 0;
+  });
+}
+function quizStats() {
+  var q = getProfile().quiz || {}, today = dayStr();
+  var alive = q.last === today || q.last === addDays(today, -1);
+  return { doneToday: q.last === today, streak: alive ? (q.streak || 0) : 0, days: q.days || [] };
+}
+function markQuizDay() {
+  var pr = getProfile(), q = Object.assign({}, pr.quiz || {}), today = dayStr();
+  if (q.last === today) return;
+  q.streak = q.last === addDays(today, -1) ? (q.streak || 0) + 1 : 1;
+  q.best = Math.max(q.best || 0, q.streak); q.last = today;
+  q.days = (q.days || []).concat([today]).slice(-14);
+  pr.quiz = q; setProfile(pr);
+  pushProfile(false).catch(function(){});
+}
+function streakTxt(n) { return t(n === 1 ? '1 day in a row' : '{n} days in a row', { n: n }); }
+function listAnd(xs) { return xs.length < 2 ? (xs[0] || '') : xs.slice(0, -1).join(', ') + ' ' + t('and') + ' ' + xs[xs.length - 1]; }
+function recPhoto(r) {
+  if (photoURLs[r.id]) return photoURLs[r.id];
+  if (r.photo instanceof Blob) return (photoURLs[r.id] = URL.createObjectURL(r.photo));
+  return r.photo || r.thumb || '';
+}
+function weekDots(days) {
+  var now = new Date(), monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7)), today = dayStr();
+  var out = '';
+  for (var i = 0; i < 7; i++) {
+    var d = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i), ds = dayStr(d);
+    var cls = days.indexOf(ds) >= 0 ? 'on' : ds === today ? 'today' : '';
+    out += '<div class="qzc-day"><div class="qzc-dot ' + cls + '"></div>' + esc(d.toLocaleDateString(LOCALES[getLang()], { weekday: 'narrow' })) + '</div>';
+  }
+  return out;
+}
+function renderQuizCard() {
+  var body = document.querySelector('#s-home .home-body'); if (!body) return;
+  var el = document.getElementById('quizCard');
+  if (!el) { el = document.createElement('div'); el.id = 'quizCard'; el.addEventListener('click', onQuizCard); }
+  var fav = favSection(); if (el.nextSibling !== fav) body.insertBefore(el, fav.parentNode === body ? fav : body.firstChild);
+  var lang = getLang(), pool = quizPool(), eligible = journal.filter(quizEligible).length, st = quizStats(), s = qz.session;
+  if (eligible > pool.length) setTimeout(prepareQuizzes, 400);
+  if (pool.length < QZ_MIN && !(s && !s.finished)) { el.hidden = true; return; }
+  el.hidden = false;
+  if (s && !s.finished) {
+    el.innerHTML = '<button class="qzc qzc-mini" data-qz="resume"><span class="qzc-ic">' + FLAME + '</span><span class="qzc-mt"><b>' + t('Resume the quiz ({i}/{n})', { i: s.i + 1, n: s.items.length }) + '</b></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F4C542" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>';
+    return;
+  }
+  if (st.doneToday) {
+    el.innerHTML = '<div class="qzc qzc-mini"><span class="qzc-ic">' + FLAME + '</span><span class="qzc-mt"><b>' + t('Daily quiz done') + '</b><span>' + streakTxt(st.streak) + ' · ' + t('Come back tomorrow for the next one.') + '</span></span><button class="qzc-more" data-qz="more">' + t('Another quiz') + '</button></div>';
+    return;
+  }
+  var names = pool.slice(0, 3).map(function(r){ return rTitle(r); });
+  el.innerHTML = '<div class="qzc"><div class="qzc-head"><span class="qzc-k">' + t('Daily quiz') + '</span>' + (st.streak ? '<span class="qzc-st">' + FLAME + streakTxt(st.streak) + '</span>' : '') + '</div>' +
+    '<div class="qzc-t">' + t('Do you remember what you discovered?') + '</div>' +
+    '<div class="qzc-s">' + esc(t('3 questions on {a} · 1 minute', { a: listAnd(names) })) + '</div>' +
+    '<div class="qzc-week">' + weekDots(st.days) + '</div>' +
+    '<button class="qzc-go" data-qz="start">' + t('Start') + '</button></div>';
+}
+function onQuizCard(e) {
+  var b = e.target.closest('[data-qz]'); if (!b) return;
+  var a = b.getAttribute('data-qz');
+  if (a === 'resume') { show('s-quiz'); renderQuiz(); }
+  else startQuiz(a === 'more');
+}
+function shuffled(n) { var o = []; for (var i = 0; i < n; i++) o.push(i); for (var j = n - 1; j > 0; j--) { var k = Math.floor(Math.random() * (j + 1)), x = o[j]; o[j] = o[k]; o[k] = x; } return o; }
+function startQuiz(extra) {
+  var pool = quizPool(extra ? qz.last : null);
+  if (!pool.length) pool = quizPool();
+  if (!pool.length) { toast(t('Scan a few works first: the quiz is made from them.')); return; }
+  var items = pool.slice(0, 3).map(function(r){
+    var qs = quizFor(r), st = qzState(r), q = qs[(st.n || 0) % qs.length], order = shuffled(q.options.length);
+    return { id: r.id, q: { q: q.q, explain: q.explain || '', visual: !!q.visual, options: order.map(function(i){ return q.options[i]; }), answer: order.indexOf(q.answer) } };
+  });
+  qz.session = { items: items, i: 0, score: 0, answered: false, extra: !!extra, finished: false, results: [] };
+  show('s-quiz'); renderQuiz();
+}
+function qzRec(it) { return journal.find(function(r){ return r.id === it.id; }); }
+function renderQuiz() {
+  var s = qz.session; if (!s) { show('s-home'); return; }
+  document.getElementById('qzFb').hidden = true;
+  var n = s.items.length;
+  document.getElementById('qzProg').innerHTML = s.items.map(function(_, k){ return '<div class="qz-seg' + (k < s.i || (k === s.i && s.answered) || s.finished ? ' on' : '') + '"></div>'; }).join('');
+  document.getElementById('qzCount').textContent = s.finished ? '' : (s.i + 1) + '/' + n;
+  if (s.finished) return renderQuizResults();
+  var it = s.items[s.i], r = qzRec(it); if (!r) { s.i++; return s.i < n ? renderQuiz() : finishQuiz(); }
+  var v = rView(r);
+  document.getElementById('qzBody').innerHTML =
+    '<div class="qz-photo' + (it.q.visual ? ' big' : '') + '" style="background-image:url(\'' + recPhoto(r) + '\')"><span class="qz-cap">' + esc(t('Your photo · scanned {d}', { d: fmtDay(r.created_at) })) + '</span></div>' +
+    '<div class="qz-main"><div class="qz-kick">' + esc([v.title || r.title, v.artist_short || r.artist_short].filter(Boolean).join(' · ')) + '</div>' +
+    '<div class="qz-q">' + esc(it.q.q) + '</div>' +
+    '<div class="qz-opts">' + it.q.options.map(function(o, k){ return '<button class="qz-opt" data-o="' + k + '"><span>' + esc(o) + '</span></button>'; }).join('') + '</div></div>';
+  document.getElementById('qzBody').scrollTop = 0;
+}
+function answerQuiz(k) {
+  var s = qz.session; if (!s || s.answered || s.finished) return;
+  var it = s.items[s.i], r = qzRec(it), ok = k === it.q.answer;
+  s.answered = true; if (ok) s.score++;
+  document.querySelectorAll('#qzBody .qz-opt').forEach(function(b, j){
+    b.disabled = true;
+    if (j === it.q.answer) { b.classList.add('ok'); b.insertAdjacentHTML('beforeend', CHECK); }
+    else if (j === k) b.classList.add('ko'); else b.classList.add('dim');
+  });
+  document.querySelectorAll('#qzProg .qz-seg')[s.i].classList.add('on');
+  // spaced repetition: right answers come back later and later, a miss comes back tomorrow
+  if (r) {
+    var st = Object.assign({}, qzState(r)), today = dayStr(), len = (quizFor(r) || [1]).length;
+    if (ok) { st.box = Math.min((st.box || 0) + 1, QZ_GAPS.length - 1); st.wrong = false; } else { st.box = 0; st.wrong = true; }
+    st.due = addDays(today, QZ_GAPS[st.box]); st.n = ((st.n || 0) + 1) % len; st.last = today;
+    r.data.qz = st; saveLocal(r).catch(function(){});
+    s.results[s.i] = { id: r.id, ok: ok, due: st.due };
+  }
+  var last = s.i === s.items.length - 1, fb = document.getElementById('qzFb');
+  fb.innerHTML = '<div class="qz-fb-h"><span class="qz-fb-ic ' + (ok ? 'ok' : 'ko') + '">' + (ok ? CHECK : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><line x1="7" y1="7" x2="17" y2="17"/><line x1="17" y1="7" x2="7" y2="17"/></svg>') + '</span>' + (ok ? t('Well spotted!') : t('Not quite')) + '</div>' +
+    (ok ? '' : '<div class="qz-fb-a">' + esc(t('The answer: {a}', { a: it.q.options[it.q.answer] })) + '</div>') +
+    (it.q.explain ? '<p class="qz-fb-p">' + esc(it.q.explain) + '</p>' : '') +
+    '<div class="qz-fb-b"><button class="qz-b2" data-qf="card">' + t('Review the card') + '</button><button class="qz-b1" data-qf="next">' + (last ? t('See my results') : t('Next question')) + '</button></div>';
+  fb.hidden = false;
+}
+function nextQuiz() {
+  var s = qz.session; if (!s) return;
+  if (s.i >= s.items.length - 1) return finishQuiz();
+  s.i++; s.answered = false; renderQuiz();
+}
+function finishQuiz() {
+  var s = qz.session; if (!s) return;
+  s.finished = true; qz.last = s.items.map(function(it){ return it.id; });
+  markQuizDay(); renderQuiz(); renderQuizCard();
+}
+function dueTxt(due) {
+  var d = daysBetween(dayStr(), due);
+  if (d <= 1) return t('Next review tomorrow');
+  if (d < 14) return t('Next review in {n} days', { n: d });
+  if (d < 60) return t('Next review in {n} weeks', { n: Math.round(d / 7) });
+  return t('Next review in {n} months', { n: Math.round(d / 30) });
+}
+var qzSuggest = null;
+function renderQuizResults() {
+  var s = qz.session, n = s.items.length, st = quizStats();
+  var msg = s.score === n ? t('Perfect. Your memory is in good shape.') : s.score * 2 >= n ? t('Nicely done.') : t('These will come back soon, to stick.');
+  var rows = s.items.map(function(it, k){
+    var r = qzRec(it), res = s.results[k]; if (!r || !res) return '';
+    return '<div class="qzr-row"><div class="qzr-th" style="background-image:url(\'' + r.thumb + '\')"></div><div class="qzr-tx"><b>' + esc(rTitle(r)) + '</b><span>' + esc(dueTxt(res.due)) + '</span></div>' +
+      (res.ok ? '<span class="qzr-ok">' + CHECK + '</span>' : '<span class="qzr-ko"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="7" y1="7" x2="17" y2="17"/><line x1="17" y1="7" x2="7" y2="17"/></svg></span>') + '</div>';
+  }).join('');
+  // go further: a work linked to one you just reviewed, not yet in the journal
+  qzSuggest = null;
+  s.items.some(function(it){
+    var r = qzRec(it); if (!r) return false;
+    var v = rView(r), mb = (v.more_by || []).filter(function(w){ return w && w.title && !journal.some(function(x){ return normName(x.title) === normName(w.title) || normName(rTitle(x)) === normName(w.title); }); })[0];
+    if (!mb) return false;
+    var c = Array.isArray(mb.colors) ? mb.colors : [];
+    qzSuggest = { from: rTitle(r), title: mb.title, year: mb.year || '', where: mb.where || '', creator: r.data.creator || '', nature: ['plant', 'sky', 'mountain'].indexOf(r.data.category) >= 0,
+      colors: c.join(' '), thumb: '' };
+    return true;
+  });
+  var more = quizPool(qz.last).length > 0;
+  document.getElementById('qzBody').innerHTML =
+    '<div class="qzr-hero"><div class="qzr-k">' + t('Daily quiz finished') + '</div><div class="qzr-score">' + s.score + '/' + n + '</div><div class="qzr-msg">' + msg + '</div>' +
+    (st.streak ? '<div class="qzr-st">' + FLAME + streakTxt(st.streak) + '</div>' : '') + '</div>' +
+    '<div class="qzr-main"><div class="qzr-lbl">' + t('What you reviewed') + '</div><div class="qzr-list">' + rows + '</div>' +
+    (qzSuggest && hasAI() ? '<div class="qzr-go"><div class="qzr-gk">' + t('Go further') + '</div><div class="qzr-gt">' + esc(t('You reviewed {a}. Discover “{b}”.', { a: qzSuggest.from, b: qzSuggest.title })) + '</div><button class="qzr-gb" data-qf="discover">' + esc(t('Discover “{b}”', { b: qzSuggest.title })) + '</button>' + (strataMe ? '<div class="qzr-gn">' + t('Uses your credit, like a scan.') + '</div>' : '') + '</div>' : '') +
+    '<div class="qzr-actions"><button class="qz-b1 wide" data-qf="home">' + t('Back to the journal') + '</button>' + (more ? '<button class="qz-link" data-qf="again">' + t('Another quiz') + '</button>' : '') + '</div></div>';
+  document.getElementById('qzBody').scrollTop = 0;
+}
+document.getElementById('qzBody').addEventListener('click', function(e){
+  var o = e.target.closest('.qz-opt'); if (o) return answerQuiz(+o.getAttribute('data-o'));
+  qzAction(e);
+});
+document.getElementById('qzFb').addEventListener('click', qzAction);
+function qzAction(e) {
+  var b = e.target.closest('[data-qf]'); if (!b) return;
+  var a = b.getAttribute('data-qf'), s = qz.session;
+  if (a === 'next') nextQuiz();
+  else if (a === 'card') { var it = s && s.items[s.i]; document.getElementById('qzFb').hidden = true; if (s.i >= s.items.length - 1) finishQuiz(); else { s.i++; s.answered = false; } if (it) openScan(it.id); }
+  else if (a === 'home') { qz.session = null; show('s-home'); renderQuizCard(); }
+  else if (a === 'again') startQuiz(true);
+  else if (a === 'discover' && qzSuggest) { var sg = qzSuggest; qz.session = null; renderQuizCard(); workPicture(sg).then(function(pic){ runLiveScan(pic, { text: '"' + sg.title + '"' + (sg.nature ? '' : ' by ' + sg.creator) + (sg.year ? ' (' + sg.year + ')' : '') + (sg.where ? ', kept at ' + sg.where : '') }); }); }
+}
+document.getElementById('qzClose').addEventListener('click', function(){
+  if (qz.session && qz.session.finished) qz.session = null;
+  show('s-home'); renderQuizCard();
+});
+
 // ─── RATING: 1 to 5 stars, kept in the scan's data so it syncs ─────
 function rating(r) { var v = r && r.data && r.data.rating; return v >= 1 && v <= 5 ? Math.round(v) : 0; }
 function starsTxt(n) { return n ? '★★★★★'.slice(0, n) + '<span class="st-off">' + '★★★★★'.slice(n) + '</span>' : ''; }
@@ -3010,7 +3343,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.31';
+var APP_VERSION = '0.32';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -3127,7 +3460,7 @@ async function pushProfile(photoChanged) {
   } else if (photoChanged) {
     await sb('/storage/v1/object/photos/' + s.user.id + '/avatar.jpg', { method: 'DELETE' }).catch(function(){});
   }
-  await sb('/auth/v1/user', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ data: { name: pr.name || '', avatar_path: path, profile_updated_at: pr.updated_at || new Date().toISOString() } }) });
+  await sb('/auth/v1/user', { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ data: { name: pr.name || '', avatar_path: path, profile_updated_at: pr.updated_at || new Date().toISOString(), quiz: pr.quiz || null } }) });
 }
 // Pull the account's profile (name, photo, confirmed email) — on sign-in and after each sync
 async function pullProfile() {
@@ -3143,7 +3476,8 @@ async function pullProfile() {
   } else if (!md.profile_updated_at && (pr.name || pr.photo)) {
     pushProfile(true).catch(function(){});   // first sign-in from this phone: the account gets this profile
   }
-  if (changed) { setProfile(pr); renderProfile(); }
+  if (md.quiz && md.quiz.last && (!pr.quiz || !pr.quiz.last || md.quiz.last > pr.quiz.last)) { pr.quiz = md.quiz; changed = true; }
+  if (changed) { setProfile(pr); renderProfile(); if (typeof renderQuizCard === 'function') renderQuizCard(); }
 }
 document.getElementById('profGoSync').addEventListener('click', function(){ document.getElementById('profSheet').hidden = true; openDataSheet(); });
 
@@ -3973,6 +4307,39 @@ fr: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
   "Browse by Date": "Parcourir par date",
+  "Close quiz": "Fermer le quiz",
+  "1 day in a row": "1 jour d'affilée",
+  "{n} days in a row": "{n} jours d'affilée",
+  "and": "et",
+  "Resume the quiz ({i}/{n})": "Reprendre le quiz ({i}/{n})",
+  "Daily quiz done": "Quiz du jour terminé",
+  "Come back tomorrow for the next one.": "Le prochain demain.",
+  "Another quiz": "Encore un quiz",
+  "Daily quiz": "Quiz du jour",
+  "Do you remember what you discovered?": "Te souviens-tu de ce que tu as découvert ?",
+  "3 questions on {a} · 1 minute": "3 questions sur {a} · 1 minute",
+  "Start": "Commencer",
+  "Scan a few works first: the quiz is made from them.": "Scanne d'abord quelques œuvres : le quiz est fait à partir d'elles.",
+  "Your photo · scanned {d}": "Ta photo · scannée le {d}",
+  "Well spotted!": "Bien vu !",
+  "Not quite": "Pas tout à fait",
+  "The answer: {a}": "La bonne réponse : {a}",
+  "Review the card": "Revoir la fiche",
+  "See my results": "Voir le bilan",
+  "Next question": "Question suivante",
+  "Next review tomorrow": "Prochaine révision demain",
+  "Next review in {n} days": "Prochaine révision dans {n} jours",
+  "Next review in {n} weeks": "Prochaine révision dans {n} semaines",
+  "Next review in {n} months": "Prochaine révision dans {n} mois",
+  "Perfect. Your memory is in good shape.": "Parfait. Ta mémoire est en forme.",
+  "Nicely done.": "Bien joué.",
+  "These will come back soon, to stick.": "Elles reviendront bientôt, pour bien s'ancrer.",
+  "Daily quiz finished": "Quiz du jour terminé",
+  "What you reviewed": "Ce que tu as revu",
+  "Go further": "Pour aller plus loin",
+  "You reviewed {a}. Discover “{b}”.": "Tu as revu {a}. Découvre « {b} ».",
+  "Discover “{b}”": "Découvrir « {b} »",
+  "Back to the journal": "Retour au journal",
   "Any": "Toutes",
   "& up": "et +",
   "Filter by rating": "Filtrer par note",
@@ -4089,6 +4456,39 @@ es: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
   "Browse by Date": "Explorar por fecha",
+  "Close quiz": "Cerrar el quiz",
+  "1 day in a row": "1 día seguido",
+  "{n} days in a row": "{n} días seguidos",
+  "and": "y",
+  "Resume the quiz ({i}/{n})": "Seguir con el quiz ({i}/{n})",
+  "Daily quiz done": "Quiz del día hecho",
+  "Come back tomorrow for the next one.": "El próximo, mañana.",
+  "Another quiz": "Otro quiz",
+  "Daily quiz": "Quiz del día",
+  "Do you remember what you discovered?": "¿Recuerdas lo que descubriste?",
+  "3 questions on {a} · 1 minute": "3 preguntas sobre {a} · 1 minuto",
+  "Start": "Empezar",
+  "Scan a few works first: the quiz is made from them.": "Primero escanea algunas obras: el quiz se hace con ellas.",
+  "Your photo · scanned {d}": "Tu foto · escaneada el {d}",
+  "Well spotted!": "¡Bien visto!",
+  "Not quite": "No exactamente",
+  "The answer: {a}": "La respuesta: {a}",
+  "Review the card": "Volver a la ficha",
+  "See my results": "Ver el resultado",
+  "Next question": "Siguiente pregunta",
+  "Next review tomorrow": "Próximo repaso mañana",
+  "Next review in {n} days": "Próximo repaso en {n} días",
+  "Next review in {n} weeks": "Próximo repaso en {n} semanas",
+  "Next review in {n} months": "Próximo repaso en {n} meses",
+  "Perfect. Your memory is in good shape.": "Perfecto. Tu memoria está en forma.",
+  "Nicely done.": "Bien hecho.",
+  "These will come back soon, to stick.": "Volverán pronto, para que se queden.",
+  "Daily quiz finished": "Quiz del día terminado",
+  "What you reviewed": "Lo que repasaste",
+  "Go further": "Para ir más lejos",
+  "You reviewed {a}. Discover “{b}”.": "Repasaste {a}. Descubre «{b}».",
+  "Discover “{b}”": "Descubrir «{b}»",
+  "Back to the journal": "Volver al diario",
   "Any": "Todas",
   "& up": "o más",
   "Filter by rating": "Filtrar por nota",
