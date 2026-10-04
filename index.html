@@ -515,6 +515,8 @@ label.key-btn{text-align:center;display:block;}
 .qzr-gn{font-size:11px;color:var(--muted);}
 .qzr-actions{display:flex;flex-direction:column;align-items:center;gap:2px;margin-top:6px;}
 .res-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.res-spot{margin-top:10px;display:inline-flex;align-items:center;gap:6px;font:600 12px 'DM Sans',sans-serif;color:var(--night);background:var(--sun);border:0;border-radius:100px;padding:8px 13px;cursor:pointer;}
+.res-spot:disabled{opacity:.6;}
 .res-stars{display:flex;gap:2px;margin-top:10px;margin-left:-4px;}
 .rs-star{background:none;border:0;padding:4px;cursor:pointer;line-height:0;-webkit-tap-highlight-color:transparent;}
 .rs-star svg{fill:none;stroke:rgba(255,255,255,.75);transition:fill .15s,stroke .15s,transform .15s;}
@@ -1300,7 +1302,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
     <button class="hero-btn" id="btn-share" aria-label="Share"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
   </div>
   <div style="flex:1 0 150px;"></div>
-  <div class="res-title"><div class="res-name" id="resName"></div><div class="res-meta" id="resMeta"></div><div class="res-where" id="resWhere" hidden></div><div class="res-tags" id="resTags" hidden></div><div class="res-stars" id="resStars" hidden role="radiogroup" aria-label="Your rating"></div></div>
+  <div class="res-title"><div class="res-name" id="resName"></div><div class="res-meta" id="resMeta"></div><div class="res-where" id="resWhere" hidden></div><div class="res-tags" id="resTags" hidden></div><div class="res-stars" id="resStars" hidden role="radiogroup" aria-label="Your rating"></div><button class="res-spot" id="resSpot" hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>I am still here: place it here</button></div>
   <div class="res-sheet" style="height:auto;">
     <div class="sheet-handle"></div>
     <div class="car-header">
@@ -1493,6 +1495,14 @@ function practicalCard(a) {
   if (entryNote) rows = '<p class="go-entry">' + entryNote + '</p>' + rows;
   return cardHTML('cc-go', ICO.go, kind === 'visit' ? t('Visit · Plan it') : t('Where to see it'), head, '<div class="lnk-list">' + rows + '</div>' + (kind === 'see' ? '<p class="go-note">' + (loc.multiple ? t('Several originals exist, in other museums too.') + ' ' : '') + t('Works travel and rest in storage: check that it is on display before you go.') + '</p>' : ''));
 }
+function renderWhere(a) {
+  var loc = a.raw && a.raw.location, wh = document.getElementById('resWhere');
+  wh.hidden = !(loc && (loc.place || loc.city || (loc.seen && isFinite(loc.lat))));
+  wh.setAttribute('role', 'button'); wh.tabIndex = 0;
+  if (wh.hidden) return;
+  if (loc.seen) { wh.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + esc(t('Spotted here · {d}', { d: fmtDay(loc.seen_at || new Date().toISOString()) })); return; }
+  wh.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + (a.raw.category === 'architecture' ? esc([loc.place, loc.city].filter(Boolean).join(', ')) : t(loc.multiple ? 'One original at {p}' : 'Original at {p}', { p: esc([loc.place, loc.city].filter(Boolean).join(', ')) }));
+}
 function updateMapBtn() {
   var a = ARTS[currentArt], rec = a && a.journalId && journal.find(function(r){ return r.id === a.journalId; });
   document.getElementById('btn-res-map').hidden = !(rec && hasLoc(rec));
@@ -1553,10 +1563,7 @@ function renderArt(key) {
   document.querySelector('#s-result .id-chip').lastChild.textContent = a.live && !a.identified ? t('Best guess') : t('Identified');
   document.getElementById('resName').textContent = a.title;
   document.getElementById('resMeta').innerHTML = a.meta.join(' <div class="mdot"></div> ');
-  var loc = a.raw && a.raw.location, wh = document.getElementById('resWhere');
-  wh.hidden = !(loc && (loc.place || loc.city));
-  wh.setAttribute('role', 'button'); wh.tabIndex = 0;
-  if (!wh.hidden) wh.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>' + (a.raw.category === 'architecture' ? esc([loc.place, loc.city].filter(Boolean).join(', ')) : t(loc.multiple ? 'One original at {p}' : 'Original at {p}', { p: esc([loc.place, loc.city].filter(Boolean).join(', ')) }));
+  renderWhere(a);
   var links = a.links.map(function(l){ return '<a class="lnk-row" target="_blank" rel="noopener" href="' + (l[3] || 'https://www.google.com/search?q=' + encodeURIComponent((l[1] + ' ' + l[2]).replace(/&amp;/g,'&'))) + '"><div class="lnk-ico" style="background:' + LNK[l[0]][0] + ';">' + LNK[l[0]][1] + '</div><div><div class="lnk-name">' + l[1] + '</div><div class="lnk-url">' + l[2] + '</div></div></a>'; }).join('');
   document.getElementById('carTrack').innerHTML =
     cardHTML('cc-spark', ICO.spark, t('Spark · 15 sec'), a.spark[0], '<div class="c-body">' + a.spark[1] + '</div><div class="c-more" style="color:rgba(255,255,255,.4);">' + ICO.arrow + t('Swipe for more') + '</div>') +
@@ -1950,7 +1957,8 @@ async function runLiveScan(file, opts) {
     if (!d.lang) d.lang = getLang();
     d.loc_v = 2;
     ARTS.live = toArt(d, url);
-    saveScan(d, file).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; refreshPracticalCard(); loadJournal().then(function(){ if (currentArt === 'live') { renderTags(); updateMapBtn(); } }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
+    var posP = opts.camera && isSeenCat(d) ? getPos().catch(function(){ return null; }) : null;
+    saveScan(d, file).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; refreshPracticalCard(); loadJournal().then(function(){ if (currentArt === 'live') { renderTags(); updateMapBtn(); } if (posP) posP.then(function(pos){ if (pos) setSpot(id, pos, false); }); }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
       .catch(function(){ toast(t('Could not save this scan on this device')); });
     currentArt = 'live';
     renderedChat = null;
@@ -2014,14 +2022,14 @@ function pickPhoto(withCamera, e) {
 ['camInput','libInput'].forEach(function(id){
   document.getElementById(id).addEventListener('change', function(e){
     var f = e.target.files && e.target.files[0];
-    if (f) { window._lastPhoto = f; runLiveScan(f); }
+    if (f) { window._lastPhoto = f; window._lastOpts = id === 'camInput' ? { camera: true } : {}; runLiveScan(f, window._lastOpts); }
   });
 });
 document.getElementById('btn-shutter').addEventListener('click', function(e){ pickPhoto(true, e); });
 document.getElementById('btn-cam-gallery').addEventListener('click', function(e){ pickPhoto(false, e); });
 document.getElementById('scanCancel').addEventListener('click', function(){ if (liveScanCtl) liveScanCtl.abort(); else show(getCamPref() === 'viewfinder' ? 's-camera' : 's-home'); });
 document.getElementById('scanOwnKey').addEventListener('click', function(){ show('s-home'); openKeySheet(); var o = document.getElementById('ownKey'); if (o) o.open = true; });
-document.getElementById('scanRetry').addEventListener('click', function(){ if (window._lastPhoto) runLiveScan(window._lastPhoto); });
+document.getElementById('scanRetry').addEventListener('click', function(){ if (window._lastPhoto) runLiveScan(window._lastPhoto, window._lastOpts || {}); });
 document.getElementById('scanBack').addEventListener('click', function(){ show(getCamPref() === 'viewfinder' ? 's-camera' : 's-home'); });
 
 // Live chat: standing instructions as a leading user turn, then the conversation
@@ -2282,7 +2290,7 @@ function captureFrame() {
   var c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight;
   c.getContext('2d').drawImage(v, 0, 0);
   var vf = document.getElementById('camVf'); vf.classList.remove('cam-flash'); void vf.offsetWidth; vf.classList.add('cam-flash');
-  c.toBlob(function(b){ if (b) { window._lastPhoto = b; runLiveScan(b); } }, 'image/jpeg', 0.9);
+  c.toBlob(function(b){ if (b) { window._lastPhoto = b; window._lastOpts = { camera: true }; runLiveScan(b, window._lastOpts); } }, 'image/jpeg', 0.9);
 }
 
 function setMode(isLive) {
@@ -2690,11 +2698,11 @@ var PENCIL = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke
 function currentRec() { var a = ARTS[currentArt]; return a && a.journalId ? journal.find(function(r){ return r.id === a.journalId; }) : null; }
 function renderTags() {
   var el = document.getElementById('resTags'), r = currentRec();
-  el.hidden = !r; if (!r) { document.getElementById('resStars').hidden = true; return; }
+  el.hidden = !r; if (!r) { document.getElementById('resStars').hidden = true; document.getElementById('resSpot').hidden = true; return; }
   el.innerHTML = scanCats(r).map(function(c){ return '<span class="res-tag">' + t(TAG_LABEL[c] || c) + '</span>'; }).join('') +
     '<button class="res-tag" id="tagEdit" aria-label="' + t('Edit categories') + '">' + PENCIL + t('Edit') + '</button>';
   document.getElementById('tagEdit').onclick = openTagSheet;
-  renderStars();
+  renderStars(); renderSpotBtn();
 }
 
 // ─── QUIZ: three questions a day on what you scanned, with spaced repetition ─────
@@ -3147,6 +3155,39 @@ document.getElementById('nrDisc').addEventListener('click', async function(){
   runLiveScan(pic, { text: '"' + p.title + '"' + (p.desc ? ' (' + p.desc + ')' : '') + ', at ' + p.lat.toFixed(4) + ',' + p.lng.toFixed(4) });
 });
 
+
+// ─── WHERE YOU SPOTTED IT: plants and sky are placed where they were scanned ─────
+var SEEN_CATS = ['plant', 'sky'];
+function isSeenCat(d) { return !!(d && SEEN_CATS.indexOf(d.category) >= 0); }
+function getPos() {
+  return new Promise(function(res, rej){
+    if (!navigator.geolocation) return rej({ code: 'nogeo' });
+    navigator.geolocation.getCurrentPosition(function(p){ res({ lat: p.coords.latitude, lng: p.coords.longitude }); },
+      function(e){ rej({ code: e && e.code === 1 ? 'denied' : 'unavailable' }); }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 });
+  });
+}
+async function setSpot(id, pos, manual) {
+  var r = journal.find(function(x){ return x.id === id; }); if (!r) return;
+  var loc = { place: '', city: '', country: '', lat: pos.lat, lng: pos.lng, seen: true, seen_at: manual ? new Date().toISOString() : r.created_at };
+  r.data.location = loc; r.data.loc_v = 2;
+  await saveLocal(r).catch(function(){});
+  [ARTS.live, ARTS['j_' + id]].forEach(function(a){ if (a && a.journalId === id && a.raw) a.raw.location = loc; });
+  var a = ARTS[currentArt];
+  if (a && a.journalId === id && document.getElementById('s-result').classList.contains('active')) { renderWhere(a); updateMapBtn(); renderSpotBtn(); }
+  toast(t('Saved where you spotted it'));
+}
+function renderSpotBtn() {
+  var b = document.getElementById('resSpot'), r = currentRec();
+  b.hidden = !(r && isSeenCat(r.data) && !hasLoc(r));
+}
+document.getElementById('resSpot').addEventListener('click', function(){
+  var r = currentRec(), b = this; if (!r) return;
+  b.disabled = true;
+  getPos().then(function(pos){ return setSpot(r.id, pos, true); }).catch(function(e){
+    toast(e && e.code === 'denied' ? t('Position not allowed. Allow it in Settings → Safari → Location.') : t('Your position could not be found.'));
+  }).then(function(){ b.disabled = false; });
+});
+
 // ─── RATING: 1 to 5 stars, kept in the scan's data so it syncs ─────
 function rating(r) { var v = r && r.data && r.data.rating; return v >= 1 && v <= 5 ? Math.round(v) : 0; }
 function starsTxt(n) { return n ? '★★★★★'.slice(0, n) + '<span class="st-off">' + '★★★★★'.slice(n) + '</span>' : ''; }
@@ -3188,8 +3229,8 @@ document.getElementById('tagSheet').addEventListener('click', function(e){ if (e
 
 var lmap = null, mapLayer = null, mapPlace = null, locating = false, mapCats = [];
 function hasLoc(r) { var l = r.data && r.data.location; return !!(l && isFinite(l.lat) && isFinite(l.lng)); }
-function placeKey(l) { return (l.place || '') + '|' + (l.city || ''); }
-function placeLabel(l) { return [l.place, l.city].filter(Boolean).join(', '); }
+function placeKey(l) { return l.seen ? 'seen|' + (+l.lat).toFixed(5) + ',' + (+l.lng).toFixed(5) : (l.place || '') + '|' + (l.city || ''); }
+function placeLabel(l) { return l.seen ? t('Where you spotted it') : [l.place, l.city].filter(Boolean).join(', '); }
 
 function renderMap() {
   var located = journal.filter(hasLoc), list = document.getElementById('mapList');
@@ -3244,7 +3285,7 @@ document.getElementById('mapCats').addEventListener('click', function(e){
 document.getElementById('mapCount').addEventListener('click', function(){ if (mapPlace) { mapPlace = null; renderMap(); } });
 
 // Scans saved before locations existed: ask Claude once per scan, text only
-function needsLocate(r) { return r.data && r.identified && (!('location' in r.data) || (r.data.location === null && r.data.loc_v !== 2)); }
+function needsLocate(r) { return r.data && r.identified && !isSeenCat(r.data) && (!('location' in r.data) || (r.data.location === null && r.data.loc_v !== 2)); }
 async function locateRec(r) {
   var text = await callClaude({ max_tokens: 300, messages: [{ role: 'user', content:
     'Where is the original of "' + r.title + '" by ' + (r.creator || 'an unknown creator') + ' kept or located today? ' + LOCATION_RULE +
@@ -3636,7 +3677,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.34';
+var APP_VERSION = '0.35';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -4600,6 +4641,12 @@ fr: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifiez votre connexion.",
   "Browse by Date": "Parcourir par date",
+  "Spotted here · {d}": "Repérée ici · {d}",
+  "I am still here: place it here": "Je suis encore là : placer ici",
+  "Saved where you spotted it": "Lieu enregistré",
+  "Where you spotted it": "Là où tu l'as repérée",
+  "Position not allowed. Allow it in Settings → Safari → Location.": "Position non autorisée. Autorise-la dans Réglages → Safari → Position.",
+  "Your position could not be found.": "Ta position est introuvable.",
   "Around me": "Autour de moi",
   "Around you": "Autour de toi",
   "Change city": "Changer de ville",
@@ -4783,6 +4830,12 @@ es: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
   "Browse by Date": "Explorar por fecha",
+  "Spotted here · {d}": "Vista aquí · {d}",
+  "I am still here: place it here": "Sigo aquí: situarla aquí",
+  "Saved where you spotted it": "Lugar guardado",
+  "Where you spotted it": "Donde la viste",
+  "Position not allowed. Allow it in Settings → Safari → Location.": "Ubicación no permitida. Permítela en Ajustes → Safari → Ubicación.",
+  "Your position could not be found.": "No se encontró tu ubicación.",
   "Around me": "Cerca de mí",
   "Around you": "A tu alrededor",
   "Change city": "Cambiar de ciudad",
