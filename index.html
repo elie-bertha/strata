@@ -2248,6 +2248,21 @@ function makeLive() {
 
 // Real thumbnails for "More by", from Wikipedia (free, no key)
 function jget(u) { return fetch(u).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }); }
+// The lead image of Wikipedia articles, including the small reproductions Wikipedia shows for works still under copyright
+async function wikiImages(lang, titles) {
+  var out = {}; titles = titles.filter(Boolean);
+  for (var i = 0; i < titles.length; i += 50) {
+    var batch = titles.slice(i, i + 50);
+    var j = await jget('https://' + lang + '.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=pageimages&piprop=thumbnail&pithumbsize=400&pilicense=any&pilimit=50&titles=' + encodeURIComponent(batch.join('|')));
+    if (!j || !j.query) continue;
+    var back = {};   // map normalised and redirected titles back to what was asked
+    batch.forEach(function(x){ back[x] = x; });
+    (j.query.normalized || []).forEach(function(n){ back[n.to] = back[n.from] || back[n.to] || n.from; });
+    (j.query.redirects || []).forEach(function(n){ back[n.to] = back[n.from] || back[n.to] || n.from; });
+    Object.keys(j.query.pages || {}).forEach(function(k){ var pg = j.query.pages[k]; if (pg.thumbnail && back[pg.title]) out[back[pg.title]] = pg.thumbnail.source; });
+  }
+  return out;
+}
 async function findThumb(wiki, q, book) {
   var j;
   if (book) {
@@ -2257,9 +2272,10 @@ async function findThumb(wiki, q, book) {
   if (wiki) {
     j = await jget('https://en.wikipedia.org/api/rest_v1/page/summary/' + encodeURIComponent(wiki.replace(/ /g, '_')));
     if (j && j.thumbnail && j.thumbnail.source) return j.thumbnail.source;
+    var im = await wikiImages('en', [wiki]); if (im[wiki]) return im[wiki];
   }
   if (q) {
-    j = await jget('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=3&prop=pageimages&piprop=thumbnail&pithumbsize=400&gsrsearch=' + encodeURIComponent(q));
+    j = await jget('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=3&prop=pageimages&piprop=thumbnail&pithumbsize=400&pilicense=any&gsrsearch=' + encodeURIComponent(q));
     var pages = j && j.query && j.query.pages ? Object.values(j.query.pages).sort(function(a, b){ return a.index - b.index; }) : [];
     for (var k = 0; k < pages.length; k++) if (pages[k].thumbnail) return pages[k].thumbnail.source;
     j = await jget('https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrnamespace=6&gsrlimit=1&prop=imageinfo&iiprop=url&iiurlwidth=400&gsrsearch=' + encodeURIComponent(q));
@@ -3016,11 +3032,11 @@ function nrClass(types) {
 }
 async function nrQuery(pos, km) {
   var lang = wikiLang(), all = NR_TYPES.art.concat(NR_TYPES.museum, NR_TYPES.arch);
-  var q = 'SELECT ?item ?itemLabel ?itemDescription ?loc ?img ?n ?type ?heritage ?article WHERE { ' +
+  var q = 'SELECT ?item ?itemLabel ?itemDescription ?loc ?img ?n ?type ?heritage ?article ?enA WHERE { ' +
     'SERVICE wikibase:around { ?item wdt:P625 ?loc . bd:serviceParam wikibase:center "Point(' + pos.lng + ' ' + pos.lat + ')"^^geo:wktLiteral . bd:serviceParam wikibase:radius "' + km + '" . } ' +
     '{ VALUES ?type { ' + all.map(function(x){ return 'wd:' + x; }).join(' ') + ' } ?item wdt:P31 ?type . } UNION { ?item wdt:P1435 ?h . BIND(1 AS ?heritage) } ' +
     '?item wikibase:sitelinks ?n . FILTER(?n > 0) OPTIONAL { ?item wdt:P18 ?img } ' +
-    'OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://' + lang + '.wikipedia.org/> . } ' +
+    'OPTIONAL { ?article schema:about ?item ; schema:isPartOf <https://' + lang + '.wikipedia.org/> . } OPTIONAL { ?enA schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . } ' +
     'SERVICE wikibase:label { bd:serviceParam wikibase:language "' + lang + ',en". } } ORDER BY DESC(?n) LIMIT 500';
   var j = await jget('https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(q));
   var rows = (j && j.results && j.results.bindings) || [], by = {};
@@ -3030,7 +3046,7 @@ async function nrQuery(pos, km) {
       var m = /Point\(([-\d.]+) ([-\d.]+)\)/.exec(b.loc && b.loc.value || ''); if (!m) return;
       var title = b.itemLabel && b.itemLabel.value; if (!title || /^Q\d+$/.test(title)) return;
       x = by[id] = { qid: id, title: title, desc: b.itemDescription ? b.itemDescription.value : '', lat: +m[2], lng: +m[1], fame: +(b.n && b.n.value) || 0,
-        thumb: b.img ? cImg(b.img.value) : '', article: b.article ? decodeURIComponent(b.article.value.split('/wiki/').pop()).replace(/_/g, ' ') : '', types: [], heritage: false };
+        thumb: b.img ? cImg(b.img.value) : '', article: b.article ? decodeURIComponent(b.article.value.split('/wiki/').pop()).replace(/_/g, ' ') : '', enTitle: b.enA ? wikiTitle(b.enA.value) : '', types: [], heritage: false };
     }
     if (b.type) { var tq = b.type.value.split('/').pop(); if (x.types.indexOf(tq) < 0) x.types.push(tq); }
     if (b.heritage) x.heritage = true;
@@ -3048,7 +3064,7 @@ async function nrSearch(pos) {
       NR.radius = radii[i] * 1000;
       return items.map(function(x, k){
         var at = { lat: x.lat, lng: x.lng }, d = distM(pos, at), kind = nrClass(x.types);
-        return { id: x.qid, qid: x.qid, title: x.title, desc: x.desc, extract: '', article: x.article, thumb: x.thumb, lat: x.lat, lng: x.lng, dist: d, kind: kind, fame: x.fame, lang: lang,
+        return { id: x.qid, qid: x.qid, title: x.title, desc: x.desc, extract: '', article: x.article, enTitle: x.enTitle, locTitle: x.article, thumb: x.thumb, lat: x.lat, lng: x.lng, dist: d, kind: kind, fame: x.fame, lang: lang,
           score: Math.log(1 + x.fame) * 2.2 - d / 900 + (kind === 'museum' ? 1.5 : 0) + (x.heritage ? 0.3 : 0) };
       }).sort(function(a, b){ return b.score - a.score; }).slice(0, 40);
     }
@@ -3064,12 +3080,25 @@ async function nrExtract(p) {
   return p.extract;
 }
 // Paintings and sculptures that the nearby museums hold, from Wikidata, most famous first
+function wikiTitle(url) { return decodeURIComponent(url.split('/wiki/').pop()).replace(/_/g, ' '); }
+// No free image: try the lead image of the Wikipedia article, in English then in the app language
+async function nrFillImages(items, lang) {
+  try {
+    var need = items.filter(function(x){ return !x.thumb && x.enTitle; }), im = await wikiImages('en', need.map(function(x){ return x.enTitle; }));
+    need.forEach(function(x){ if (im[x.enTitle]) x.thumb = im[x.enTitle]; });
+    if (lang !== 'en') {
+      need = items.filter(function(x){ return !x.thumb && x.locTitle; }); im = await wikiImages(lang, need.map(function(x){ return x.locTitle; }));
+      need.forEach(function(x){ if (im[x.locTitle]) x.thumb = im[x.locTitle]; });
+    }
+  } catch (e) {}
+}
 async function nrWorks(museums) {
   var qs = museums.filter(function(m){ return m.qid; }).slice(0, 12); if (!qs.length) return [];
   var lang = wikiLang();
-  var q = 'SELECT ?item ?itemLabel ?museum ?img ?creatorLabel ?kind ?n WHERE { VALUES ?museum { ' + qs.map(function(m){ return 'wd:' + m.qid; }).join(' ') + ' } ' +
+  var q = 'SELECT ?item ?itemLabel ?museum ?img ?creatorLabel ?kind ?n ?enA ?locA WHERE { VALUES ?museum { ' + qs.map(function(m){ return 'wd:' + m.qid; }).join(' ') + ' } ' +
     '?item wdt:P195 ?museum . { ?item wdt:P31 wd:Q3305213 . BIND("painting" AS ?kind) } UNION { ?item wdt:P31 wd:Q860861 . BIND("sculpture" AS ?kind) } ' +
     '?item wikibase:sitelinks ?n . FILTER(?n > 1) OPTIONAL { ?item wdt:P18 ?img } OPTIONAL { ?item wdt:P170 ?creator } ' +
+    'OPTIONAL { ?enA schema:about ?item ; schema:isPartOf <https://en.wikipedia.org/> . } OPTIONAL { ?locA schema:about ?item ; schema:isPartOf <https://' + lang + '.wikipedia.org/> . } ' +
     'SERVICE wikibase:label { bd:serviceParam wikibase:language "' + lang + ',en". } } ORDER BY DESC(?n) LIMIT 120';
   var j = await jget('https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(q));
   var rows = (j && j.results && j.results.bindings) || [], seen = {}, out = [];
@@ -3079,9 +3108,12 @@ async function nrWorks(museums) {
     var mq = b.museum.value.split('/').pop(), museum = qs.filter(function(m){ return m.qid === mq; })[0]; if (!museum) return;
     seen[id] = 1;
     out.push({ qid: id, title: title, creator: b.creatorLabel && !/^Q\d+$/.test(b.creatorLabel.value) ? b.creatorLabel.value : '', kind: b.kind.value,
-      thumb: b.img ? cImg(b.img.value, 400) : '', museum: museum, dist: museum.dist, fame: +(b.n && b.n.value) || 0 });
+      thumb: b.img ? cImg(b.img.value, 400) : '', museum: museum, dist: museum.dist, fame: +(b.n && b.n.value) || 0,
+      enTitle: b.enA ? wikiTitle(b.enA.value) : '', locTitle: b.locA ? wikiTitle(b.locA.value) : '' });
   });
-  return out.slice(0, 60);
+  out = out.slice(0, 60);
+  await nrFillImages(out, lang);
+  return out;
 }
 function nrInJournal(pl) {
   var n = normName(pl.title);
@@ -3137,6 +3169,7 @@ async function nrLoad(pos) {
   NR.works = [];
   try { NR.places = await nrSearch(pos); } catch (e) { NR.places = []; }
   NR.busy = false; renderNear();
+  if (NR.places.some(function(p){ return !p.thumb; })) { await nrFillImages(NR.places, wikiLang()); if (NR.pos === pos) renderNear(); }
   try { NR.works = await nrWorks(NR.places.filter(function(p){ return p.kind === 'museum'; })); } catch (e) { NR.works = []; }
   if (NR.pos === pos) renderNear();
 }
@@ -3799,7 +3832,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.41';
+var APP_VERSION = '0.42';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
