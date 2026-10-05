@@ -13,7 +13,16 @@ const ANTHROPIC_KEY = Deno.env.get('ANTHROPIC_API_KEY') || '';
 
 const MODELS = ['claude-sonnet-5-5', 'claude-sonnet-4-6'];
 // US dollars per million tokens [input, output]. Check claude.com/pricing if Anthropic changes them.
-const PRICE: Record<string, number[]> = { 'claude-sonnet-5-5': [3, 15], 'claude-sonnet-4-6': [3, 15] };
+const PRICE: Record<string, number[]> = { 'claude-sonnet-5-5': [2, 10], 'claude-sonnet-4-6': [3, 15], 'claude-haiku-4-5': [1, 5] };
+
+// Cost of one Claude answer, in millionths of a dollar, from its usage block
+function costOf(model: string, u: any) {
+  const p = PRICE[model] || [3, 15];
+  const searches = (u.server_tool_use && u.server_tool_use.web_search_requests) || 0;
+  const inTok = (u.input_tokens || 0) + (u.cache_creation_input_tokens || 0) + (u.cache_read_input_tokens || 0);
+  return { inTok, outTok: u.output_tokens || 0, searches, cost: Math.ceil(inTok * p[0] + (u.output_tokens || 0) * p[1] + searches * SEARCH_MICRO) };
+}
+const tag = (f: any) => String(f || '').replace(/[^a-z0-9_]/gi, '').slice(0, 24) || null;
 const SEARCH_MICRO = 10000;            // web search: $10 per 1,000 searches
 const ADMIN_INVITE_CENTS = 200;        // $2 offered with each invitation sent by the admin
 const MAX_TOPUP_CENTS = 2000;
@@ -103,6 +112,15 @@ Deno.serve(async (req) => {
       requested_cents: prof.requested_cents || 0, inviter: await nameOf(prof.invited_by), payer: prof.server_paid ? admin : '', approver: admin, friends: friends || 0, pending: pending || 0 });
   }
 
+  // Calls made with the user's own Claude key: recorded to measure speed and cost, never charged to any credit
+  if (action === 'log') {
+    const u = body.usage || {}, model = String(body.model || '').slice(0, 40);
+    const c = costOf(model, u);
+    await db.from('usage').insert({ user_id: user.id, model, input_tokens: c.inTok, output_tokens: c.outTok, searches: c.searches, cost_micro: c.cost,
+      feature: tag(body.feature), ms: Math.max(0, Math.min(Number(body.ms) || 0, 600000)), via: 'own' });
+    return json({ ok: true });
+  }
+
   if (action === 'claude') {
     const left = remaining(prof);
     if (left !== null && left <= 0) return json({ error: prof.requested_cents > 0 ? 'pending_approval' : 'no_budget', remaining_micro: 0 }, 402);
@@ -114,6 +132,7 @@ Deno.serve(async (req) => {
     if (Array.isArray(b.tools)) payload.tools = b.tools.filter((t: any) => t && /^web_search/.test(t.type)).map((t: any) => ({ ...t, max_uses: Math.min(t.max_uses || 3, 3) }));
     if (!Array.isArray(payload.messages)) return json({ error: 'bad_request' }, 400);
     let res: Response | null = null, data: any = null, model = '';
+    const t0 = Date.now();
     for (const m of MODELS) {
       model = m;
       res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -127,13 +146,11 @@ Deno.serve(async (req) => {
       break;
     }
     if (res && res.ok && data && data.usage) {
-      const u = data.usage, p = PRICE[model] || [3, 15];
-      const searches = (u.server_tool_use && u.server_tool_use.web_search_requests) || 0;
-      const inTok = (u.input_tokens || 0) + (u.cache_creation_input_tokens || 0) + (u.cache_read_input_tokens || 0);
-      const cost = Math.ceil(inTok * p[0] + (u.output_tokens || 0) * p[1] + searches * SEARCH_MICRO);
-      const { data: leftAfter } = await db.rpc('strata_spend', { p_uid: user.id, p_micro: cost });
-      await db.from('usage').insert({ user_id: user.id, model, input_tokens: inTok, output_tokens: u.output_tokens || 0, searches, cost_micro: cost });
-      data.strata = { remaining_micro: prof.is_admin ? null : leftAfter, cost_micro: cost };
+      const c = costOf(model, data.usage);
+      const { data: leftAfter } = await db.rpc('strata_spend', { p_uid: user.id, p_micro: c.cost });
+      await db.from('usage').insert({ user_id: user.id, model, input_tokens: c.inTok, output_tokens: c.outTok, searches: c.searches, cost_micro: c.cost,
+        feature: tag(body.feature), ms: Date.now() - t0, via: 'relay' });
+      data.strata = { remaining_micro: prof.is_admin ? null : leftAfter, cost_micro: c.cost };
     }
     return json(data, res ? res.status : 502);
   }
