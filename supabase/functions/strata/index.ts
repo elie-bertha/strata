@@ -117,7 +117,7 @@ Deno.serve(async (req) => {
     const u = body.usage || {}, model = String(body.model || '').slice(0, 40);
     const c = costOf(model, u);
     await db.from('usage').insert({ user_id: user.id, model, input_tokens: c.inTok, output_tokens: c.outTok, searches: c.searches, cost_micro: c.cost,
-      feature: tag(body.feature), ms: Math.max(0, Math.min(Number(body.ms) || 0, 600000)), via: 'own' });
+      feature: tag(body.feature), scan_id: tag(body.scan), ms: Math.max(0, Math.min(Number(body.ms) || 0, 600000)), via: 'own' });
     return json({ ok: true });
   }
 
@@ -127,9 +127,9 @@ Deno.serve(async (req) => {
     if (!ANTHROPIC_KEY) return json({ error: 'relay_not_configured' }, 500);
     const apiKey = ANTHROPIC_KEY;
     const b = body.body || {};
-    const payload: any = { max_tokens: Math.min(Number(b.max_tokens) || 1000, 4000), messages: b.messages };
+    const payload: any = { max_tokens: Math.min(Number(b.max_tokens) || 1000, 6000), messages: b.messages };
     if (b.system) payload.system = b.system;
-    if (Array.isArray(b.tools)) payload.tools = b.tools.filter((t: any) => t && /^web_search/.test(t.type)).map((t: any) => ({ ...t, max_uses: Math.min(t.max_uses || 3, 3) }));
+    if (Array.isArray(b.tools)) payload.tools = b.tools.filter((t: any) => t && /^web_search/.test(t.type)).map((t: any) => ({ ...t, max_uses: Math.min(t.max_uses || 1, 3) }));
     if (!Array.isArray(payload.messages)) return json({ error: 'bad_request' }, 400);
     let res: Response | null = null, data: any = null, model = '';
     const t0 = Date.now();
@@ -149,10 +149,50 @@ Deno.serve(async (req) => {
       const c = costOf(model, data.usage);
       const { data: leftAfter } = await db.rpc('strata_spend', { p_uid: user.id, p_micro: c.cost });
       await db.from('usage').insert({ user_id: user.id, model, input_tokens: c.inTok, output_tokens: c.outTok, searches: c.searches, cost_micro: c.cost,
-        feature: tag(body.feature), ms: Date.now() - t0, via: 'relay' });
+        feature: tag(body.feature), scan_id: tag(body.scan), ms: Date.now() - t0, via: 'relay' });
       data.strata = { remaining_micro: prof.is_admin ? null : leftAfter, cost_micro: c.cost };
     }
     return json(data, res ? res.status : 502);
+  }
+
+  // Admin dashboard: per user, scans per day, credit used, and the speed and cost of each scan (all its passes together)
+  if (action === 'stats') {
+    if (!prof.is_admin) return json({ error: 'forbidden' }, 403);
+    const days = Math.max(0, Math.min(Number(body.days) || 0, 3650));
+    let q = db.from('usage').select('user_id, at, feature, scan_id, ms, cost_micro, searches, refunded').order('at', { ascending: true }).limit(20000);
+    if (days) q = q.gte('at', new Date(Date.now() - days * 86400000).toISOString());
+    const { data: rows, error } = await q;
+    if (error) return json({ error: 'stats_failed', message: error.message }, 500);
+    const { data: profs } = await db.from('profiles').select('user_id, name, is_admin');
+    const names: Record<string, string> = {};
+    (profs || []).forEach((p: any) => { names[p.user_id] = p.name || '—'; });
+    const day = (iso: string) => new Date(iso).toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' });
+    const pct = (a: number[], p: number) => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.ceil(p * s.length) - 1)]; };
+    const sum = (a: number[]) => a.reduce((x, y) => x + y, 0);
+    const summary = (scans: any[]) => {
+      const ms = scans.map((x) => x.ms), cost = scans.map((x) => x.cost);
+      const perDay: Record<string, number> = {};
+      scans.forEach((x) => { perDay[x.day] = (perDay[x.day] || 0) + 1; });
+      return { scans: scans.length, advanced: scans.filter((x) => x.advanced).length, simple: scans.filter((x) => !x.advanced).length, per_day: perDay,
+        ms: { avg: scans.length ? Math.round(sum(ms) / scans.length) : null, min: ms.length ? Math.min(...ms) : null, max: ms.length ? Math.max(...ms) : null, p90: pct(ms, 0.9) },
+        cost_micro: { avg: scans.length ? Math.round(sum(cost) / scans.length) : null, min: cost.length ? Math.min(...cost) : null, max: cost.length ? Math.max(...cost) : null, p90: pct(cost, 0.9) } };
+    };
+    const users: Record<string, any> = {}, scansBy: Record<string, any> = {};
+    for (const r of rows || []) {
+      const u = users[r.user_id] || (users[r.user_id] = { id: r.user_id, name: names[r.user_id] || '—', credit_micro: 0, calls: 0 });
+      u.calls++;
+      if (!r.refunded) u.credit_micro += Number(r.cost_micro) || 0;
+      if (!r.scan_id) continue;
+      const k = r.user_id + '|' + r.scan_id;
+      const sc = scansBy[k] || (scansBy[k] = { user: r.user_id, day: day(r.at), ms: 0, cost: 0, advanced: false });
+      sc.ms += Number(r.ms) || 0; sc.cost += Number(r.cost_micro) || 0;
+      if (!/pass1$/.test(r.feature || '')) sc.advanced = true;
+    }
+    const all = Object.values(scansBy);
+    const list = Object.values(users).map((u: any) => ({ ...u, ...summary(all.filter((x: any) => x.user === u.id)) }))
+      .sort((a: any, b: any) => b.scans - a.scans || b.credit_micro - a.credit_micro);
+    const total = { name: 'Total', credit_micro: sum(list.map((u: any) => u.credit_micro)), calls: (rows || []).length, ...summary(all) };
+    return json({ days, total, users: list });
   }
 
   if (action === 'invite') {

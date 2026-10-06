@@ -644,6 +644,25 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
 .hp-h i{font-style:normal;width:22px;height:22px;border-radius:6px;background:var(--sun);color:var(--night);font:700 11px 'DM Sans',sans-serif;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
 .hp-p{font-size:14px;line-height:1.55;color:var(--ink2);margin:0;}
 .hp-p a{color:var(--night);font-weight:600;}
+.ds-card{background:var(--s2);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;margin-bottom:10px;}
+.ds-card.tot{background:var(--sun-bg);}
+.ds-head{display:flex;align-items:baseline;gap:8px;}
+.ds-name{font:600 16px 'DM Sans',sans-serif;color:var(--ink);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ds-credit{font:600 15px 'DM Sans',sans-serif;color:var(--ink);}
+.ds-sub{font-size:12px;color:var(--muted);}
+.ds-bars{display:flex;align-items:flex-end;gap:3px;height:46px;}
+.ds-bar{flex:1;min-width:4px;background:var(--night);border-radius:3px 3px 0 0;position:relative;}
+.ds-bar.z{background:var(--s3);height:2px !important;}
+.ds-bar span{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);}
+.ds-days{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:-6px;}
+.ds-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.ds-tbl th{font-weight:500;color:var(--muted);text-align:right;padding:2px 0;}
+.ds-tbl th:first-child,.ds-tbl td:first-child{text-align:left;}
+.ds-tbl td{text-align:right;padding:3px 0;color:var(--ink);font-variant-numeric:tabular-nums;}
+.ds-mix{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--s3);}
+.ds-mix i{display:block;height:100%;}
+.ds-legend{display:flex;gap:14px;font-size:12px;color:var(--ink2);}
+.ds-legend b{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:-1px;}
 .fr-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--s3);}
 .fr-row:last-child{border-bottom:none;}
 .fr-info{flex:1;min-width:0;}
@@ -864,6 +883,12 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
   <p class="key-note" id="friendsNote"></p>
   <div id="friendsList"></div>
   <button class="key-btn pri" id="friendsInvite">Invite a friend</button>
+</div></div>
+<div class="key-sheet" id="dashSheet" hidden><div class="key-card" role="dialog" aria-labelledby="dashTitle">
+  <div class="key-top"><div class="key-title" id="dashTitle">Dashboard</div><button class="key-x" id="dashClose" aria-label="Close">×</button></div>
+  <div class="seg" id="dashSeg" role="radiogroup"><button class="seg-b" data-days="7" role="radio">7 days</button><button class="seg-b" data-days="30" role="radio">30 days</button><button class="seg-b" data-days="0" role="radio">All</button></div>
+  <div id="dashBody"></div>
+  <p class="key-note">Time and cost count each scan as a whole, second pass included. Advanced = the scan needed a second pass with web search. Credit includes chat, quiz and translations, minus refunds.</p>
 </div></div>
 <div class="welcome" id="welcome" hidden><div class="wl-in">
   <div class="wl-logo" data-logo></div>
@@ -1157,6 +1182,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
       <div class="menu-item" id="btn-profile"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span class="m-lbl">Edit Profile</span><span class="m-val" id="langVal"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item" id="btn-invite"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span class="m-lbl">Share with friends</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item" id="btn-friends" hidden><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg></div><span class="m-lbl">Friends &amp; credit</span><span class="m-val" id="friendsVal"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="menu-item" id="btn-dash" hidden><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><span class="m-lbl">Dashboard</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item" id="btn-data"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg></div><span class="m-lbl">Journal &amp; sync</span><span class="m-val" id="syncMenuVal"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item" id="btn-prefs"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></div><span class="m-lbl">Settings</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item" id="btn-install" hidden><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg></div><span class="m-lbl">Add to home screen</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
@@ -2088,6 +2114,8 @@ function answer(text) {
 var searchOff = false;
 // Landscapes, plants and the sky are never 'certain' like a named work, and a web search rarely helps: the first answer is kept
 var NATURE_CATS = ['plant', 'sky', 'mountain'];
+// Room for the whole answer: a cut-off answer cannot be read and used to trigger a costly second pass. Only the words written are paid for.
+var SCAN_MAX_TOKENS = 6000;
 var TEXT_SHORT_NOTE = '\n\nKeep strictly within every word limit above (story at most 220 words); the whole answer must stay compact.';
 var NO_SEARCH_NOTE = '\n\nThis first pass has no web search. Set "confidence" to "high" only if you are certain of the exact work, its title and its creator. If you have any doubt, set it to "medium" or "low": you will then get web search to confirm. Leave deep_dive urls empty unless you are sure of them.';
 var LANGS = { en: 'English', fr: 'French', es: 'Spanish' };
@@ -2149,8 +2177,8 @@ function textOf(data) {
   blocks.forEach(function(b, k){ if (b.type === 'web_search_tool_result' || b.type === 'server_tool_use') lastTool = k; });
   return blocks.slice(lastTool + 1).filter(function(b){ return b.type === 'text'; }).map(function(b){ return b.text; }).join('');
 }
-async function callRelay(body, signal, feature) {
-  var r = await relay('claude', { body: body, feature: feature }, true, signal), data = r.data || {};
+async function callRelay(body, signal, feature, scan) {
+  var r = await relay('claude', { body: body, feature: feature, scan: scan }, true, signal), data = r.data || {};
   if (data.strata) setCredit(data.strata.remaining_micro);
   if (r.ok) return textOf(data);
   if (r.status === 402) { setCredit(0); throw { code: data.error === 'pending_approval' ? 'pending_approval' : 'no_budget' }; }
@@ -2163,13 +2191,13 @@ async function callRelay(body, signal, feature) {
   throw { code: 'upstream_error', message: msg || (typeof data.error === 'string' ? data.error : '') };
 }
 // Calls made with your own key are recorded (feature, time, tokens) so speed and cost can be measured; nothing is charged
-function logOwn(feature, model, usage, ms) {
+function logOwn(feature, model, usage, ms, scan) {
   if (!getSession() || !usage) return;
-  relay('log', { feature: feature, model: model, usage: usage, ms: ms }, true).catch(function(){});
+  relay('log', { feature: feature, model: model, usage: usage, ms: ms, scan: scan }, true).catch(function(){});
 }
 async function callClaude(body, signal) {
-  var feature = body._f || ''; body = Object.assign({}, body); delete body._f;
-  if (relayMode()) return callRelay(body, signal, feature);
+  var feature = body._f || '', scan = body._scan || ''; body = Object.assign({}, body); delete body._f; delete body._scan;
+  if (relayMode()) return callRelay(body, signal, feature, scan);
   var lastErr = { code: 'upstream_error' }, t0 = Date.now();
   for (var i = 0; i < API_MODELS.length; i++) {
     var res;
@@ -2184,7 +2212,7 @@ async function callClaude(body, signal) {
       throw { code: 'network' };
     }
     var data = await res.json().catch(function(){ return {}; });
-    if (res.ok) { logOwn(feature, API_MODELS[i], data.usage, Date.now() - t0); if (i > 0) API_MODELS = API_MODELS.slice(i).concat(API_MODELS.slice(0, i));
+    if (res.ok) { logOwn(feature, API_MODELS[i], data.usage, Date.now() - t0, scan); if (i > 0) API_MODELS = API_MODELS.slice(i).concat(API_MODELS.slice(0, i));
       var blocks = data.content || [], lastTool = -1;
       blocks.forEach(function(b, k){ if (b.type === 'web_search_tool_result' || b.type === 'server_tool_use') lastTool = k; });
       return blocks.slice(lastTool + 1).filter(function(b){ return b.type === 'text'; }).map(function(b){ return b.text; }).join(''); }
@@ -2229,26 +2257,29 @@ function makeLive() {
     }
     if (!(opts.images && opts.images[0]) && opts.onStage) opts.onStage('prepared');
     if (typeof content === 'string') content += TEXT_SHORT_NOTE;
-    var body = { max_tokens: 4000, messages: [{ role: 'user', content: content }] }, kind = typeof content === 'string' ? 'text' : 'scan';
+    // One id per scan, so its passes can be counted as a single scan (speed and cost dashboard)
+    var sid = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    var body = { _scan: sid, max_tokens: SCAN_MAX_TOKENS, messages: [{ role: 'user', content: content }] }, kind = typeof content === 'string' ? 'text' : 'scan';
     // Pass 1 without web search: most works are recognised straight away, and searching costs about half of a scan
     if (opts.searchIfUnsure && !searchOff) {
       var c1 = typeof content === 'string' ? content + NO_SEARCH_NOTE : content.slice(0, -1).concat([{ type: 'text', text: prompt + NO_SEARCH_NOTE }]);
       try {
-        var d1 = parseJSON(await callClaude({ _f: kind + '_pass1', max_tokens: 4000, messages: [{ role: 'user', content: c1 }] }, opts.signal));
+        var d1 = parseJSON(await callClaude({ _f: kind + '_pass1', _scan: sid, max_tokens: SCAN_MAX_TOKENS, messages: [{ role: 'user', content: c1 }] }, opts.signal));
         if (d1 && d1.identified !== false && (d1.confidence === 'high' || (opts.trusted && d1.confidence !== 'low') || NATURE_CATS.indexOf(d1.category) >= 0)) return d1;
       } catch (e) { if (e && /cancelled|bad_key|no_credit|no_budget|session_expired|network|relay_not_configured/.test(e.code)) throw e; }
       if (opts.onSearch) opts.onSearch();
     }
     var withSearch = !searchOff;
-    // up to two attempts: an incomplete or failed answer is retried once; web search is dropped if the account has it turned off
+    // up to two attempts; web search is dropped if the account has it turned off
     for (var attempt = 0; attempt < 2; attempt++) {
       var b = Object.assign({ _f: kind + (withSearch ? '_search' : '_nosearch') }, body);
-      if (withSearch) b.tools = [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }];
+      if (withSearch) b.tools = [{ type: 'web_search_20250305', name: 'web_search', max_uses: 1 }];
       try {
         return parseJSON(await callClaude(b, opts.signal));
       } catch (e) {
         if (e && e.code === 'search_off' && withSearch) { searchOff = true; withSearch = false; attempt--; continue; }
-        if (attempt === 0 && e && (e.code === 'invalid_json' || e.code === 'upstream_error')) continue;
+        // a failed answer is retried once, without web search: cheaper and faster than searching again
+        if (attempt === 0 && e && (e.code === 'invalid_json' || e.code === 'upstream_error')) { withSearch = false; continue; }
         throw e;
       }
     }
@@ -3843,7 +3874,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.46';
+var APP_VERSION = '0.47';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -4345,6 +4376,7 @@ function renderAdmin() {
   if (typeof renderDeleteBtn === 'function') renderDeleteBtn();
   var b = document.getElementById('btn-friends'); if (!b) return;
   b.hidden = !(getSession() && strataMe && (strataMe.is_admin || strataMe.friends > 0));
+  var db = document.getElementById('btn-dash'); if (db) db.hidden = !(getSession() && strataMe && strataMe.is_admin);
   var fv = document.getElementById('friendsVal'); if (fv && strataMe) fv.textContent = strataMe.pending ? t('{n} to approve', { n: strataMe.pending }) : (strataMe.friends ? String(strataMe.friends) : '');
 }
 async function openFriends() {
@@ -4369,6 +4401,50 @@ async function openFriends() {
   }).join('') : '<p class="key-note">' + t('No friends yet. Invite one!') + '</p>';
 }
 document.getElementById('btn-friends').addEventListener('click', openFriends);
+
+// ─── ADMIN DASHBOARD: scans, credit, speed and cost per user ───
+var dashDays = 7;
+function dsNum(n, d) { return n.toLocaleString(LOCALES[getLang()], { minimumFractionDigits: d, maximumFractionDigits: d }); }
+function dsSec(ms) { return ms == null ? '–' : dsNum(ms / 1000, ms < 10000 ? 1 : 0) + ' s'; }
+function dsCost(m) { return m == null ? '–' : dsNum(m / 10000, 1) + ' c'; }
+function dsMoney(m) { return money(m); }
+function dsDayList(u, days) {
+  var keys = Object.keys(u.per_day || {}).sort(), n = days || 0, out = [];
+  if (!n) { if (!keys.length) return []; n = Math.max(1, Math.round((Date.now() - new Date(keys[0] + 'T12:00:00').getTime()) / 86400000) + 1); n = Math.min(n, 60); }
+  for (var i = n - 1; i >= 0; i--) { var d = new Date(Date.now() - i * 86400000).toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' }); out.push([d, (u.per_day || {})[d] || 0]); }
+  return out;
+}
+function dsCard(u, days, tot) {
+  var dl = dsDayList(u, days), mx = Math.max.apply(null, dl.map(function(x){ return x[1]; }).concat([1]));
+  var fmt = function(d){ return new Date(d + 'T12:00:00').toLocaleDateString(LOCALES[getLang()] || 'en', { day: 'numeric', month: 'short' }); };
+  var bars = dl.map(function(x){ return '<div class="ds-bar' + (x[1] ? '' : ' z') + '" style="height:' + Math.round(x[1] / mx * 100) + '%" title="' + x[0] + ': ' + x[1] + '">' + (x[1] && dl.length <= 31 ? '<span>' + x[1] + '</span>' : '') + '</div>'; }).join('');
+  var adv = u.scans ? Math.round(u.advanced / u.scans * 100) : 0;
+  return '<div class="ds-card' + (tot ? ' tot' : '') + '">' +
+    '<div class="ds-head"><div class="ds-name">' + esc(tot ? t('Total') : u.name) + '</div><div class="ds-credit">' + dsMoney(u.credit_micro) + '</div></div>' +
+    '<div class="ds-sub">' + t('{n} scans · credit used', { n: u.scans }) + '</div>' +
+    (dl.length && u.scans ? '<div class="ds-bars" aria-label="' + esc(t('Scans per day')) + '">' + bars + '</div><div class="ds-days"><span>' + fmt(dl[0][0]) + '</span><span>' + fmt(dl[dl.length - 1][0]) + '</span></div>' : '') +
+    (u.scans ? '<table class="ds-tbl"><tr><th></th><th>' + t('Avg') + '</th><th>Min</th><th>Max</th><th>P90</th></tr>' +
+      '<tr><td>' + t('Time') + '</td><td>' + dsSec(u.ms.avg) + '</td><td>' + dsSec(u.ms.min) + '</td><td>' + dsSec(u.ms.max) + '</td><td>' + dsSec(u.ms.p90) + '</td></tr>' +
+      '<tr><td>' + t('Cost') + '</td><td>' + dsCost(u.cost_micro.avg) + '</td><td>' + dsCost(u.cost_micro.min) + '</td><td>' + dsCost(u.cost_micro.max) + '</td><td>' + dsCost(u.cost_micro.p90) + '</td></tr></table>' +
+      '<div class="ds-mix"><i style="width:' + (100 - adv) + '%;background:var(--night)"></i><i style="width:' + adv + '%;background:var(--sun)"></i></div>' +
+      '<div class="ds-legend"><span><b style="background:var(--night)"></b>' + t('Simple') + ' ' + u.simple + '</span><span><b style="background:var(--sun)"></b>' + t('Advanced search') + ' ' + u.advanced + '</span></div>'
+      : '<div class="ds-sub">' + t('No scans in this period') + '</div>') +
+  '</div>';
+}
+async function openDash() {
+  var sheet = document.getElementById('dashSheet'), body = document.getElementById('dashBody');
+  sheet.hidden = false;
+  document.querySelectorAll('#dashSeg .seg-b').forEach(function(b){ var on = Number(b.getAttribute('data-days')) === dashDays; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+  body.innerHTML = '<p class="key-note">' + t('Loading…') + '</p>';
+  var r = await relay('stats', { days: dashDays }, true).catch(function(){ return { ok: false, data: {} }; });
+  if (!r.ok) { body.innerHTML = '<p class="key-msg">' + t('Could not load the dashboard.') + '</p>'; return; }
+  var d = r.data;
+  body.innerHTML = dsCard(d.total, d.days, true) + (d.users || []).map(function(u){ return dsCard(u, d.days, false); }).join('');
+}
+document.getElementById('btn-dash').addEventListener('click', openDash);
+document.getElementById('dashSeg').addEventListener('click', function(e){ var b = e.target.closest('.seg-b'); if (!b) return; dashDays = Number(b.getAttribute('data-days')); openDash(); });
+document.getElementById('dashClose').addEventListener('click', function(){ document.getElementById('dashSheet').hidden = true; });
+document.getElementById('dashSheet').addEventListener('click', function(e){ if (e.target.id === 'dashSheet') e.target.hidden = true; });
 document.getElementById('friendsList').addEventListener('click', async function(e){
   var b = e.target.closest('[data-topup],[data-approve],[data-decline]'); if (!b) return;
   var action = b.hasAttribute('data-topup') ? 'topup' : b.hasAttribute('data-approve') ? 'approve' : 'decline';
@@ -4819,6 +4895,20 @@ fr: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifie ta connexion.",
   "Browse by Date": "Parcourir par date",
+  "Dashboard": "Tableau de bord",
+  "7 days": "7 jours",
+  "30 days": "30 jours",
+  "Total": "Total",
+  "{n} scans · credit used": "{n} scans · crédit utilisé",
+  "Scans per day": "Scans par jour",
+  "Avg": "Moy.",
+  "Time": "Temps",
+  "Cost": "Coût",
+  "Simple": "Simple",
+  "Advanced search": "Recherche avancée",
+  "No scans in this period": "Aucun scan sur cette période",
+  "Could not load the dashboard.": "Impossible de charger le tableau de bord.",
+  "Time and cost count each scan as a whole, second pass included. Advanced = the scan needed a second pass with web search. Credit includes chat, quiz and translations, minus refunds.": "Temps et coût comptent chaque scan en entier, deuxième passage compris. Avancée = le scan a eu besoin d'un deuxième passage avec recherche web. Le crédit inclut chat, quiz et traductions, remboursements déduits.",
   "Your map": "Ta carte",
   "Every discovery finds its place on the map: the museum where the original is kept, the building itself, or the spot where you saw a plant or a constellation. The map icon on a card takes you straight there.": "Chaque découverte trouve sa place sur la carte : le musée où l'original est conservé, le bâtiment lui-même, ou l'endroit où tu as repéré une plante ou une constellation. L'icône carte d'une fiche t'y emmène directement.",
   "Visit · See · Read": "Visiter · Voir · Lire",
@@ -5044,6 +5134,20 @@ es: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
   "Browse by Date": "Explorar por fecha",
+  "Dashboard": "Panel",
+  "7 days": "7 días",
+  "30 days": "30 días",
+  "Total": "Total",
+  "{n} scans · credit used": "{n} escaneos · crédito usado",
+  "Scans per day": "Escaneos por día",
+  "Avg": "Media",
+  "Time": "Tiempo",
+  "Cost": "Coste",
+  "Simple": "Simple",
+  "Advanced search": "Búsqueda avanzada",
+  "No scans in this period": "Sin escaneos en este periodo",
+  "Could not load the dashboard.": "No se pudo cargar el panel.",
+  "Time and cost count each scan as a whole, second pass included. Advanced = the scan needed a second pass with web search. Credit includes chat, quiz and translations, minus refunds.": "Tiempo y coste cuentan cada escaneo entero, segunda pasada incluida. Avanzada = el escaneo necesitó una segunda pasada con búsqueda web. El crédito incluye chat, quiz y traducciones, descontando reembolsos.",
   "Your map": "Tu mapa",
   "Every discovery finds its place on the map: the museum where the original is kept, the building itself, or the spot where you saw a plant or a constellation. The map icon on a card takes you straight there.": "Cada descubrimiento tiene su lugar en el mapa: el museo donde se conserva el original, el propio edificio o el sitio donde viste una planta o una constelación. El icono del mapa de una ficha te lleva directamente allí.",
   "Visit · See · Read": "Visitar · Ver · Leer",
