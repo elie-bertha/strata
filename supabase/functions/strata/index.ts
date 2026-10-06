@@ -171,9 +171,12 @@ Deno.serve(async (req) => {
     const sum = (a: number[]) => a.reduce((x, y) => x + y, 0);
     const summary = (scans: any[]) => {
       const ms = scans.map((x) => x.ms), cost = scans.map((x) => x.cost);
-      const perDay: Record<string, number> = {};
-      scans.forEach((x) => { perDay[x.day] = (perDay[x.day] || 0) + 1; });
-      return { scans: scans.length, advanced: scans.filter((x) => x.advanced).length, simple: scans.filter((x) => !x.advanced).length, per_day: perDay,
+      const perDay: Record<string, number> = {}, acc: Record<string, number[]> = {};
+      scans.forEach((x) => { perDay[x.day] = (perDay[x.day] || 0) + 1; const a = acc[x.day] || (acc[x.day] = [0, 0]); a[0] += x.ms; a[1] += x.cost; });
+      // average time and cost of the scans of each day, to follow the trend
+      const perDayAvg: Record<string, any> = {};
+      Object.keys(acc).forEach((d) => { perDayAvg[d] = { ms: Math.round(acc[d][0] / perDay[d]), cost_micro: Math.round(acc[d][1] / perDay[d]) }; });
+      return { scans: scans.length, advanced: scans.filter((x) => x.advanced).length, simple: scans.filter((x) => !x.advanced).length, per_day: perDay, per_day_avg: perDayAvg,
         ms: { avg: scans.length ? Math.round(sum(ms) / scans.length) : null, min: ms.length ? Math.min(...ms) : null, max: ms.length ? Math.max(...ms) : null, p90: pct(ms, 0.9) },
         cost_micro: { avg: scans.length ? Math.round(sum(cost) / scans.length) : null, min: cost.length ? Math.min(...cost) : null, max: cost.length ? Math.max(...cost) : null, p90: pct(cost, 0.9) } };
     };

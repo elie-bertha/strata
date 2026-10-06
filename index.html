@@ -655,6 +655,13 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
 .ds-bar.z{background:var(--s3);height:2px !important;}
 .ds-bar span{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:9px;color:var(--muted);}
 .ds-days{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-top:-6px;}
+.ds-trend{display:flex;flex-direction:column;gap:4px;}
+.ds-th{display:flex;justify-content:space-between;font-size:12px;color:var(--ink2);}
+.ds-tv{font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;}
+.ds-trend svg{width:100%;height:92px;display:block;overflow:visible;}
+.ds-trend circle{pointer-events:none;}
+.ds-plot{position:relative;}
+.ds-tgt{position:absolute;left:0;transform:translateY(-110%);font-size:10px;color:var(--muted);background:var(--sun-bg);padding:0 2px;pointer-events:none;}
 .ds-tbl{width:100%;border-collapse:collapse;font-size:12px;}
 .ds-tbl th{font-weight:500;color:var(--muted);text-align:right;padding:2px 0;}
 .ds-tbl th:first-child,.ds-tbl td:first-child{text-align:left;}
@@ -3874,7 +3881,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.47';
+var APP_VERSION = '0.48';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -4414,6 +4421,29 @@ function dsDayList(u, days) {
   for (var i = n - 1; i >= 0; i--) { var d = new Date(Date.now() - i * 86400000).toLocaleDateString('en-CA', { timeZone: 'Europe/Madrid' }); out.push([d, (u.per_day || {})[d] || 0]); }
   return out;
 }
+// Trend of one daily average (one measure per chart, never two scales), with a dashed target line
+var DS_TARGET = { ms: 15000, cost_micro: 50000 };
+function dsTrend(u, days, key, title, fmtv) {
+  var dl = dsDayList(u, days), avg = u.per_day_avg || {};
+  var pts = dl.map(function(x, i){ var a = avg[x[0]]; return { i: i, d: x[0], v: a ? a[key] : null }; });
+  var vals = pts.filter(function(p){ return p.v != null; });
+  if (!vals.length) return '';
+  var W = 300, H = 92, L = 4, R = 4, T = 10, B = 4, tgt = DS_TARGET[key];
+  var max = Math.max(tgt * 1.15, Math.max.apply(null, vals.map(function(p){ return p.v; })) * 1.1);
+  var x = function(i){ return dl.length < 2 ? W / 2 : L + i * (W - L - R) / (dl.length - 1); };
+  var y = function(v){ return T + (1 - v / max) * (H - T - B); };
+  // a line joins consecutive days with scans; a day without scans breaks it
+  var path = '', prev = null;
+  pts.forEach(function(p){ if (p.v == null) { prev = null; return; } path += (prev ? 'L' : 'M') + x(p.i).toFixed(1) + ' ' + y(p.v).toFixed(1); prev = p; });
+  var dots = vals.map(function(p){ return '<circle cx="' + x(p.i).toFixed(1) + '" cy="' + y(p.v).toFixed(1) + '" r="3.2" fill="var(--night)" stroke="var(--surface)" stroke-width="1.5"/>' +
+    '<rect class="ds-hit" x="' + (x(p.i) - 9).toFixed(1) + '" y="0" width="18" height="' + H + '" fill="transparent" data-tip="' + esc(new Date(p.d + 'T12:00:00').toLocaleDateString(LOCALES[getLang()] || 'en', { day: 'numeric', month: 'short' }) + ' · ' + fmtv(p.v)) + '"/>'; }).join('');
+  var last = vals[vals.length - 1];
+  return '<div class="ds-trend"><div class="ds-th"><span>' + esc(title) + '</span><span class="ds-tv" data-def="' + esc(fmtv(last.v)) + '">' + esc(fmtv(last.v)) + '</span></div>' +
+    '<div class="ds-plot"><svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="' + esc(title) + '">' +
+    '<line x1="0" x2="' + W + '" y1="' + y(tgt).toFixed(1) + '" y2="' + y(tgt).toFixed(1) + '" stroke="var(--muted)" stroke-width="1" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>' +
+    '<path d="' + path + '" fill="none" stroke="var(--night)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>' + dots + '</svg>' +
+    '<div class="ds-tgt" style="top:' + (y(tgt) / H * 100).toFixed(1) + '%">' + esc(t('Target {v}', { v: fmtv(tgt) })) + '</div></div></div>';
+}
 function dsCard(u, days, tot) {
   var dl = dsDayList(u, days), mx = Math.max.apply(null, dl.map(function(x){ return x[1]; }).concat([1]));
   var fmt = function(d){ return new Date(d + 'T12:00:00').toLocaleDateString(LOCALES[getLang()] || 'en', { day: 'numeric', month: 'short' }); };
@@ -4423,6 +4453,7 @@ function dsCard(u, days, tot) {
     '<div class="ds-head"><div class="ds-name">' + esc(tot ? t('Total') : u.name) + '</div><div class="ds-credit">' + dsMoney(u.credit_micro) + '</div></div>' +
     '<div class="ds-sub">' + t('{n} scans · credit used', { n: u.scans }) + '</div>' +
     (dl.length && u.scans ? '<div class="ds-bars" aria-label="' + esc(t('Scans per day')) + '">' + bars + '</div><div class="ds-days"><span>' + fmt(dl[0][0]) + '</span><span>' + fmt(dl[dl.length - 1][0]) + '</span></div>' : '') +
+    (tot && u.scans ? dsTrend(u, days, 'cost_micro', t('Average cost per scan'), dsCost) + dsTrend(u, days, 'ms', t('Average response time'), dsSec) : '') +
     (u.scans ? '<table class="ds-tbl"><tr><th></th><th>' + t('Avg') + '</th><th>Min</th><th>Max</th><th>P90</th></tr>' +
       '<tr><td>' + t('Time') + '</td><td>' + dsSec(u.ms.avg) + '</td><td>' + dsSec(u.ms.min) + '</td><td>' + dsSec(u.ms.max) + '</td><td>' + dsSec(u.ms.p90) + '</td></tr>' +
       '<tr><td>' + t('Cost') + '</td><td>' + dsCost(u.cost_micro.avg) + '</td><td>' + dsCost(u.cost_micro.min) + '</td><td>' + dsCost(u.cost_micro.max) + '</td><td>' + dsCost(u.cost_micro.p90) + '</td></tr></table>' +
@@ -4442,6 +4473,11 @@ async function openDash() {
   body.innerHTML = dsCard(d.total, d.days, true) + (d.users || []).map(function(u){ return dsCard(u, d.days, false); }).join('');
 }
 document.getElementById('btn-dash').addEventListener('click', openDash);
+document.getElementById('dashBody').addEventListener('click', function(e){
+  var h = e.target.closest('.ds-hit'); if (!h) return;
+  var tv = h.closest('.ds-trend').querySelector('.ds-tv'); tv.textContent = h.getAttribute('data-tip');
+  clearTimeout(tv._t); tv._t = setTimeout(function(){ tv.textContent = tv.getAttribute('data-def'); }, 2500);
+});
 document.getElementById('dashSeg').addEventListener('click', function(e){ var b = e.target.closest('.seg-b'); if (!b) return; dashDays = Number(b.getAttribute('data-days')); openDash(); });
 document.getElementById('dashClose').addEventListener('click', function(){ document.getElementById('dashSheet').hidden = true; });
 document.getElementById('dashSheet').addEventListener('click', function(e){ if (e.target.id === 'dashSheet') e.target.hidden = true; });
@@ -4895,6 +4931,9 @@ fr: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifie ta connexion.",
   "Browse by Date": "Parcourir par date",
+  "Average cost per scan": "Coût moyen par scan",
+  "Average response time": "Temps de réponse moyen",
+  "Target {v}": "Objectif {v}",
   "Dashboard": "Tableau de bord",
   "7 days": "7 jours",
   "30 days": "30 jours",
@@ -5134,6 +5173,9 @@ es: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
   "Browse by Date": "Explorar por fecha",
+  "Average cost per scan": "Coste medio por escaneo",
+  "Average response time": "Tiempo de respuesta medio",
+  "Target {v}": "Objetivo {v}",
   "Dashboard": "Panel",
   "7 days": "7 días",
   "30 days": "30 días",
