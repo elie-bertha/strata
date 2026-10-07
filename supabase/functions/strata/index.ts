@@ -121,6 +121,13 @@ Deno.serve(async (req) => {
     return json({ ok: true });
   }
 
+  // Real time of a scan, measured on the phone from the scan to the result page on screen
+  if (action === 'scan_time') {
+    await db.from('usage').insert({ user_id: user.id, model: null, input_tokens: 0, output_tokens: 0, searches: 0, cost_micro: 0,
+      feature: 'scan_total', scan_id: tag(body.scan), ms: Math.max(0, Math.min(Number(body.ms) || 0, 600000)), via: 'phone' });
+    return json({ ok: true });
+  }
+
   if (action === 'claude') {
     const left = remaining(prof);
     if (left !== null && left <= 0) return json({ error: prof.requested_cents > 0 ? 'pending_approval' : 'no_budget', remaining_micro: 0 }, 402);
@@ -170,31 +177,33 @@ Deno.serve(async (req) => {
     const pct = (a: number[], p: number) => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y); return s[Math.min(s.length - 1, Math.ceil(p * s.length) - 1)]; };
     const sum = (a: number[]) => a.reduce((x, y) => x + y, 0);
     const summary = (scans: any[]) => {
-      const ms = scans.map((x) => x.ms), cost = scans.map((x) => x.cost);
+      const ms = scans.map((x) => x.real != null ? x.real : x.ms), cost = scans.map((x) => x.cost), mc = scans.map((x) => x.ms);
       const perDay: Record<string, number> = {}, acc: Record<string, number[]> = {};
-      scans.forEach((x) => { perDay[x.day] = (perDay[x.day] || 0) + 1; const a = acc[x.day] || (acc[x.day] = [0, 0]); a[0] += x.ms; a[1] += x.cost; });
+      scans.forEach((x) => { perDay[x.day] = (perDay[x.day] || 0) + 1; const a = acc[x.day] || (acc[x.day] = [0, 0]); a[0] += x.real != null ? x.real : x.ms; a[1] += x.cost; });
       // average time and cost of the scans of each day, to follow the trend
       const perDayAvg: Record<string, any> = {};
       Object.keys(acc).forEach((d) => { perDayAvg[d] = { ms: Math.round(acc[d][0] / perDay[d]), cost_micro: Math.round(acc[d][1] / perDay[d]) }; });
       return { scans: scans.length, advanced: scans.filter((x) => x.advanced).length, simple: scans.filter((x) => !x.advanced).length, per_day: perDay, per_day_avg: perDayAvg,
         ms: { avg: scans.length ? Math.round(sum(ms) / scans.length) : null, min: ms.length ? Math.min(...ms) : null, max: ms.length ? Math.max(...ms) : null, p90: pct(ms, 0.9) },
+        ms_claude: { avg: scans.length ? Math.round(sum(mc) / scans.length) : null, min: mc.length ? Math.min(...mc) : null, max: mc.length ? Math.max(...mc) : null, p90: pct(mc, 0.9) },
         cost_micro: { avg: scans.length ? Math.round(sum(cost) / scans.length) : null, min: cost.length ? Math.min(...cost) : null, max: cost.length ? Math.max(...cost) : null, p90: pct(cost, 0.9) } };
     };
     const users: Record<string, any> = {}, scansBy: Record<string, any> = {};
     for (const r of rows || []) {
       const u = users[r.user_id] || (users[r.user_id] = { id: r.user_id, name: names[r.user_id] || '—', credit_micro: 0, calls: 0 });
+      const k = r.user_id + '|' + r.scan_id;
+      if (r.feature === 'scan_total') { if (scansBy[k]) scansBy[k].real = Number(r.ms) || 0; continue; }
       u.calls++;
       if (!r.refunded) u.credit_micro += Number(r.cost_micro) || 0;
       if (!r.scan_id) continue;
-      const k = r.user_id + '|' + r.scan_id;
-      const sc = scansBy[k] || (scansBy[k] = { user: r.user_id, day: day(r.at), ms: 0, cost: 0, advanced: false });
+      const sc = scansBy[k] || (scansBy[k] = { user: r.user_id, day: day(r.at), ms: 0, cost: 0, advanced: false, real: null });
       sc.ms += Number(r.ms) || 0; sc.cost += Number(r.cost_micro) || 0;
       if (!/pass1$/.test(r.feature || '')) sc.advanced = true;
     }
     const all = Object.values(scansBy);
     const list = Object.values(users).map((u: any) => ({ ...u, ...summary(all.filter((x: any) => x.user === u.id)) }))
       .sort((a: any, b: any) => b.scans - a.scans || b.credit_micro - a.credit_micro);
-    const total = { name: 'Total', credit_micro: sum(list.map((u: any) => u.credit_micro)), calls: (rows || []).length, ...summary(all) };
+    const total = { name: 'Total', credit_micro: sum(list.map((u: any) => u.credit_micro)), calls: (rows || []).filter((r: any) => r.feature !== 'scan_total').length, ...summary(all) };
     return json({ days, total, users: list });
   }
 

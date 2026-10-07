@@ -665,6 +665,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
 .ds-tbl{width:100%;border-collapse:collapse;font-size:12px;}
 .ds-tbl th{font-weight:500;color:var(--muted);text-align:right;padding:2px 0;}
 .ds-tbl th:first-child,.ds-tbl td:first-child{text-align:left;}
+.ds-tbl tr.ds-sub2 td{color:var(--muted);font-size:11px;}
 .ds-tbl td{text-align:right;padding:3px 0;color:var(--ink);font-variant-numeric:tabular-nums;}
 .ds-mix{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--s3);}
 .ds-mix i{display:block;height:100%;}
@@ -895,7 +896,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
   <div class="key-top"><div class="key-title" id="dashTitle">Dashboard</div><button class="key-x" id="dashClose" aria-label="Close">×</button></div>
   <div class="seg" id="dashSeg" role="radiogroup"><button class="seg-b" data-days="7" role="radio">7 days</button><button class="seg-b" data-days="30" role="radio">30 days</button><button class="seg-b" data-days="0" role="radio">All</button></div>
   <div id="dashBody"></div>
-  <p class="key-note">Time and cost count each scan as a whole, second pass included. Advanced = the scan needed a second pass with web search. Credit includes chat, quiz and translations, minus refunds.</p>
+  <p class="key-note">Time is measured on the phone, from the scan to the result page on screen (scans before v0.49: Claude's time only). Cost counts each scan as a whole, second pass included. Advanced = the scan needed a second pass with web search. Credit includes chat, quiz and translations, minus refunds.</p>
 </div></div>
 <div class="welcome" id="welcome" hidden><div class="wl-in">
   <div class="wl-logo" data-logo></div>
@@ -1984,6 +1985,8 @@ async function runLiveScan(file, opts) {
   var url = URL.createObjectURL(file);
   document.getElementById('scanBg').style.backgroundImage = 'url(' + url + ')';
   liveScanning = true;
+  // Real scan time: from the moment the photo (or the work to discover) is handed to the scan, until its page is on screen
+  var t0 = Date.now(), sid = 's' + t0.toString(36) + Math.random().toString(36).slice(2, 6);
   scanStatus(t('Identifying artwork…'), t('Powered by Claude · usually 10–40 seconds'));
   stepsStart();
   show('s-scanning');
@@ -1991,7 +1994,7 @@ async function runLiveScan(file, opts) {
   liveScanCtl = new AbortController();
   try {
     var prompt = SCAN_PROMPT + langRule() + (opts.text ? '\n\nThere is no photo this time: the user tapped a work they want to discover. Write about this work: ' + opts.text + '. Set "identified" to true if you know it. There is nothing to recognise: "confidence" is only about how well you know this work.' : '');
-    var d = await live.json(prompt, { trusted: !!opts.text, images: opts.text ? [] : [file], signal: liveScanCtl.signal, searchIfUnsure: true, onStage: function(){ if (liveScanning) stepsPrepared(); }, onSearch: function(){ if (liveScanning) { stepsSearching(); document.getElementById('scanSub').textContent = t('Powered by Claude · up to a minute'); } } });
+    var d = await live.json(prompt, { scanId: sid, trusted: !!opts.text, images: opts.text ? [] : [file], signal: liveScanCtl.signal, searchIfUnsure: true, onStage: function(){ if (liveScanning) stepsPrepared(); }, onSearch: function(){ if (liveScanning) { stepsSearching(); document.getElementById('scanSub').textContent = t('Powered by Claude · up to a minute'); } } });
     stepsAllDone(); await new Promise(function(r){ setTimeout(r, 450); });
     if (!d || typeof d !== 'object' || !d.title) throw { code: 'invalid_json' };
     var dup = findDuplicate(d);
@@ -2000,7 +2003,7 @@ async function runLiveScan(file, opts) {
       // Same work already saved: open the saved entry instead of adding a copy
       URL.revokeObjectURL(url);
       markSeen(dup);
-      openScan(dup.id);
+      openScan(dup.id); reportScanTime(sid, t0);
       toast(t('Already in your journal · first scanned {d}', { d: fmtDay(dup.created_at) }));
       return;
     }
@@ -2012,7 +2015,7 @@ async function runLiveScan(file, opts) {
       .catch(function(){ toast(t('Could not save this scan on this device')); });
     currentArt = 'live';
     renderedChat = null;
-    show('s-result');
+    show('s-result'); reportScanTime(sid, t0);
   } catch (e) {
     liveScanning = false;
     if (e && e.code === 'cancelled') { show(getCamPref() === 'viewfinder' ? 's-camera' : 's-home'); return; }
@@ -2198,6 +2201,11 @@ async function callRelay(body, signal, feature, scan) {
   throw { code: 'upstream_error', message: msg || (typeof data.error === 'string' ? data.error : '') };
 }
 // Calls made with your own key are recorded (feature, time, tokens) so speed and cost can be measured; nothing is charged
+// Sent once the result page is painted (next frame), so the time covers everything the user waits through
+function reportScanTime(sid, t0) {
+  if (!getSession()) return;
+  requestAnimationFrame(function(){ setTimeout(function(){ relay('scan_time', { scan: sid, ms: Date.now() - t0 }, true).catch(function(){}); }, 0); });
+}
 function logOwn(feature, model, usage, ms, scan) {
   if (!getSession() || !usage) return;
   relay('log', { feature: feature, model: model, usage: usage, ms: ms, scan: scan }, true).catch(function(){});
@@ -2265,7 +2273,7 @@ function makeLive() {
     if (!(opts.images && opts.images[0]) && opts.onStage) opts.onStage('prepared');
     if (typeof content === 'string') content += TEXT_SHORT_NOTE;
     // One id per scan, so its passes can be counted as a single scan (speed and cost dashboard)
-    var sid = 's' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    var sid = opts.scanId || ('s' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
     var body = { _scan: sid, max_tokens: SCAN_MAX_TOKENS, messages: [{ role: 'user', content: content }] }, kind = typeof content === 'string' ? 'text' : 'scan';
     // Pass 1 without web search: most works are recognised straight away, and searching costs about half of a scan
     if (opts.searchIfUnsure && !searchOff) {
@@ -3881,7 +3889,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.48';
+var APP_VERSION = '0.49';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -4456,6 +4464,7 @@ function dsCard(u, days, tot) {
     (tot && u.scans ? dsTrend(u, days, 'cost_micro', t('Average cost per scan'), dsCost) + dsTrend(u, days, 'ms', t('Average response time'), dsSec) : '') +
     (u.scans ? '<table class="ds-tbl"><tr><th></th><th>' + t('Avg') + '</th><th>Min</th><th>Max</th><th>P90</th></tr>' +
       '<tr><td>' + t('Time') + '</td><td>' + dsSec(u.ms.avg) + '</td><td>' + dsSec(u.ms.min) + '</td><td>' + dsSec(u.ms.max) + '</td><td>' + dsSec(u.ms.p90) + '</td></tr>' +
+      (u.ms_claude ? '<tr class="ds-sub2"><td>' + t('of which Claude') + '</td><td>' + dsSec(u.ms_claude.avg) + '</td><td>' + dsSec(u.ms_claude.min) + '</td><td>' + dsSec(u.ms_claude.max) + '</td><td>' + dsSec(u.ms_claude.p90) + '</td></tr>' : '') +
       '<tr><td>' + t('Cost') + '</td><td>' + dsCost(u.cost_micro.avg) + '</td><td>' + dsCost(u.cost_micro.min) + '</td><td>' + dsCost(u.cost_micro.max) + '</td><td>' + dsCost(u.cost_micro.p90) + '</td></tr></table>' +
       '<div class="ds-mix"><i style="width:' + (100 - adv) + '%;background:var(--night)"></i><i style="width:' + adv + '%;background:var(--sun)"></i></div>' +
       '<div class="ds-legend"><span><b style="background:var(--night)"></b>' + t('Simple') + ' ' + u.simple + '</span><span><b style="background:var(--sun)"></b>' + t('Advanced search') + ' ' + u.advanced + '</span></div>'
@@ -4931,6 +4940,7 @@ fr: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifie ta connexion.",
   "Browse by Date": "Parcourir par date",
+  "of which Claude": "dont Claude",
   "Average cost per scan": "Coût moyen par scan",
   "Average response time": "Temps de réponse moyen",
   "Target {v}": "Objectif {v}",
@@ -4947,7 +4957,7 @@ fr: {
   "Advanced search": "Recherche avancée",
   "No scans in this period": "Aucun scan sur cette période",
   "Could not load the dashboard.": "Impossible de charger le tableau de bord.",
-  "Time and cost count each scan as a whole, second pass included. Advanced = the scan needed a second pass with web search. Credit includes chat, quiz and translations, minus refunds.": "Temps et coût comptent chaque scan en entier, deuxième passage compris. Avancée = le scan a eu besoin d'un deuxième passage avec recherche web. Le crédit inclut chat, quiz et traductions, remboursements déduits.",
+  "Time is measured on the phone, from the scan to the result page on screen (scans before v0.49: Claude's time only). Cost counts each scan as a whole, second pass included. Advanced = the scan needed a second pass with web search. Credit includes chat, quiz and translations, minus refunds.": "Le temps est mesuré sur le téléphone, du scan jusqu'à l'affichage de la page (scans d'avant la v0.49 : temps de Claude seul). Le coût compte chaque scan en entier, deuxième passage compris. Avancée = le scan a eu besoin d'un deuxième passage avec recherche web. Le crédit inclut chat, quiz et traductions, remboursements déduits.",
   "Your map": "Ta carte",
   "Every discovery finds its place on the map: the museum where the original is kept, the building itself, or the spot where you saw a plant or a constellation. The map icon on a card takes you straight there.": "Chaque découverte trouve sa place sur la carte : le musée où l'original est conservé, le bâtiment lui-même, ou l'endroit où tu as repéré une plante ou une constellation. L'icône carte d'une fiche t'y emmène directement.",
   "Visit · See · Read": "Visiter · Voir · Lire",
@@ -5173,6 +5183,7 @@ es: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
   "Browse by Date": "Explorar por fecha",
+  "of which Claude": "de ello Claude",
   "Average cost per scan": "Coste medio por escaneo",
   "Average response time": "Tiempo de respuesta medio",
   "Target {v}": "Objetivo {v}",
@@ -5189,7 +5200,7 @@ es: {
   "Advanced search": "Búsqueda avanzada",
   "No scans in this period": "Sin escaneos en este periodo",
   "Could not load the dashboard.": "No se pudo cargar el panel.",
-  "Time and cost count each scan as a whole, second pass included. Advanced = the scan needed a second pass with web search. Credit includes chat, quiz and translations, minus refunds.": "Tiempo y coste cuentan cada escaneo entero, segunda pasada incluida. Avanzada = el escaneo necesitó una segunda pasada con búsqueda web. El crédito incluye chat, quiz y traducciones, descontando reembolsos.",
+  "Time is measured on the phone, from the scan to the result page on screen (scans before v0.49: Claude's time only). Cost counts each scan as a whole, second pass included. Advanced = the scan needed a second pass with web search. Credit includes chat, quiz and translations, minus refunds.": "El tiempo se mide en el teléfono, desde el escaneo hasta que la página aparece (escaneos anteriores a la v0.49: solo el tiempo de Claude). El coste cuenta cada escaneo entero, segunda pasada incluida. Avanzada = el escaneo necesitó una segunda pasada con búsqueda web. El crédito incluye chat, quiz y traducciones, descontando reembolsos.",
   "Your map": "Tu mapa",
   "Every discovery finds its place on the map: the museum where the original is kept, the building itself, or the spot where you saw a plant or a constellation. The map icon on a card takes you straight there.": "Cada descubrimiento tiene su lugar en el mapa: el museo donde se conserva el original, el propio edificio o el sitio donde viste una planta o una constelación. El icono del mapa de una ficha te lleva directamente allí.",
   "Visit · See · Read": "Visitar · Ver · Leer",
