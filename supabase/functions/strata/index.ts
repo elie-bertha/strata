@@ -35,6 +35,118 @@ const CORS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...CORS, 'content-type': 'application/json' } });
+declare const EdgeRuntime: any;
+// One Claude call with the server key (newest model first), its cost charged and recorded
+async function claudeCall(payload: any) {
+  let res: Response | null = null, data: any = null, model = '';
+  const t0 = Date.now();
+  for (const m of MODELS) {
+    model = m;
+    res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
+      body: JSON.stringify({ ...payload, model: m }),
+    });
+    data = await res.json().catch(() => ({}));
+    const msg = (data && data.error && data.error.message) || '';
+    if (res.status === 404 || (res.status === 400 && /model/i.test(msg) && /not.*found|invalid/i.test(msg))) continue;
+    break;
+  }
+  return { res, data, model, ms: Date.now() - t0 };
+}
+async function charge(uid: string, model: string, usage: any, feature: string, scan: string | null, ms: number, via: string) {
+  const c = costOf(model, usage);
+  const { data: leftAfter } = await db.rpc('strata_spend', { p_uid: uid, p_micro: c.cost });
+  await db.from('usage').insert({ user_id: uid, model, input_tokens: c.inTok, output_tokens: c.outTok, searches: c.searches, cost_micro: c.cost, feature, scan_id: scan, ms, via });
+  return { cost: c.cost, left: leftAfter };
+}
+function textOf(data: any) {
+  const blocks = (data && data.content) || []; let last = -1;
+  blocks.forEach((b: any, k: number) => { if (b.type === 'web_search_tool_result' || b.type === 'server_tool_use') last = k; });
+  return blocks.slice(last + 1).filter((b: any) => b.type === 'text').map((b: any) => b.text).join('');
+}
+function parseJSON(t: string) {
+  try { return JSON.parse(t); } catch { /* next */ }
+  const f = t.match(/```(?:json)?\s*([\s\S]*?)```/); if (f) { try { return JSON.parse(f[1]); } catch { /* next */ } }
+  const a = t.indexOf('{'), b = t.lastIndexOf('}');
+  if (a >= 0 && b > a) { try { return JSON.parse(t.slice(a, b + 1)); } catch { /* next */ } }
+  return null;
+}
+function callError(res: Response | null, data: any) {
+  const msg = (data && data.error && data.error.message) || '';
+  if (!res) return 'network';
+  if (res.status === 429 || res.status === 529) return 'rate_limited';
+  if (/credit/i.test(msg)) return 'no_credit';
+  return 'upstream_error';
+}
+// Give back what a failed scan cost: its calls are marked refunded and taken off the user's spending
+async function refundScan(uid: string, scan: string) {
+  const { data: rows } = await db.from('usage').select('id, cost_micro').eq('user_id', uid).eq('scan_id', scan).eq('refunded', false);
+  const total = (rows || []).reduce((x: number, r: any) => x + (Number(r.cost_micro) || 0), 0);
+  if (total > 0) {
+    await db.rpc('strata_spend', { p_uid: uid, p_micro: -total });
+    await db.from('usage').update({ refunded: true }).in('id', (rows || []).map((r: any) => r.id));
+  }
+  await db.from('scan_jobs').update({ refunded: true }).eq('id', scan).eq('user_id', uid);
+}
+const jobSet = (id: string, uid: string, v: any) => db.from('scan_jobs').update({ ...v, updated_at: new Date().toISOString() }).eq('id', id).eq('user_id', uid);
+// The whole scan on the server, so it finishes even if the phone goes to sleep:
+// pass 1 without web search; if Claude is unsure, pass 2 with one web search; a failed answer is retried once without search
+async function runScanJob(uid: string, prof: any, j: any) {
+  const id = j.id, kind = j.kind, t0 = Date.now();
+  const content = (text: string) => j.image ? [{ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: j.image } }, { type: 'text', text }] : text;
+  const maxTok = Math.min(Number(j.max_tokens) || 6000, 6000);
+  const stillOn = async () => { const { data } = await db.from('scan_jobs').select('status').eq('id', id).maybeSingle(); return data && data.status === 'running'; };
+  const budgetOk = async () => { if (prof.is_admin) return true; const { data } = await db.from('profiles').select('budget_cents, spent_micro').eq('user_id', uid).maybeSingle(); return !!data && data.budget_cents * 10000 - data.spent_micro > 0; };
+  try {
+    await jobSet(id, uid, { stage: 'recog' });
+    if (j.search) {
+      const r1 = await claudeCall({ max_tokens: maxTok, messages: [{ role: 'user', content: content(j.prompt + (j.note || '')) }] });
+      if (r1.res && r1.res.ok && r1.data && r1.data.usage) {
+        await charge(uid, r1.model, r1.data.usage, kind + '_pass1', id, r1.ms, 'server');
+        const d1 = parseJSON(textOf(r1.data));
+        const nature = Array.isArray(j.nature) ? j.nature : [];
+        if (d1 && d1.identified !== false && (d1.confidence === 'high' || (j.trusted && d1.confidence !== 'low') || nature.indexOf(d1.category) >= 0)) {
+          await jobSet(id, uid, { status: 'done', stage: 'write', result: d1 }); return;
+        }
+      } else if (r1.res && (r1.res.status === 429 || r1.res.status === 529 || r1.res.status >= 500)) { /* go on to pass 2 */ }
+      if (!(await stillOn())) return;
+      if (!(await budgetOk())) { await jobSet(id, uid, { status: 'error', error: 'no_budget' }); return; }
+      await jobSet(id, uid, { stage: 'search' });
+    }
+    let withSearch = !!j.search;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const payload: any = { max_tokens: maxTok, messages: [{ role: 'user', content: content(j.prompt) }] };
+      if (withSearch) payload.tools = [{ type: 'web_search_20250305', name: 'web_search', max_uses: 1 }];
+      const r = await claudeCall(payload);
+      if (r.res && r.res.ok && r.data && r.data.usage) {
+        await charge(uid, r.model, r.data.usage, kind + (withSearch ? '_search' : '_nosearch'), id, r.ms, 'server');
+        const d = parseJSON(textOf(r.data));
+        if (d && d.title) { await jobSet(id, uid, { status: 'done', stage: 'write', result: d }); return; }
+      } else if (r.res && r.res.status === 400 && withSearch) { withSearch = false; continue; }
+      // one more try without web search, only if there is time left before the server stops this run
+      if (attempt === 0 && Date.now() - t0 < 95000 && (await stillOn()) && (await budgetOk())) { withSearch = false; continue; }
+      await jobSet(id, uid, { status: 'error', error: r.res && r.res.ok ? 'invalid_json' : callError(r.res, r.data) });
+      await refundScan(uid, id); return;
+    }
+  } catch (e) {
+    await jobSet(id, uid, { status: 'error', error: 'upstream_error' });
+    await refundScan(uid, id);
+  }
+}
+// A scan still "running" long after the server's time limit was stopped by the platform: it failed, and is refunded
+async function settleStale(uid: string, jobs: any[]) {
+  for (const j of jobs) {
+    if (j.status === 'running' && Date.now() - new Date(j.updated_at).getTime() > 180000) {
+      j.status = 'error'; j.error = 'timeout';
+      await jobSet(j.id, uid, { status: 'error', error: 'timeout' }); await refundScan(uid, j.id);
+    }
+  }
+  return jobs;
+}
+const jobView = (j: any, withImage = false) => ({ id: j.id, status: j.status, stage: j.stage, kind: j.kind, error: j.error, result: j.status === 'done' ? j.result : null,
+  image: withImage ? j.image : undefined, consumed: j.consumed, created_at: j.created_at });
+
 const remaining = (p: any) => p.is_admin ? null : p.budget_cents * 10000 - p.spent_micro;
 
 function newCode() {
@@ -125,6 +237,45 @@ Deno.serve(async (req) => {
   if (action === 'scan_time') {
     await db.from('usage').insert({ user_id: user.id, model: null, input_tokens: 0, output_tokens: 0, searches: 0, cost_micro: 0,
       feature: 'scan_total', scan_id: tag(body.scan), ms: Math.max(0, Math.min(Number(body.ms) || 0, 600000)), via: 'phone' });
+    return json({ ok: true });
+  }
+
+  // ── Scans run on the server: start one, follow it, collect the finished ones ──
+  if (action === 'scan_start') {
+    const left = remaining(prof);
+    if (left !== null && left <= 0) return json({ error: prof.requested_cents > 0 ? 'pending_approval' : 'no_budget' }, 402);
+    if (!ANTHROPIC_KEY) return json({ error: 'relay_not_configured' }, 500);
+    const id = tag(body.scan);
+    if (!id || typeof body.prompt !== 'string') return json({ error: 'bad_request' }, 400);
+    const image = typeof body.image === 'string' && body.image.length < 4000000 ? body.image : null;
+    const kind = image ? 'scan' : 'text';
+    const { error } = await db.from('scan_jobs').insert({ id, user_id: user.id, status: 'running', stage: 'prepared', kind, image });
+    if (error) return json({ error: 'job_failed', message: error.message }, 500);
+    const j = { id, kind, image, prompt: body.prompt, note: String(body.note || ''), search: body.search !== false, trusted: !!body.trusted,
+      nature: Array.isArray(body.nature) ? body.nature : [], max_tokens: body.max_tokens };
+    EdgeRuntime.waitUntil(runScanJob(user.id, prof, j));
+    return json({ ok: true, id });
+  }
+  if (action === 'scan_status') {
+    const { data: j } = await db.from('scan_jobs').select('*').eq('id', tag(body.scan)).eq('user_id', user.id).maybeSingle();
+    if (!j) return json({ error: 'not_found' }, 404);
+    await settleStale(user.id, [j]);
+    return json(jobView(j));
+  }
+  // Scans finished (or still running) that the phone has not collected yet, e.g. after the app was closed
+  if (action === 'scan_pending') {
+    const { data: jobs } = await db.from('scan_jobs').select('*').eq('user_id', user.id).eq('consumed', false)
+      .gte('created_at', new Date(Date.now() - 7 * 86400000).toISOString()).order('created_at', { ascending: true });
+    const list = await settleStale(user.id, jobs || []);
+    return json({ jobs: list.filter((j: any) => j.status === 'done' || j.status === 'running').map((j: any) => jobView(j, true)) });
+  }
+  // The phone has the result: the job is closed and its copy of the photo deleted
+  if (action === 'scan_ack') {
+    await db.from('scan_jobs').update({ consumed: true, image: null, updated_at: new Date().toISOString() }).eq('id', tag(body.scan)).eq('user_id', user.id);
+    return json({ ok: true });
+  }
+  if (action === 'scan_cancel') {
+    await db.from('scan_jobs').update({ status: 'cancelled', consumed: true, image: null, updated_at: new Date().toISOString() }).eq('id', tag(body.scan)).eq('user_id', user.id).eq('status', 'running');
     return json({ ok: true });
   }
 
@@ -252,6 +403,7 @@ Deno.serve(async (req) => {
     if (files && files.length) await db.storage.from('photos').remove(files.map((f: any) => user.id + '/' + f.name));
     await db.from('scans').delete().eq('user_id', user.id);
     await db.from('usage').delete().eq('user_id', user.id);
+    await db.from('scan_jobs').delete().eq('user_id', user.id);
     await db.from('invites').delete().eq('created_by', user.id).is('used_by', null);
     await db.from('profiles').delete().eq('user_id', user.id);
     const { error } = await db.auth.admin.deleteUser(user.id);
