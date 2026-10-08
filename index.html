@@ -1934,6 +1934,7 @@ function toArt(d, imgURL) {
 var SCAN_ERR = {
   not_granted: 'Strata needs your permission to ask Claude. Reload the page and allow it when asked.',
   rate_limited: 'Claude is busy or your usage limit is reached. Try again in a moment.',
+  timeout: 'This scan took too long. Try again.',
   session_expired: 'Your Claude session expired. Sign in again, then retry.',
   image_rejected: 'This photo could not be read. Try another one, under 20 MB.',
   refused: 'Claude declined this photo. Try a different subject.',
@@ -2023,7 +2024,7 @@ async function runLiveScan(file, opts) {
     liveScanning = false;
     if (e && e.code === 'cancelled') { show(getCamPref() === 'viewfinder' ? 's-camera' : 's-home'); return; }
     var credErr = e && (e.code === 'pending_approval' || e.code === 'no_budget');
-    scanStatus(credErr ? t('No credit yet') : t('Could not identify this one'), (SCAN_ERR[e && e.code] ? t(SCAN_ERR[e.code]) : t('Something went wrong while asking Claude. Try again.')) + ' [' + ((e && e.code) || 'unknown') + (e && e.message ? ': ' + String(e.message).slice(0, 120) : '') + (credErr ? '' : ']'), true);
+    scanStatus(credErr ? t('No credit yet') : t('Could not identify this one'), (SCAN_ERR[e && e.code] ? t(SCAN_ERR[e.code]) : t('Something went wrong while asking Claude. Try again.')) + (e && e.refunded ? ' ' + t('This scan cost you nothing.') : '') + ' [' + ((e && e.code) || 'unknown') + (e && e.message ? ': ' + String(e.message).slice(0, 120) : '') + (credErr ? '' : ']'), true);
     if (credErr) document.getElementById('scanSub').textContent = t(SCAN_ERR[e.code]);
     document.getElementById('scanOwnKey').hidden = !credErr; document.getElementById('scanRetry').hidden = credErr;
   } finally { clearTimeout(scanTimer); stepsStop(); }
@@ -2204,6 +2205,83 @@ async function callRelay(body, signal, feature, scan) {
   throw { code: 'upstream_error', message: msg || (typeof data.error === 'string' ? data.error : '') };
 }
 // Calls made with your own key are recorded (feature, time, tokens) so speed and cost can be measured; nothing is charged
+// ─── SCANS ON THE SERVER ───
+// Signed-in users on credit, and the admin (whose server key it is), scan through the server
+function useServerScan() { return !!getSession() && (relayMode() || !!(strataMe && strataMe.is_admin)); }
+var activeJobs = {};
+function sleepSig(ms, signal) {
+  return new Promise(function(ok, ko){
+    if (signal && signal.aborted) return ko({ code: 'cancelled' });
+    var tm = setTimeout(ok, ms);
+    if (signal) signal.addEventListener('abort', function(){ clearTimeout(tm); ko({ code: 'cancelled' }); }, { once: true });
+  });
+}
+// Starts the scan on the server, then follows it. Returns null when the server cannot take it (the phone then scans as before)
+async function serverScan(req, opts) {
+  var r;
+  try { r = await relay('scan_start', req, true, opts.signal); } catch (e) { if (e && e.code === 'cancelled') throw e; return null; }
+  if (r.status === 402) { setCredit(0); throw { code: r.data && r.data.error === 'pending_approval' ? 'pending_approval' : 'no_budget' }; }
+  if (r.status === 401) throw { code: 'session_expired' };
+  if (!r.ok) return null;
+  activeJobs[req.scan] = true;
+  var stage = '', deadline = Date.now() + 6 * 60000;
+  try {
+    for (;;) {
+      await sleepSig(2000, opts.signal);
+      var s;
+      try { s = await relay('scan_status', { scan: req.scan }, true); }
+      catch (e) { if (Date.now() > deadline) throw { code: 'network' }; continue; }   // asleep or offline: keep following
+      if (!s.ok) { if (s.status === 401) throw { code: 'session_expired' }; if (Date.now() > deadline) throw { code: 'network' }; continue; }
+      var j = s.data || {};
+      if (j.stage === 'search' && stage !== 'search' && opts.onSearch) opts.onSearch();
+      stage = j.stage;
+      if (j.status === 'done' && j.result) { relay('scan_ack', { scan: req.scan }, true).catch(function(){}); fetchMe(); return j.result; }
+      if (j.status === 'error') { fetchMe(); throw { code: j.error || 'upstream_error', refunded: true }; }
+      if (j.status === 'cancelled') throw { code: 'cancelled' };
+    }
+  } catch (e) {
+    if (e && e.code === 'cancelled') relay('scan_cancel', { scan: req.scan }, true).catch(function(){});
+    throw e;
+  } finally { delete activeJobs[req.scan]; }
+}
+function b64ToFile(b64) {
+  var bin = atob(b64), u = new Uint8Array(bin.length);
+  for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+  return new File([u], 'scan.jpg', { type: 'image/jpeg' });
+}
+// Scans finished on the server while the app was closed: added to the journal, and the latest one is opened
+async function checkPendingScans() {
+  if (!getSession() || checkPendingScans.busy) return;
+  checkPendingScans.busy = true;
+  var again = false;
+  try {
+    var r = await relay('scan_pending', {}, true).catch(function(){ return { ok: false }; });
+    if (!r.ok) return;
+    var jobs = (r.data.jobs || []).filter(function(j){ return !activeJobs[j.id]; }), lastId = null, lastTitle = '';
+    for (var i = 0; i < jobs.length; i++) {
+      var j = jobs[i];
+      if (j.status === 'running') { again = true; continue; }
+      var d = j.result;
+      relay('scan_ack', { scan: j.id }, true).catch(function(){});
+      if (!d || !d.title) continue;
+      var dup = findDuplicate(d); if (dup) continue;
+      if (!d.lang) d.lang = getLang();
+      d.loc_v = 2;
+      var file = j.image ? b64ToFile(j.image) : await workPicture({ colors: '', thumb: '' });
+      lastId = await saveScan(d, file).catch(function(){ return null; }); lastTitle = d.title;
+    }
+    if (lastId) {
+      await loadJournal();
+      toast(t('Your scan is ready: {a}', { a: lastTitle }));
+      if (!liveScanning) openScan(lastId);
+    }
+  } finally {
+    checkPendingScans.busy = false;
+    if (again) setTimeout(checkPendingScans, 4000);
+  }
+}
+document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible') setTimeout(checkPendingScans, 1500); });
+
 // Sent once the result page is painted (next frame), so the time covers everything the user waits through
 function reportScanTime(sid, t0) {
   if (!getSession()) return;
@@ -2278,6 +2356,12 @@ function makeLive() {
     // One id per scan, so its passes can be counted as a single scan (speed and cost dashboard)
     var sid = opts.scanId || ('s' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
     var body = { _scan: sid, max_tokens: SCAN_MAX_TOKENS, messages: [{ role: 'user', content: content }] }, kind = typeof content === 'string' ? 'text' : 'scan';
+    // On the server when possible: the scan then finishes even if the phone goes to sleep or the app is left
+    if (opts.searchIfUnsure && useServerScan()) {
+      var srv = await serverScan({ scan: sid, prompt: kind === 'text' ? content : prompt, image: kind === 'text' ? null : b64, note: NO_SEARCH_NOTE, search: !searchOff,
+        trusted: !!opts.trusted, nature: NATURE_CATS, max_tokens: SCAN_MAX_TOKENS }, opts);
+      if (srv) return srv;
+    }
     // Pass 1 without web search: most works are recognised straight away, and searching costs about half of a scan
     if (opts.searchIfUnsure && !searchOff) {
       var c1 = typeof content === 'string' ? content + NO_SEARCH_NOTE : content.slice(0, -1).concat([{ type: 'text', text: prompt + NO_SEARCH_NOTE }]);
@@ -3906,7 +3990,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.50';
+var APP_VERSION = '0.51';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -4686,7 +4770,7 @@ document.getElementById('wlOwnKey').addEventListener('click', function(){ hideWe
 async function afterSignIn(email, password, msgEl) {
   await sbAuth('password', { email: email, password: password });
   hideWelcome(); renderSync(); renderProfile(); setMode(hasAI());
-  await fetchMe(); syncNow(false); pullProfile().catch(function(){});
+  await fetchMe(); syncNow(false); pullProfile().catch(function(){}); checkPendingScans();
 }
 document.getElementById('wlCreate').addEventListener('click', async function(){
   var btn = this, msg = document.getElementById('wlMsg');
@@ -4957,6 +5041,9 @@ fr: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifie ta connexion.",
   "Browse by Date": "Parcourir par date",
+  "Your scan is ready: {a}": "Ton scan est prêt : {a}",
+  "This scan cost you nothing.": "Ce scan ne t'a rien coûté.",
+  "This scan took too long. Try again.": "Ce scan a pris trop de temps. Réessaie.",
   "5 questions on {a} · 2 minutes": "5 questions sur {a} · 2 minutes",
   "Preparing 5 questions on {a}…": "Préparation de 5 questions sur {a}…",
   "Could not prepare the quiz. Try again in a moment.": "Impossible de préparer le quiz. Réessaie dans un moment.",
@@ -5203,6 +5290,9 @@ es: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
   "Browse by Date": "Explorar por fecha",
+  "Your scan is ready: {a}": "Tu escaneo está listo: {a}",
+  "This scan cost you nothing.": "Este escaneo no te ha costado nada.",
+  "This scan took too long. Try again.": "Este escaneo tardó demasiado. Inténtalo de nuevo.",
   "5 questions on {a} · 2 minutes": "5 preguntas sobre {a} · 2 minutos",
   "Preparing 5 questions on {a}…": "Preparando 5 preguntas sobre {a}…",
   "Could not prepare the quiz. Try again in a moment.": "No se pudo preparar el quiz. Inténtalo en un momento.",
@@ -5470,7 +5560,7 @@ document.querySelector('.phone').classList.toggle('no-music', !MUSIC_ENABLED);
 initSections();
 captureI18n();
 applyLang();
-loadJournal().then(function(){ if (getSession()) { syncNow(false); fetchMe(); } translateJournal(getLang(), true); maybeWelcome(); renderInstallGuides(); });
+loadJournal().then(function(){ if (getSession()) { syncNow(false); fetchMe().then(checkPendingScans); } translateJournal(getLang(), true); maybeWelcome(); renderInstallGuides(); });
 renderAdmin();
 
 // ─── INIT ─────────────────────────────────────
