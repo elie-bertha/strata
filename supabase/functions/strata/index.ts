@@ -335,7 +335,7 @@ Deno.serve(async (req) => {
       res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'x-api-key': apiKey, 'anthropic-version': '2023-06-01', 'content-type': 'application/json' },
-        body: JSON.stringify({ ...payload, model: m }),
+        body: JSON.stringify({ ...payload, model: m, ...(b.fast && m === 'claude-sonnet-5-5' ? { thinking: { type: 'between_tools' }, output_config: { effort: 'low' } } : {}) }),
       });
       data = await res.json().catch(() => ({}));
       const msg = (data && data.error && data.error.message) || '';

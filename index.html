@@ -2263,6 +2263,8 @@ function langRule() {
     'Also add "title_en": the usual English title, used to recognise the same work across languages, and "wiki": the exact title of its English Wikipedia article (the work, building, book, species or mountain itself), or an empty string if it has none.';
 }
 var API_MODELS = ['claude-sonnet-5-5', 'claude-sonnet-4-6'];
+// short answers: Sonnet 5.5 thinks before answering by default, which a one-line answer does not need (and pays for)
+var FAST_OPTS = { thinking: { type: 'between_tools' }, output_config: { effort: 'low' } };
 var KEY_STORE = 'strata.apiKey';
 function getKey() { try { return localStorage.getItem(KEY_STORE) || ''; } catch (e) { return window._memKey || ''; } }
 function setKey(k) { window._memKey = k; try { if (k) localStorage.setItem(KEY_STORE, k); else localStorage.removeItem(KEY_STORE); } catch (e) {} }
@@ -2397,8 +2399,8 @@ function logOwn(feature, model, usage, ms, scan) {
   relay('log', { feature: feature, model: model, usage: usage, ms: ms, scan: scan }, true).catch(function(){});
 }
 async function callClaude(body, signal) {
-  var feature = body._f || '', scan = body._scan || '', want = body._model || ''; body = Object.assign({}, body); delete body._f; delete body._scan; delete body._model;
-  if (relayMode()) return callRelay(Object.assign(want ? { model: want } : {}, body), signal, feature, scan);
+  var feature = body._f || '', scan = body._scan || '', want = body._model || '', fast = !!body._fast; body = Object.assign({}, body); delete body._f; delete body._scan; delete body._model; delete body._fast;
+  if (relayMode()) return callRelay(Object.assign(want ? { model: want } : {}, fast ? { fast: 1 } : {}, body), signal, feature, scan);
   var models = want ? [want].concat(API_MODELS) : API_MODELS;
   var lastErr = { code: 'upstream_error' }, t0 = Date.now();
   for (var i = 0; i < models.length; i++) {
@@ -2407,7 +2409,7 @@ async function callClaude(body, signal) {
       res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST', signal: signal,
         headers: { 'content-type': 'application/json', 'x-api-key': getKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-        body: JSON.stringify(Object.assign({ model: models[i] }, body))
+        body: JSON.stringify(Object.assign({ model: models[i] }, body, fast && models[i] === 'claude-sonnet-5-5' ? FAST_OPTS : {}))
       });
     } catch (e) {
       if (e && e.name === 'AbortError') throw { code: 'cancelled' };
@@ -3517,7 +3519,7 @@ async function fillLink(r) {
   if (!others.length) return;   // nothing to link with yet: try again when the journal grows
   var lang = getLang();
   try {
-    var txt = await callClaude({ _f: 'link', max_tokens: 500, messages: [{ role: 'user', content:
+    var txt = await callClaude({ _f: 'link', _fast: true, max_tokens: 500, messages: [{ role: 'user', content:
       'New find: ' + linkFact(r) + '\n\nThe user\'s journal (number | title | creator | date):\n' +
       others.map(function(x, i){ return (i + 1) + ' | ' + linkFact(x); }).join('\n') +
       '\n\nFind the single most surprising TRUE connection between the new find and ONE item of the journal: an influence, a copy or homage, the same model or patron, one depicting or mentioning the other, a person or event tying them, a rivalry. ' +
@@ -4732,7 +4734,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.62';
+var APP_VERSION = '0.63';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
