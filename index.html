@@ -638,7 +638,10 @@ button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dash
 .ts-card{width:100%;background:var(--surface);border-radius:24px 24px 0 0;padding:20px 20px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;animation:czIn .22s ease-out;}
 .ts-top{display:flex;align-items:center;justify-content:space-between;}
 .ts-title{font-family:'DM Serif Display',serif;font-size:20px;color:var(--ink);}
-.ts-p{font-size:13px;color:var(--muted);}
+.ts-p{font-size:13px;color:var(--muted);margin-top:-6px;}
+.ts-h{font:600 12px 'DM Sans',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:4px;}
+#tsSeenSec{display:flex;flex-direction:column;gap:10px;}
+#tsSeenSec[hidden]{display:none;}
 .ts-chips{display:flex;flex-wrap:wrap;gap:8px;}
 .ts-chip{font:500 14px 'DM Sans',sans-serif;padding:10px 14px;border-radius:100px;border:1.5px solid var(--s3);background:var(--surface);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px;}
 .ts-chip.on{background:var(--sun);border-color:var(--sun);color:var(--night);font-weight:600;}
@@ -1088,7 +1091,9 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
 <div class="ig-arrow" id="igArrow" hidden aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="20"/><polyline points="5 13 12 20 19 13"/></svg></div>
 <div class="tag-sheet" id="tagSheet" hidden>
   <div class="ts-card" role="dialog" aria-labelledby="tsTitle">
-    <div class="ts-top"><div class="ts-title" id="tsTitle">Categories</div><button class="cz-x" id="tsClose" aria-label="Close">×</button></div>
+    <div class="ts-top"><div class="ts-title" id="tsTitle">Edit</div><button class="cz-x" id="tsClose" aria-label="Close">×</button></div>
+    <div id="tsSeenSec"><div class="ts-h">How you saw it</div><div class="ts-chips" id="tsSeen"></div></div>
+    <div class="ts-h">Categories</div>
     <p class="ts-p">Tap to add or remove. Changes are saved right away.</p>
     <div class="ts-chips" id="tsChips"></div>
     <button class="key-btn pri" id="tsDone">Done</button>
@@ -2994,7 +2999,7 @@ function renderTags() {
   el.innerHTML = seenChip(r) + scanCats(r).map(function(c){ return '<span class="res-tag">' + t(TAG_LABEL[c] || c) + '</span>'; }).join('') +
     '<button class="res-tag" id="tagEdit" aria-label="' + t('Edit categories') + '">' + PENCIL + t('Edit') + '</button>';
   document.getElementById('tagEdit').onclick = openTagSheet;
-  var sc = document.getElementById('tagSeen'); if (sc) sc.onclick = function(){ toggleSeen(r); };
+  var sc = document.getElementById('tagSeen'); if (sc) sc.onclick = openTagSheet;
   renderStars(); renderSpotBtn();
 }
 
@@ -3105,11 +3110,11 @@ var SEEN = {
 function seenOf(r) { var v = r && r.data && r.data.seen; return SEEN[v] ? v : ''; }
 function seenChip(r) {
   var k = seenOf(r); if (!k) return '';
-  return k === 'discovery' ? '<span class="res-tag seen-tag sk-discovery">' + SEEN[k].ic + t(SEEN[k].label) + '</span>'
-    : '<button class="res-tag seen-tag sk-' + k + '" id="tagSeen" aria-label="' + esc(t('Change: seen in person or a reproduction')) + '">' + SEEN[k].ic + t(SEEN[k].label) + '</button>';
+  return '<button class="res-tag seen-tag sk-' + k + '" id="tagSeen" aria-label="' + esc(t('Change: seen in person or a reproduction')) + '">' + SEEN[k].ic + t(SEEN[k].label) + '</button>';
 }
-function toggleSeen(r) {
-  r.data.seen = seenOf(r) === 'original' ? 'reproduction' : 'original'; r.data.seen_by = 'user';
+function setSeen(r, v) {
+  if (seenOf(r) === v) return;
+  r.data.seen = v; r.data.seen_by = 'user';
   saveLocal(r).catch(function(){}); renderTags(); renderJournal(); renderResColl(); collCheckDone();
   toast(t(r.data.seen === 'original' ? 'Marked as seen in person' : 'Marked as a reproduction'));
 }
@@ -4171,8 +4176,19 @@ function openTagSheet() {
   document.getElementById('tsChips').innerHTML = TAG_ORDER.map(function(c){
     return '<button class="ts-chip' + (cats.indexOf(c) >= 0 ? ' on' : '') + '" data-cat="' + c + '" aria-pressed="' + (cats.indexOf(c) >= 0) + '">' + t(TAG_LABEL[c]) + '</button>';
   }).join('');
+  var k = seenOf(r), sec = document.getElementById('tsSeenSec');
+  sec.hidden = isSeenCat(r.data) && !k;
+  document.getElementById('tsSeen').innerHTML = ['original', 'reproduction'].map(function(v){
+    return '<button class="ts-chip' + (k === v ? ' on' : '') + '" data-seen="' + v + '" aria-pressed="' + (k === v) + '">' + SEEN[v].ic + t(SEEN[v].label) + '</button>';
+  }).join('');
   document.getElementById('tagSheet').hidden = false;
 }
+document.getElementById('tsSeen').addEventListener('click', function(e){
+  var chip = e.target.closest('.ts-chip'), r = currentRec(); if (!chip || !r) return;
+  var v = chip.getAttribute('data-seen');
+  Array.prototype.forEach.call(document.querySelectorAll('#tsSeen .ts-chip'), function(c){ var on = c === chip; c.classList.toggle('on', on); c.setAttribute('aria-pressed', on); });
+  setSeen(r, v);
+});
 function closeTagSheet() { document.getElementById('tagSheet').hidden = true; }
 document.getElementById('tsChips').addEventListener('click', function(e){
   var chip = e.target.closest('.ts-chip'), r = currentRec(); if (!chip || !r) return;
@@ -4639,7 +4655,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.56';
+var APP_VERSION = '0.57';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -5664,7 +5680,7 @@ document.getElementById('czNext').addEventListener('click', function(){ openZoom
 // Keys are the English interface text; French and Spanish below. Missing keys fall back to English.
 var I18N = {
 fr: {
-  "Categories": "Catégories", "Tap to add or remove. Changes are saved right away.": "Touche pour ajouter ou retirer. Les changements sont enregistrés tout de suite.", "Done": "Terminé",
+  "How you saw it": "Comment tu l'as vu", "Categories": "Catégories", "Tap to add or remove. Changes are saved right away.": "Touche pour ajouter ou retirer. Les changements sont enregistrés tout de suite.", "Done": "Terminé",
   "Settings": "Réglages", "Claude API key": "Clé API Claude",
   "Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.": "Strata interroge Claude sur chaque photo avec ta propre clé. Elle est enregistrée uniquement dans ce navigateur, sur ce téléphone.",
   "Save key": "Enregistrer la clé", "Try the demo": "Essayer la démo", "Remove key": "Supprimer la clé",
@@ -5968,7 +5984,7 @@ fr: {
   "Choose a photo from your library": "Choisir une photo dans ta photothèque", "Edit categories": "Modifier les catégories"
 },
 es: {
-  "Categories": "Categorías", "Tap to add or remove. Changes are saved right away.": "Toca para añadir o quitar. Los cambios se guardan al momento.", "Done": "Listo",
+  "How you saw it": "Cómo lo viste", "Categories": "Categorías", "Tap to add or remove. Changes are saved right away.": "Toca para añadir o quitar. Los cambios se guardan al momento.", "Done": "Listo",
   "Settings": "Ajustes", "Claude API key": "Clave API de Claude",
   "Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.": "Strata consulta a Claude sobre cada foto con tu propia clave. Solo se guarda en este navegador, en este teléfono.",
   "Save key": "Guardar clave", "Try the demo": "Probar la demo", "Remove key": "Eliminar clave",
