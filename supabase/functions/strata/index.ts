@@ -13,7 +13,9 @@ const ANTHROPIC_KEY = Deno.env.get('ANTHROPIC_API_KEY') || '';
 
 const MODELS = ['claude-sonnet-5-5', 'claude-sonnet-4-6'];
 // US dollars per million tokens [input, output]. Check claude.com/pricing if Anthropic changes them.
-const PRICE: Record<string, number[]> = { 'claude-sonnet-5-5': [2, 10], 'claude-sonnet-4-6': [3, 15], 'claude-haiku-4-5': [1, 5] };
+const PRICE: Record<string, number[]> = { 'claude-sonnet-5-5': [2, 10], 'claude-sonnet-4-6': [3, 15], 'claude-haiku-4-5': [1, 5], 'claude-haiku-4-5-20251001': [1, 5] };
+// The short identification with web search reads long web pages: the cheaper model does it, the main one takes over if it is unavailable
+const ID_MODELS = ['claude-haiku-4-5-20251001', 'claude-sonnet-5-5'];
 
 // Cost of one Claude answer, in millionths of a dollar, from its usage block
 function costOf(model: string, u: any) {
@@ -37,10 +39,10 @@ const CORS = {
 const json = (o: unknown, status = 200) => new Response(JSON.stringify(o), { status, headers: { ...CORS, 'content-type': 'application/json' } });
 declare const EdgeRuntime: any;
 // One Claude call with the server key (newest model first), its cost charged and recorded
-async function claudeCall(payload: any) {
+async function claudeCall(payload: any, models: string[] = MODELS) {
   let res: Response | null = null, data: any = null, model = '';
   const t0 = Date.now();
-  for (const m of MODELS) {
+  for (const m of models) {
     model = m;
     res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -100,11 +102,12 @@ async function runScanJob(uid: string, prof: any, j: any) {
   const budgetOk = async () => { if (prof.is_admin) return true; const { data } = await db.from('profiles').select('budget_cents, spent_micro').eq('user_id', uid).maybeSingle(); return !!data && data.budget_cents * 10000 - data.spent_micro > 0; };
   try {
     await jobSet(id, uid, { stage: 'recog' });
+    let d1: any = null;
     if (j.search) {
       const r1 = await claudeCall({ max_tokens: maxTok, messages: [{ role: 'user', content: content(j.prompt + (j.note || '')) }] });
       if (r1.res && r1.res.ok && r1.data && r1.data.usage) {
         await charge(uid, r1.model, r1.data.usage, kind + '_pass1', id, r1.ms, 'server');
-        const d1 = parseJSON(textOf(r1.data));
+        d1 = parseJSON(textOf(r1.data));
         const nature = Array.isArray(j.nature) ? j.nature : [];
         if (d1 && d1.identified !== false && (d1.confidence === 'high' || (j.trusted && d1.confidence !== 'low') || nature.indexOf(d1.category) >= 0)) {
           await jobSet(id, uid, { status: 'done', stage: 'write', result: d1 }); return;
@@ -113,6 +116,40 @@ async function runScanJob(uid: string, prof: any, j: any) {
       if (!(await stillOn())) return;
       if (!(await budgetOk())) { await jobSet(id, uid, { status: 'error', error: 'no_budget' }); return; }
       await jobSet(id, uid, { stage: 'search' });
+      // Unsure: a short identification with one web search, instead of rewriting every card with search results.
+      // If it confirms the first guess, the cards already written are kept; otherwise they are rewritten for the right work, without search.
+      if (d1 && d1.title) {
+        const ask = (j.image ? 'Identify the work in this photo.' : 'Identify this work: ' + j.prompt.slice(-400)) +
+          ' A first look suggested: "' + d1.title + '"' + (d1.creator ? ' by ' + d1.creator : '') + (d1.date ? ' (' + d1.date + ')' : '') + '.' +
+          ' Use the web_search tool once to check it. Reply with only JSON: {"first_guess_correct": true or false, "identified": true or false, "title": "exact title of the work, building, book or species", "creator": "artist, architect, author, or scientific name", "date": "year or period", "confidence": "high", "medium" or "low"}';
+        const idPayload = { max_tokens: 700, tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 1 }], messages: [{ role: 'user', content: content(ask) }] };
+        let ri = await claudeCall(idPayload, ID_MODELS);
+        if (!(ri.res && ri.res.ok) && ri.model !== MODELS[0]) ri = await claudeCall(idPayload, MODELS);   // the cheaper model refused: the main one does it
+        if (ri.res && ri.res.ok && ri.data && ri.data.usage) {
+          await charge(uid, ri.model, ri.data.usage, kind + '_identify', id, ri.ms, 'server');
+          const idf = parseJSON(textOf(ri.data));
+          if (idf && (idf.first_guess_correct === true || idf.identified === false)) {
+            // confirmed (or still unknown: the first answer already tells its style and context)
+            if (idf.first_guess_correct === true) d1.confidence = 'high';
+            await jobSet(id, uid, { status: 'done', stage: 'write', result: d1 }); return;
+          }
+          if (idf && idf.identified !== false && idf.title) {
+            if (!(await stillOn()) || !(await budgetOk())) { if (!(await budgetOk())) await jobSet(id, uid, { status: 'error', error: 'no_budget' }); return; }
+            await jobSet(id, uid, { stage: 'write' });
+            const known = '\n\nA web search identified this work as: "' + idf.title + '"' + (idf.creator ? ' by ' + idf.creator : '') + (idf.date ? ' (' + idf.date + ')' : '') +
+              '. Write about this work. Set "identified" to true and "confidence" to "high".';
+            const rw = await claudeCall({ max_tokens: maxTok, messages: [{ role: 'user', content: content(j.prompt + known) }] });
+            if (rw.res && rw.res.ok && rw.data && rw.data.usage) {
+              await charge(uid, rw.model, rw.data.usage, kind + '_rewrite', id, rw.ms, 'server');
+              const d2 = parseJSON(textOf(rw.data));
+              if (d2 && d2.title) { await jobSet(id, uid, { status: 'done', stage: 'write', result: d2 }); return; }
+            }
+          }
+        }
+        // the identification could not settle it: the full search pass below, as before
+        if (!(await stillOn())) return;
+        if (Date.now() - t0 > 75000) { await jobSet(id, uid, { status: 'done', stage: 'write', result: d1 }); return; }
+      }
     }
     let withSearch = !!j.search;
     for (let attempt = 0; attempt < 2; attempt++) {
