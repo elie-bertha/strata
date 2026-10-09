@@ -547,6 +547,61 @@ label.key-btn{text-align:center;display:block;}
 .cat-stars{color:#C99A12;letter-spacing:1px;font-size:10px;}
 .cat-stars .st-off{color:var(--border);}
 .rate-chips{display:flex;gap:7px;flex-wrap:nowrap;}
+/* COLLECTIONS */
+#collSec,#findsSec{margin-bottom:22px;}
+.cl-strip{gap:12px;}
+.cl-card{width:152px;flex-shrink:0;background:var(--surface);border:none;border-radius:18px;padding:10px;text-align:left;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--ink);}
+.cl-card.gold{background:linear-gradient(160deg,#FFF6D8,#F7DE8C);} .cl-card.done{box-shadow:inset 0 0 0 2px var(--sun);}
+.cl-mos{display:grid;grid-template-columns:1fr 1fr;gap:3px;height:112px;border-radius:12px;overflow:hidden;position:relative;}
+.cl-mos div{background:var(--s3) center/cover;}
+.cl-badge{position:absolute;top:6px;left:6px;font-size:10px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;background:var(--night);color:var(--sun);padding:3px 8px;border-radius:100px;}
+.cl-n{font-weight:600;font-size:14px;margin-top:9px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.cl-bar{height:5px;border-radius:3px;background:var(--s3);margin-top:7px;overflow:hidden;}.cl-bar i{display:block;height:100%;background:var(--night);border-radius:3px;}
+.cl-card.gold .cl-bar i{background:#C9921A;}
+.cl-p{font-size:12px;color:var(--muted);margin-top:4px;}
+.fd-chips{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;margin:0 -16px 10px;padding:0 16px;}.fd-chips::-webkit-scrollbar{display:none;}
+.fd-chip{flex-shrink:0;font:500 13px 'DM Sans',sans-serif;padding:7px 12px;border-radius:100px;border:1.5px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer;}
+.fd-chip span{color:var(--muted);font-size:11px;margin-left:2px;}
+.fd-chip.on{background:var(--sun);border-color:var(--sun);color:var(--night);font-weight:600;}.fd-chip.on span{color:var(--night);}
+.fd-list{display:flex;flex-direction:column;gap:8px;}
+.fd-row{display:flex;gap:12px;align-items:center;background:var(--surface);border-radius:16px;padding:9px;cursor:pointer;}
+.fd-th{width:52px;height:52px;border-radius:12px;background:#2C2C2E center/cover;flex-shrink:0;position:relative;}
+.fd-seen{position:absolute;right:-5px;bottom:-5px;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--surface);}
+.fd-seen svg{width:11px;height:11px;}
+.fd-seen.sk-original{background:var(--sun);color:var(--night);}.fd-seen.sk-reproduction{background:#8E8E93;color:#fff;}
+.fd-tx{flex:1;min-width:0;}.fd-tx b{display:block;font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.fd-tx span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+#s-coll{background:var(--bg);}
+.cl-head{background:var(--night);color:#fff;padding:calc(14px + env(safe-area-inset-top,0px)) 20px 20px;flex-shrink:0;}
+.cl-head.gold{background:linear-gradient(160deg,#3A2A06,#16346B);}
+.cl-back{width:40px;height:40px;border-radius:50%;border:none;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:pointer;margin-bottom:12px;}
+.cl-k{font-size:11px;letter-spacing:1.2px;font-weight:600;color:var(--sun);text-transform:uppercase;}
+.cl-name{font-family:'DM Serif Display',serif;font-size:28px;line-height:1.1;margin:5px 0 4px;}
+.cl-sub{font-size:13px;opacity:.8;}
+.cl-pg{display:flex;align-items:center;gap:12px;margin-top:14px;}.cl-pbar{flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.18);overflow:hidden;}.cl-pbar i{display:block;height:100%;background:var(--sun);border-radius:4px;}
+.cl-pg b{font-size:15px;}.cl-seen{font-size:12px;color:#FFE7A3;margin-top:6px;}.cl-seen:empty{display:none;}
+.cl-body{flex:1;overflow-y:auto;padding:16px 16px calc(30px + env(safe-area-inset-bottom,0px));}
+.cl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.cl-it{background:var(--surface);border:none;border-radius:14px;overflow:hidden;padding:0;text-align:left;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.cl-im{height:96px;background:#E3E3E8 center/cover;position:relative;}
+.cl-it.miss .cl-im{filter:grayscale(1);opacity:.45;}
+.cl-it.miss .cl-im:not([style]){background:repeating-linear-gradient(135deg,#ECECF0 0 8px,#E3E3E8 8px 16px);opacity:1;filter:none;}
+.cl-ok{position:absolute;top:6px;right:6px;width:22px;height:22px;border-radius:50%;background:var(--sun);color:var(--night);display:flex;align-items:center;justify-content:center;}
+.cl-ok svg{width:12px;height:12px;}
+.cl-it .fd-seen{right:6px;bottom:6px;left:auto;}
+.cl-tx{padding:7px 8px 9px;font-size:11.5px;font-weight:600;line-height:1.2;color:var(--ink);}
+.cl-tx span{display:block;font-weight:400;color:var(--muted);font-size:10.5px;margin-top:2px;}
+.cl-it.miss .cl-tx{color:#6B6B70;}
+.cl-mapbtn,.cl-replay{width:100%;margin-top:16px;height:50px;border-radius:14px;border:none;background:var(--night);color:#fff;font:600 15px 'DM Sans',sans-serif;cursor:pointer;}
+.cl-replay{background:var(--surface);color:var(--ink);border:1.5px solid var(--border);}
+.cl-map{height:280px;border-radius:16px;overflow:hidden;margin-top:12px;}
+.res-coll{display:flex;align-items:center;gap:10px;margin-top:12px;padding:8px 14px 8px 8px;border-radius:16px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font:400 12px 'DM Sans',sans-serif;text-align:left;cursor:pointer;backdrop-filter:blur(12px);max-width:100%;}
+.res-coll b{display:block;font-size:13px;font-weight:600;}.res-coll span{opacity:.75;}
+.celeb{position:absolute;inset:0;z-index:4000;background:#000;display:flex;align-items:center;justify-content:center;}
+.celeb canvas{width:100%;height:100%;object-fit:cover;}
+.celeb-x{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:16px;width:40px;height:40px;border-radius:50%;border:none;background:rgba(255,255,255,.18);color:#fff;font-size:24px;cursor:pointer;}
+.celeb-acts{position:absolute;left:20px;right:20px;bottom:calc(30px + env(safe-area-inset-bottom,0px));}
+.celeb-share{width:100%;height:54px;border-radius:16px;border:none;background:var(--sun);color:var(--night);font:700 16px 'DM Sans',sans-serif;cursor:pointer;}
 .rar-chips{overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px;}.rar-chips::-webkit-scrollbar{display:none;}
 /* RARITY */
 .res-rate-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -576,6 +631,9 @@ label.key-btn{text-align:center;display:block;}
 
 .res-tag{font:500 11px 'DM Sans',sans-serif;color:#fff;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.24);backdrop-filter:blur(12px);padding:5px 10px;border-radius:100px;display:inline-flex;align-items:center;gap:5px;}
 button.res-tag{cursor:pointer;background:rgba(255,255,255,.06);border-style:dashed;}
+.res-tag.seen-tag{border-style:solid;font-weight:600;}
+.res-tag.sk-original{background:rgba(244,197,66,.22);border-color:rgba(244,197,66,.6);color:#FFE7A3;}
+.res-tag.sk-reproduction{background:rgba(255,255,255,.12);}
 .tag-sheet{position:absolute;inset:0;z-index:2600;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;}
 .ts-card{width:100%;background:var(--surface);border-radius:24px 24px 0 0;padding:20px 20px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px;animation:czIn .22s ease-out;}
 .ts-top{display:flex;align-items:center;justify-content:space-between;}
@@ -1379,7 +1437,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
     <button class="hero-btn" id="btn-share" aria-label="Share"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
   </div>
   <div style="flex:1 0 150px;"></div>
-  <div class="res-title"><div class="res-name" id="resName"></div><div class="res-meta" id="resMeta"></div><div class="res-where" id="resWhere" hidden></div><div class="res-tags" id="resTags" hidden></div><div class="res-rate-row"><div class="res-rar" id="resRar" hidden></div><div class="res-stars" id="resStars" hidden role="radiogroup" aria-label="Your rating"></div></div><button class="res-spot" id="resSpot" hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>I am still here: place it here</button></div>
+  <div class="res-title"><div class="res-name" id="resName"></div><div class="res-meta" id="resMeta"></div><div class="res-where" id="resWhere" hidden></div><div class="res-tags" id="resTags" hidden></div><button class="res-coll" id="resColl" hidden></button><div class="res-rate-row"><div class="res-rar" id="resRar" hidden></div><div class="res-stars" id="resStars" hidden role="radiogroup" aria-label="Your rating"></div></div><button class="res-spot" id="resSpot" hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>I am still here: place it here</button></div>
   <div class="res-sheet" style="height:auto;">
     <div class="sheet-handle"></div>
     <div class="car-header">
@@ -1403,6 +1461,16 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
 </div>
 
 <!-- QUIZ -->
+<div class="screen" id="s-coll">
+  <div class="cl-head" id="clHead">
+    <button class="cl-back" id="clBack" aria-label="Back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="cl-k" id="clKick"></div><div class="cl-name" id="clName"></div><div class="cl-sub" id="clSub"></div>
+    <div class="cl-pg"><div class="cl-pbar"><i id="clBar"></i></div><b id="clCount"></b></div><div class="cl-seen" id="clSeen"></div>
+  </div>
+  <div class="cl-body"><div class="cl-grid" id="clGrid"></div><button class="cl-mapbtn" id="clMapBtn"></button><div class="cl-map" id="clMap" hidden></div><button class="cl-replay" id="clReplay" hidden>Watch the video again</button></div>
+</div>
+<div class="celeb" id="celeb" hidden><canvas id="celebCv"></canvas><button class="celeb-x" id="celebClose" aria-label="Close">×</button>
+  <div class="celeb-acts" id="celebActs" hidden><button class="celeb-share" id="celebShare">Share the video</button></div></div>
 <div class="screen" id="s-quiz">
   <div class="qz-top"><button class="qz-x" id="qzClose" aria-label="Close quiz"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1C1C1E" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg></button><div class="qz-prog" id="qzProg"></div><div class="qz-count" id="qzCount"></div></div>
   <div class="qz-body" id="qzBody"></div>
@@ -1887,6 +1955,7 @@ var SCAN_PROMPT = [
   '{',
   '  "identified": true,',
   '  "confidence": "high" | "medium" | "low",',
+  '  "seen": "original" if the photo shows the real thing in front of the photographer (a painting on a wall, a building, a statue, a plant, a mountain, a book held in hand), "reproduction" if it shows a screen, a TV, a printed poster, a postcard, a book illustration or a projection,',
   '  "category": "painting" | "print" | "architecture" | "sculpture" | "book" | "plant" | "sky" | "mountain" | "other",',
   '  "also": ["other categories from the same list that clearly also fit, e.g. a painting of a starry sky is also sky; empty array if none"],',
   '  "title": "the usual English title",',
@@ -2036,6 +2105,7 @@ async function runLiveScan(file, opts) {
     }
     if (!d.lang) d.lang = getLang();
     d.loc_v = 2;
+    d.seen = typeof opts !== 'undefined' && opts && opts.text ? 'discovery' : (d.seen === 'reproduction' ? 'reproduction' : d.seen === 'original' ? 'original' : undefined);
     ARTS.live = toArt(d, url);
     var posP = opts.camera && isSeenCat(d) ? getPos().catch(function(){ return null; }) : null;
     saveScan(d, file).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; refreshPracticalCard(); loadJournal().then(function(){ fillRarities(); if (currentArt === 'live') { renderTags(); updateMapBtn(); } if (posP) posP.then(function(pos){ if (pos) setSpot(id, pos, false); }); }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
@@ -2290,6 +2360,7 @@ async function checkPendingScans() {
       var dup = findDuplicate(d); if (dup) continue;
       if (!d.lang) d.lang = getLang();
       d.loc_v = 2;
+      d.seen = j.kind === 'text' ? 'discovery' : (d.seen === 'reproduction' ? 'reproduction' : d.seen === 'original' ? 'original' : undefined);
       var file = j.image ? b64ToFile(j.image) : await workPicture({ colors: '', thumb: '' });
       lastId = await saveScan(d, file).catch(function(){ return null; }); lastTitle = d.title;
     }
@@ -2315,23 +2386,24 @@ function logOwn(feature, model, usage, ms, scan) {
   relay('log', { feature: feature, model: model, usage: usage, ms: ms, scan: scan }, true).catch(function(){});
 }
 async function callClaude(body, signal) {
-  var feature = body._f || '', scan = body._scan || ''; body = Object.assign({}, body); delete body._f; delete body._scan;
-  if (relayMode()) return callRelay(body, signal, feature, scan);
+  var feature = body._f || '', scan = body._scan || '', want = body._model || ''; body = Object.assign({}, body); delete body._f; delete body._scan; delete body._model;
+  if (relayMode()) return callRelay(Object.assign(want ? { model: want } : {}, body), signal, feature, scan);
+  var models = want ? [want].concat(API_MODELS) : API_MODELS;
   var lastErr = { code: 'upstream_error' }, t0 = Date.now();
-  for (var i = 0; i < API_MODELS.length; i++) {
+  for (var i = 0; i < models.length; i++) {
     var res;
     try {
       res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST', signal: signal,
         headers: { 'content-type': 'application/json', 'x-api-key': getKey(), 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-        body: JSON.stringify(Object.assign({ model: API_MODELS[i] }, body))
+        body: JSON.stringify(Object.assign({ model: models[i] }, body))
       });
     } catch (e) {
       if (e && e.name === 'AbortError') throw { code: 'cancelled' };
       throw { code: 'network' };
     }
     var data = await res.json().catch(function(){ return {}; });
-    if (res.ok) { logOwn(feature, API_MODELS[i], data.usage, Date.now() - t0, scan); if (i > 0) API_MODELS = API_MODELS.slice(i).concat(API_MODELS.slice(0, i));
+    if (res.ok) { logOwn(feature, models[i], data.usage, Date.now() - t0, scan); if (!want && i > 0) API_MODELS = API_MODELS.slice(i).concat(API_MODELS.slice(0, i));
       var blocks = data.content || [], lastTool = -1;
       blocks.forEach(function(b, k){ if (b.type === 'web_search_tool_result' || b.type === 'server_tool_use') lastTool = k; });
       return blocks.slice(lastTool + 1).filter(function(b){ return b.type === 'text'; }).map(function(b){ return b.text; }).join(''); }
@@ -2783,7 +2855,7 @@ function renderJournal() {
       return '<div class="h-card" data-scan="' + r.id + '" style="background:#2C2C2E url(\'' + r.thumb + '\') center/cover;"><div class="h-card-scrim"></div><div class="h-card-info"><div class="h-card-name">' + esc(rTitle(r)) + '</div><div class="h-card-meta">' + esc(rShort(r)) + '</div>' + (rating(r) ? '<div class="h-card-stars">' + starsTxt(rating(r)) + '</div>' : '') + '</div></div>';
     }).join(''));
     badge.textContent = mine.length; badge.hidden = !mine.length;
-    sec.hidden = !mine.length || (cat === 'music' && !MUSIC_ENABLED);
+    sec.hidden = true;   // replaced by "My finds" below, with its type filter
     order.push({ sec: sec, n: mine.length, last: mine[0] ? mine[0].created_at : '' });
   });
   // Favourites: 4 stars and more, best first
@@ -2799,6 +2871,9 @@ function renderJournal() {
     .concat(order.filter(function(o){ return !o.n; }))
     .forEach(function(o){ body.appendChild(o.sec); });
   body.insertBefore(fav, body.firstChild);
+  var cs = collSection(), fs = findsSection();
+  body.insertBefore(cs, fav); if (fav.nextSibling !== fs) body.insertBefore(fs, fav.nextSibling);
+  renderCollSection(); renderFinds();
   var slot = document.getElementById('jEmptySlot');
   slot.innerHTML = n ? '' : '<div class="j-empty" id="jEmpty"><div class="j-empty-t">' + t('Your journal is empty') + '</div><div class="j-empty-s">' + t('Scan a painting, a building or a book cover. It will appear in its category below.') + '</div><button class="j-empty-b" id="jEmptyBtn">' + t('Scan your first artwork') + '</button></div>';
   body.insertBefore(slot, body.firstChild);
@@ -2913,12 +2988,13 @@ var TAG_LABEL = { painting: 'Paintings', arch: 'Architecture', sculpture: 'Sculp
 var PENCIL = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
 function currentRec() { var a = ARTS[currentArt]; return a && a.journalId ? journal.find(function(r){ return r.id === a.journalId; }) : null; }
 function renderTags() {
-  renderRarity();
+  renderRarity(); renderResColl();
   var el = document.getElementById('resTags'), r = currentRec();
   el.hidden = !r; if (!r) { document.getElementById('resStars').hidden = true; document.getElementById('resSpot').hidden = true; return; }
-  el.innerHTML = scanCats(r).map(function(c){ return '<span class="res-tag">' + t(TAG_LABEL[c] || c) + '</span>'; }).join('') +
+  el.innerHTML = seenChip(r) + scanCats(r).map(function(c){ return '<span class="res-tag">' + t(TAG_LABEL[c] || c) + '</span>'; }).join('') +
     '<button class="res-tag" id="tagEdit" aria-label="' + t('Edit categories') + '">' + PENCIL + t('Edit') + '</button>';
   document.getElementById('tagEdit').onclick = openTagSheet;
+  var sc = document.getElementById('tagSeen'); if (sc) sc.onclick = function(){ toggleSeen(r); };
   renderStars(); renderSpotBtn();
 }
 
@@ -3018,6 +3094,47 @@ async function repairPhotos() {
     }
   } finally { photoFix.busy = false; if (fixed) loadJournal(); }
 }
+// ─── SEEN IN PERSON OR A REPRODUCTION ───
+// Claude tells it from the photo when scanning; older scans are checked once from their thumbnail by the cheapest model.
+// Tap the tag to correct it. Collections turn gold when every piece was seen in person.
+var SEEN = {
+  original:     { label: 'Seen in person', ic: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>' },
+  reproduction: { label: 'Reproduction',   ic: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>' },
+  discovery:    { label: 'Discovered',     ic: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>' }
+};
+function seenOf(r) { var v = r && r.data && r.data.seen; return SEEN[v] ? v : ''; }
+function seenChip(r) {
+  var k = seenOf(r); if (!k) return '';
+  return k === 'discovery' ? '<span class="res-tag seen-tag sk-discovery">' + SEEN[k].ic + t(SEEN[k].label) + '</span>'
+    : '<button class="res-tag seen-tag sk-' + k + '" id="tagSeen" aria-label="' + esc(t('Change: seen in person or a reproduction')) + '">' + SEEN[k].ic + t(SEEN[k].label) + '</button>';
+}
+function toggleSeen(r) {
+  r.data.seen = seenOf(r) === 'original' ? 'reproduction' : 'original'; r.data.seen_by = 'user';
+  saveLocal(r).catch(function(){}); renderTags(); renderJournal();
+  toast(t(r.data.seen === 'original' ? 'Marked as seen in person' : 'Marked as a reproduction'));
+}
+var seenRun = { busy: false, tried: {} };
+async function fillSeen() {
+  if (seenRun.busy || !hasAI()) return; seenRun.busy = true;
+  var changed = false;
+  try {
+    var todo = journal.filter(function(r){ return r.data && !seenOf(r) && !seenRun.tried[r.id] && /^data:image\//.test(r.thumb || ''); });
+    for (var i = 0; i < todo.length; i++) {
+      var r = todo[i]; seenRun.tried[r.id] = 1;
+      var m = /^data:(image\/[a-z]+);base64,(.*)$/.exec(r.thumb); if (!m) continue;
+      try {
+        var txt = await callClaude({ _f: 'seen', _model: 'claude-haiku-4-5-20251001', max_tokens: 40, messages: [{ role: 'user', content: [
+          { type: 'image', source: { type: 'base64', media_type: m[1], data: m[2] } },
+          { type: 'text', text: 'Does this photo show the real thing seen in person (a painting on a wall, a building, a statue, a plant, a mountain, a book held in hand) or a reproduction of it (a screen, a TV, a printed poster, a postcard, a book illustration, a projection)? Reply with only JSON: {"seen": "original" or "reproduction"}' }] }] });
+        var j = parseJSON(txt);
+        if (j && (j.seen === 'original' || j.seen === 'reproduction')) { r.data.seen = j.seen; await saveLocal(r).catch(function(){}); changed = true; }
+      } catch (e) { if (e && /bad_key|no_credit|no_budget|pending_approval|network|session_expired|relay_not_configured|rate_limited/.test(e.code)) break; }
+    }
+  } finally {
+    seenRun.busy = false;
+    if (changed) { renderJournal(); var cur = currentRec(); if (cur && document.getElementById('s-result').classList.contains('active')) renderTags(); }
+  }
+}
 var rarRun = { busy: false, tried: {} };
 async function fillRarities() {
   if (rarRun.busy) return; rarRun.busy = true;
@@ -3040,8 +3157,375 @@ async function fillRarities() {
   } finally {
     rarRun.busy = false;
     if (changed) renderJournal();
+    setTimeout(fillCollections, 300);
   }
 }
+
+// ─── COLLECTIONS: series to complete, built from Wikidata (free) ───
+// Five kinds: by artist (paintings, sculptures), by architect, a creator in a city, by author (books), and a city's must-sees.
+// A piece counts when the scan is that exact work (same Wikidata id). Complete with any scan; gold when every piece was seen in person.
+var COLL_KEY = 'strata.coll.v1', COLL_DONE = 'strata.collDone';
+var COLL = (function(){ try { return JSON.parse(localStorage.getItem(COLL_KEY) || '{}'); } catch (e) { return {}; } })();
+function collSave() { try { localStorage.setItem(COLL_KEY, JSON.stringify(COLL)); } catch (e) {} }
+function collDone() { try { return JSON.parse(localStorage.getItem(COLL_DONE) || '{}'); } catch (e) { return {}; } }
+function setCollDone(k, v) { var d = collDone(); d[k] = v; try { localStorage.setItem(COLL_DONE, JSON.stringify(d)); } catch (e) {} }
+var WORK_CATS = ['painting', 'print', 'sculpture'];
+async function sparql(q) {
+  var j = await jget('https://query.wikidata.org/sparql?format=json&query=' + encodeURIComponent(q));
+  return j && j.results ? j.results.bindings : null;
+}
+var qidOf = function(u){ return String(u || '').split('/').pop(); };
+// Wikidata id of a scan, from its English Wikipedia article
+async function scanQid(r) {
+  var d = r.data || {}, w = d.wiki || (d.rarity && d.rarity.wiki);
+  if (!w) return '';
+  var j = await jget('https://en.wikipedia.org/w/api.php?action=query&prop=pageprops&ppprop=wikibase_item&redirects=1&format=json&origin=*&titles=' + encodeURIComponent(w));
+  if (!j) return null;
+  var pages = (j.query && j.query.pages) || {}, pg = pages[Object.keys(pages)[0]];
+  return (pg && pg.pageprops && pg.pageprops.wikibase_item) || '';
+}
+// Who made it and in which city it is: the keys of the collections it belongs to
+async function scanFacts(q) {
+  var lang = getLang();
+  var rows = await sparql('SELECT ?cr ?crLabel ?ar ?arLabel ?au ?auLabel ?city ?cityLabel WHERE { ' +
+    'OPTIONAL { wd:' + q + ' wdt:P170 ?cr } OPTIONAL { wd:' + q + ' wdt:P84 ?ar } OPTIONAL { wd:' + q + ' wdt:P50 ?au } ' +
+    'OPTIONAL { { wd:' + q + ' wdt:P131 ?c0 } UNION { wd:' + q + ' wdt:P276/wdt:P131 ?c0 } UNION { wd:' + q + ' wdt:P195/wdt:P131 ?c0 } ' +
+    '?c0 wdt:P131* ?city . ?city wdt:P31/wdt:P279* wd:Q515 . } ' +
+    'SERVICE wikibase:label { bd:serviceParam wikibase:language "' + lang + ',en". } } LIMIT 8');
+  if (!rows) return null;
+  var f = { v: 1 }, pick = function(b, k){ return b[k] && !f[k] ? (f[k] = { q: qidOf(b[k].value), l: (b[k + 'Label'] || {}).value || '' }) : null; };
+  rows.forEach(function(b){ pick(b, 'cr'); pick(b, 'ar'); pick(b, 'au'); pick(b, 'city'); });
+  return f;
+}
+// Members of a collection: the best-known items (by number of Wikipedia languages), with image and position
+var MEMBER_SEL = '?w ?wLabel ?img ?co ?plLabel ?sl';
+var MEMBER_OPT = 'OPTIONAL { ?w wdt:P18 ?img } OPTIONAL { ?w wdt:P625 ?co } OPTIONAL { ?w wdt:P195 ?pl } ';
+function memberRows(rows) {
+  var by = {}, out = [];
+  (rows || []).forEach(function(b){
+    var q = qidOf(b.w.value); if (/^Q\d+$/.test((b.wLabel || {}).value || '')) return;   // no label: skip
+    var m = by[q] || (by[q] = { q: q, label: b.wLabel.value, img: '', lat: null, lng: null, place: '', sl: +(b.sl || {}).value || 0 });
+    if (!m.img && b.img) m.img = cImg(b.img.value, 360);
+    if (m.lat === null && b.co) { var mm = /Point\(([-\d.]+) ([-\d.]+)\)/.exec(b.co.value); if (mm) { m.lng = +mm[1]; m.lat = +mm[2]; } }
+    if (!m.place && b.plLabel && !/^Q\d+$/.test(b.plLabel.value)) m.place = b.plLabel.value;
+  });
+  Object.keys(by).forEach(function(k){ out.push(by[k]); });
+  return out.sort(function(a, b){ return b.sl - a.sl; });
+}
+var LBL = function(){ return 'SERVICE wikibase:label { bd:serviceParam wikibase:language "' + getLang() + ',en". } '; };
+var IN_CITY = function(c){ return '{ ?w wdt:P131/wdt:P131?/wdt:P131? wd:' + c + ' } UNION { ?w wdt:P195/wdt:P131/wdt:P131?/wdt:P131? wd:' + c + ' } UNION { ?w wdt:P276/wdt:P131/wdt:P131?/wdt:P131? wd:' + c + ' } '; };
+async function collMembers(def) {
+  var p = def.key.split(':'), rows, lim;
+  if (p[0] === 'artist') rows = await sparql('SELECT ' + MEMBER_SEL + ' WHERE { ?w wdt:P170 wd:' + p[1] + ' ; wikibase:sitelinks ?sl . ' +
+    'VALUES ?t { wd:Q3305213 wd:Q860861 wd:Q11060274 wd:Q93184 } ?w wdt:P31 ?t . ' + MEMBER_OPT + LBL() + '} ORDER BY DESC(?sl) LIMIT 40'), lim = 12;
+  else if (p[0] === 'architect') rows = await sparql('SELECT ' + MEMBER_SEL + ' WHERE { ?w wdt:P84 wd:' + p[1] + ' ; wikibase:sitelinks ?sl . ' + MEMBER_OPT + LBL() + '} ORDER BY DESC(?sl) LIMIT 40'), lim = 12;
+  else if (p[0] === 'author') rows = await sparql('SELECT ' + MEMBER_SEL + ' WHERE { ?w wdt:P50 wd:' + p[1] + ' ; wikibase:sitelinks ?sl . ' +
+    '?w wdt:P31/wdt:P279* wd:Q7725634 . ' + MEMBER_OPT + LBL() + '} ORDER BY DESC(?sl) LIMIT 30'), lim = 10;
+  else if (p[0] === 'cc') rows = await sparql('SELECT ' + MEMBER_SEL + ' WHERE { { ?w wdt:P170 wd:' + p[1] + ' } UNION { ?w wdt:P84 wd:' + p[1] + ' } ' + IN_CITY(p[2]) +
+    '?w wikibase:sitelinks ?sl . ' + MEMBER_OPT + LBL() + '} ORDER BY DESC(?sl) LIMIT 40'), lim = 15;
+  else if (p[0] === 'city') {
+    var a = await sparql('SELECT ' + MEMBER_SEL + ' WHERE { ?w wdt:P131/wdt:P131?/wdt:P131? wd:' + p[1] + ' ; wikibase:sitelinks ?sl . ' +
+      '{ ?w wdt:P1435 ?h } UNION { ?w wdt:P31 wd:Q860861 } FILTER(?sl > 8) ' + MEMBER_OPT + LBL() + '} ORDER BY DESC(?sl) LIMIT 40');
+    var b = await sparql('SELECT ' + MEMBER_SEL + ' WHERE { ?m wdt:P131/wdt:P131?/wdt:P131? wd:' + p[1] + ' . ?w wdt:P195 ?m ; wdt:P31 wd:Q3305213 ; wikibase:sitelinks ?sl . FILTER(?sl > 8) ' +
+      MEMBER_OPT + LBL() + '} ORDER BY DESC(?sl) LIMIT 20');
+    if (!a && !b) return null;
+    var la = memberRows(a).slice(0, 14), lb = memberRows(b).slice(0, 6);
+    return la.concat(lb.filter(function(x){ return !la.some(function(y){ return y.q === x.q; }); }));
+  }
+  if (!rows) return null;
+  return memberRows(rows).slice(0, lim);
+}
+function collName(def) {
+  var p = def.key.split(':');
+  if (p[0] === 'cc') return t('{a} in {c}', { a: def.a, c: def.c });
+  if (p[0] === 'city') return t('Must-sees of {c}', { c: def.c });
+  return def.a;
+}
+function collSub(def) {
+  var k = def.key.split(':')[0];
+  return t({ artist: 'The best-known works of {a}', architect: 'The major buildings of {a}', author: 'The essential books of {a}', cc: 'The works of {a} in {c}', city: 'The best-known buildings, sculptures and paintings of {c}' }[k], { a: def.a, c: def.c });
+}
+// Collections a scan belongs to, from its facts
+function scanCollKeys(r) {
+  var d = r.data || {}, f = d.wd; if (!f || f.none) return [];
+  var cat = d.category, out = [], who = f.cr || f.ar;
+  if (WORK_CATS.indexOf(cat) >= 0 && f.cr) out.push({ key: 'artist:' + f.cr.q, a: f.cr.l });
+  if (cat === 'architecture' && f.ar) out.push({ key: 'architect:' + f.ar.q, a: f.ar.l });
+  if (cat === 'book' && f.au) out.push({ key: 'author:' + f.au.q, a: f.au.l });
+  if ((WORK_CATS.indexOf(cat) >= 0 || cat === 'architecture') && who && f.city) out.push({ key: 'cc:' + who.q + ':' + f.city.q, a: who.l, c: f.city.l });
+  if ((WORK_CATS.indexOf(cat) >= 0 || cat === 'architecture') && f.city) out.push({ key: 'city:' + f.city.q, c: f.city.l });
+  return out;
+}
+function journalByQid() { var m = {}; journal.forEach(function(r){ var q = r.data && r.data.qid; if (q && !m[q]) m[q] = r; }); return m; }
+// Progress of every collection with at least one piece
+function collList() {
+  var byQ = journalByQid(), done = collDone(), out = [];
+  Object.keys(COLL).forEach(function(k){
+    var def = COLL[k]; if (!def || def.skip || !def.members) return;
+    var found = def.members.filter(function(m){ return byQ[m.q]; });
+    if (!found.length) return;
+    var seen = found.filter(function(m){ return seenOf(byQ[m.q]) === 'original'; }).length;
+    var last = found.reduce(function(x, m){ var c = byQ[m.q].created_at; return c > x ? c : x; }, '');
+    out.push({ def: def, found: found, total: def.members.length, complete: found.length === def.members.length, gold: found.length === def.members.length && seen === found.length, seen: seen, last: last, done: done[k] });
+  });
+  return out.sort(function(a, b){ return (b.complete - a.complete) || (b.found.length / b.total - a.found.length / a.total) || (a.last < b.last ? 1 : -1); });
+}
+var collRun = { busy: false, tried: {} };
+async function fillCollections() {
+  if (collRun.busy) return; collRun.busy = true;
+  var changed = false;
+  try {
+    // 1. Wikidata id and facts of each scan (once)
+    var todo = journal.filter(function(r){ var d = r.data; return d && r.identified && d.identified !== false && !d.wd && !collRun.tried[r.id] &&
+      (WORK_CATS.indexOf(d.category) >= 0 || d.category === 'architecture' || d.category === 'book') && (d.wiki || (d.rarity && d.rarity.wiki)); });
+    for (var i = 0; i < todo.length; i++) {
+      var r = todo[i]; collRun.tried[r.id] = 1;
+      var q = r.data.qid || await scanQid(r).catch(function(){ return null; });
+      if (q === null) continue;
+      if (!q) { r.data.wd = { none: 1 }; await saveLocal(r).catch(function(){}); continue; }
+      var f = await scanFacts(q).catch(function(){ return null; });
+      if (!f) continue;
+      r.data.qid = q; r.data.wd = f; await saveLocal(r).catch(function(){}); changed = true;
+    }
+    // 2. Members of each collection (cached a month)
+    var want = {};
+    journal.forEach(function(r){ scanCollKeys(r).forEach(function(c){ if (!want[c.key]) want[c.key] = c; }); });
+    var keys = Object.keys(want), month = 30 * 86400000;
+    for (var k = 0; k < keys.length; k++) {
+      var key = keys[k], old = COLL[key];
+      if (old && Date.now() - (old.at || 0) < month) continue;
+      var def = { key: key, a: want[key].a || '', c: want[key].c || '', at: Date.now() };
+      var mem = await collMembers(def).catch(function(){ return null; });
+      if (!mem) continue;
+      if (mem.length < 5) { COLL[key] = { key: key, skip: 1, at: Date.now() }; collSave(); continue; }
+      // the user's own pieces of this creator or city always count, even beyond the best-known ones
+      journal.forEach(function(r){
+        var q = r.data && r.data.qid; if (!q || mem.some(function(m){ return m.q === q; })) return;
+        if (scanCollKeys(r).some(function(c){ return c.key === key; })) mem.push({ q: q, label: rTitle(r), img: '', lat: null, lng: null, place: '', sl: 0 });
+      });
+      def.members = mem; COLL[key] = def; collSave(); changed = true;
+    }
+  } finally {
+    collRun.busy = false;
+    if (changed) renderJournal();
+    collCheckDone();
+  }
+}
+// A collection just completed (or turned gold): celebrate it once
+var collCelebrated = false;
+function collCheckDone() {
+  collList().forEach(function(c){
+    var want = c.gold ? 'gold' : c.complete ? 'done' : '';
+    if (!want || c.done === want || (c.done === 'gold')) return;
+    setCollDone(c.def.key, want);
+    if (!collCelebrated) { collCelebrated = true; setTimeout(function(){ celebrateColl(c); }, 600); }
+  });
+}
+// ─── HOME: my collections ───
+function collCardHTML(c) {
+  var byQ = journalByQid(), pics = c.found.slice(0, 4).map(function(m){ return byQ[m.q].thumb; });
+  while (pics.length < 4) pics.push('');
+  var pct = Math.round(c.found.length / c.total * 100);
+  return '<button class="cl-card' + (c.gold ? ' gold' : c.complete ? ' done' : '') + '" data-coll="' + esc(c.def.key) + '">' +
+    '<div class="cl-mos">' + pics.map(function(u){ return '<div' + (u ? ' style="background-image:url(\'' + u + '\')"' : '') + '></div>'; }).join('') +
+    (c.complete ? '<span class="cl-badge">' + (c.gold ? t('Gold') : t('Complete')) + '</span>' : '') + '</div>' +
+    '<div class="cl-n">' + esc(collName(c.def)) + '</div><div class="cl-bar"><i style="width:' + pct + '%"></i></div>' +
+    '<div class="cl-p">' + esc(t('{a} of {b}', { a: c.found.length, b: c.total })) + '</div></button>';
+}
+var collSec = null, findsSec = null, findsCat = 'all';
+function collSection() {
+  if (collSec) return collSec;
+  collSec = document.createElement('div'); collSec.id = 'collSec'; collSec.hidden = true;
+  collSec.innerHTML = '<div class="sec-head"><div class="sec-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>' + t('My collections') + '</span><span class="sec-badge"></span></div></div><div class="h-strip cl-strip"></div>';
+  collSec.addEventListener('click', function(e){ var b = e.target.closest('[data-coll]'); if (b) openColl(b.getAttribute('data-coll')); });
+  return collSec;
+}
+function renderCollSection() {
+  var sec = collSection(), list = collList();
+  sec.querySelector('.cl-strip').innerHTML = list.map(collCardHTML).join('');
+  sec.querySelector('.sec-badge').textContent = list.length;
+  sec.hidden = !list.length;
+}
+// ─── HOME: my finds, filtered by type, with rarity ───
+function findsSection() {
+  if (findsSec) return findsSec;
+  findsSec = document.createElement('div'); findsSec.id = 'findsSec';
+  findsSec.innerHTML = '<div class="sec-head"><div class="sec-title"><span>' + t('My finds') + '</span><span class="sec-badge"></span></div><button class="sec-more" id="findsAll">' + t('See all') + '</button></div><div class="fd-chips"></div><div class="fd-list"></div>';
+  findsSec.querySelector('.fd-chips').addEventListener('click', function(e){ var b = e.target.closest('[data-fc]'); if (!b) return; findsCat = b.getAttribute('data-fc'); renderFinds(); });
+  findsSec.querySelector('#findsAll').onclick = function(){ var c = document.querySelector('.cat-chip[data-cat="' + findsCat + '"]') || document.querySelector('.cat-chip[data-cat="all"]'); if (c) c.click(); show('s-search-cat'); };
+  return findsSec;
+}
+function renderFinds() {
+  var sec = findsSection(), cnt = {};
+  journal.forEach(function(r){ scanCats(r).forEach(function(c){ cnt[c] = (cnt[c] || 0) + 1; }); });
+  var cats = TAG_ORDER.concat(['other']).filter(function(c){ return cnt[c]; });
+  if (findsCat !== 'all' && !cnt[findsCat]) findsCat = 'all';
+  sec.querySelector('.fd-chips').innerHTML = '<button class="fd-chip' + (findsCat === 'all' ? ' on' : '') + '" data-fc="all">' + t('All') + ' <span>' + journal.length + '</span></button>' +
+    cats.map(function(c){ return '<button class="fd-chip' + (findsCat === c ? ' on' : '') + '" data-fc="' + c + '">' + t(c === 'other' ? 'Other' : TAG_LABEL[c]) + ' <span>' + cnt[c] + '</span></button>'; }).join('');
+  var rows = journal.filter(function(r){ return findsCat === 'all' || scanCats(r).indexOf(findsCat) >= 0; });
+  var shown = rows.slice(0, 40);
+  sec.querySelector('.fd-list').innerHTML = shown.map(function(r){
+    var k = rarTier(r), s = seenOf(r), v = rView(r);
+    return '<div class="fd-row" data-scan="' + r.id + '"><div class="fd-th" style="background-image:url(\'' + r.thumb + '\')">' + (s && s !== 'discovery' ? '<span class="fd-seen sk-' + s + '" title="' + esc(t(SEEN[s].label)) + '">' + SEEN[s].ic + '</span>' : '') + '</div>' +
+      '<div class="fd-tx"><b>' + esc(rTitle(r)) + '</b><span>' + esc([rShort(r) || r.creator, v.date || (r.data && r.data.date)].filter(Boolean).join(' · ')) + '</span></div>' +
+      (k ? '<span class="cat-rar cr-' + k + '">' + esc(t(RAR[k].label)) + '</span>' : '') + '</div>';
+  }).join('');
+  sec.querySelector('.sec-badge').textContent = rows.length;
+  sec.querySelector('#findsAll').hidden = rows.length <= shown.length;
+  sec.hidden = !journal.length;
+}
+// ─── COLLECTION PAGE ───
+var collOpen = null, collMap = null;
+function openColl(key) {
+  var c = collList().find(function(x){ return x.def.key === key; }); if (!c) return;
+  collOpen = key;
+  var byQ = journalByQid(), def = c.def;
+  document.getElementById('clKick').textContent = t(c.gold ? 'Gold collection' : c.complete ? 'Complete collection' : 'Collection');
+  document.getElementById('clName').textContent = collName(def);
+  document.getElementById('clSub').textContent = collSub(def);
+  document.getElementById('clBar').style.width = Math.round(c.found.length / c.total * 100) + '%';
+  document.getElementById('clCount').textContent = c.found.length + '/' + c.total;
+  document.getElementById('clSeen').textContent = c.seen ? t('{n} seen in person', { n: c.seen }) : '';
+  document.getElementById('clHead').className = 'cl-head' + (c.gold ? ' gold' : '');
+  var miss = def.members.filter(function(m){ return !byQ[m.q]; });
+  document.getElementById('clGrid').innerHTML = def.members.map(function(m){
+    var r = byQ[m.q];
+    if (r) { var s = seenOf(r);
+      return '<button class="cl-it" data-scan="' + r.id + '"><div class="cl-im" style="background-image:url(\'' + r.thumb + '\')"><span class="cl-ok">' + CHECK + '</span>' + (s && s !== 'discovery' ? '<span class="fd-seen sk-' + s + '">' + SEEN[s].ic + '</span>' : '') + '</div><div class="cl-tx">' + esc(m.label) + '<span>' + esc(t('Yours · {d}', { d: fmtDay(r.created_at) })) + '</span></div></button>'; }
+    var dist = NR.pos && m.lat !== null ? fmtDist(distM(NR.pos, { lat: m.lat, lng: m.lng })) : '';
+    return '<button class="cl-it miss" data-cm="' + m.q + '"><div class="cl-im"' + (m.img ? ' style="background-image:url(\'' + m.img + '\')"' : '') + '></div><div class="cl-tx">' + esc(m.label) + '<span>' + esc([dist, m.place].filter(Boolean).join(' · ')) + '</span></div></button>';
+  }).join('');
+  var mb = document.getElementById('clMapBtn'), withPos = miss.filter(function(m){ return m.lat !== null; });
+  mb.hidden = !withPos.length; mb.textContent = t(miss.length === 1 ? 'See the missing one on the map' : 'See the {n} missing on the map', { n: withPos.length });
+  document.getElementById('clMap').hidden = true;
+  document.getElementById('clReplay').hidden = !c.complete;
+  show('s-coll'); document.querySelector('#s-coll .cl-body').scrollTop = 0;
+}
+function distM(a, b) { var R = 6371000, toR = Math.PI / 180, dLat = (b.lat - a.lat) * toR, dLng = (b.lng - a.lng) * toR, x = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(a.lat * toR) * Math.cos(b.lat * toR) * Math.sin(dLng / 2) * Math.sin(dLng / 2); return 2 * R * Math.asin(Math.sqrt(x)); }
+function collShowMap() {
+  var c = collList().find(function(x){ return x.def.key === collOpen; }); if (!c) return;
+  var byQ = journalByQid(), box = document.getElementById('clMap'); box.hidden = false;
+  if (typeof L === 'undefined') return;
+  if (!collMap) { collMap = L.map('clMap', { zoomControl: false }); L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap contributors' }).addTo(collMap); collMap._lyr = L.layerGroup().addTo(collMap); }
+  collMap._lyr.clearLayers();
+  var pts = [];
+  c.def.members.forEach(function(m){
+    if (m.lat === null) return;
+    var have = !!byQ[m.q];
+    L.circleMarker([m.lat, m.lng], { radius: have ? 7 : 9, color: '#fff', weight: 2, fillColor: have ? '#F4C542' : '#16346B', fillOpacity: 1 }).addTo(collMap._lyr)
+      .bindPopup('<b>' + esc(m.label) + '</b>' + (have ? '<br>' + esc(t('In your journal')) : (m.place ? '<br>' + esc(m.place) : '')));
+    if (!have) pts.push([m.lat, m.lng]);
+  });
+  setTimeout(function(){ collMap.invalidateSize(); if (pts.length) collMap.fitBounds(pts, { padding: [30, 30], maxZoom: 15 }); }, 60);
+  box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+// a missing piece: its story (like More by), how to get there
+function openCollMissing(q) {
+  var c = collList().find(function(x){ return x.def.key === collOpen; }); if (!c) return;
+  var m = c.def.members.find(function(x){ return x.q === q; }); if (!m) return;
+  var kind = c.def.key.split(':')[0];
+  mbItem = { title: m.label, year: '', where: m.place || '', creator: kind === 'city' ? '' : c.def.a, book: kind === 'author', nature: false, colors: '', thumb: m.img ? 'url("' + m.img + '")' : '' };
+  document.getElementById('mbTitle').textContent = m.label;
+  document.getElementById('mbYear').textContent = [mbItem.creator, m.place].filter(Boolean).join(' · ');
+  document.getElementById('mbHook').textContent = t('Missing from your collection {a}', { a: collName(c.def) });
+  document.getElementById('mbThumb').setAttribute('style', m.img ? 'background:#2C2C2E url(\'' + m.img + '\') center/cover' : '');
+  var links = mbItem.book ? bookLinks(m.label + ' ' + c.def.a) : (m.lat !== null ? mapLinks(m.place || m.label, '', m.lat, m.lng) : (m.place ? mapLinks(m.place, '') : ''));
+  document.getElementById('mbLinks').innerHTML = links; document.getElementById('mbLinks').hidden = !links;
+  var can = hasAI();
+  document.getElementById('mbDiscover').hidden = !can; document.getElementById('mbCost').hidden = !can || !strataMe;
+  document.getElementById('mbSheet').hidden = false;
+}
+document.getElementById('clGrid').addEventListener('click', function(e){ var b = e.target.closest('[data-cm]'); if (b) openCollMissing(b.getAttribute('data-cm')); });
+document.getElementById('clBack').addEventListener('click', function(){ show('s-home'); });
+document.getElementById('clMapBtn').addEventListener('click', collShowMap);
+document.getElementById('clReplay').addEventListener('click', function(){ var c = collList().find(function(x){ return x.def.key === collOpen; }); if (c) celebrateColl(c); });
+// On the result page: the collection this scan belongs to
+function renderResColl() {
+  var el = document.getElementById('resColl'), r = currentRec(); el.hidden = true;
+  if (!r || !r.data || !r.data.qid) return;
+  var c = collList().filter(function(x){ return x.def.members.some(function(m){ return m.q === r.data.qid; }); })
+    .sort(function(a, b){ var o = { artist: 0, architect: 0, author: 0, cc: 1, city: 2 }; return o[a.def.key.split(':')[0]] - o[b.def.key.split(':')[0]]; })[0];
+  if (!c) return;
+  var pct = c.found.length / c.total, R = 15, L2 = 2 * Math.PI * R;
+  el.innerHTML = '<svg width="38" height="38" viewBox="0 0 40 40"><circle cx="20" cy="20" r="' + R + '" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="4"/><circle cx="20" cy="20" r="' + R + '" fill="none" stroke="#F4C542" stroke-width="4" stroke-linecap="round" stroke-dasharray="' + (pct * L2).toFixed(1) + ' 200" transform="rotate(-90 20 20)"/></svg>' +
+    '<div><b>' + esc(t('Collection {a} · {n}/{t}', { a: collName(c.def), n: c.found.length, t: c.total })) + '</b><span>' + esc(c.complete ? t(c.gold ? 'Gold collection' : 'Complete collection') : t('{n} to find', { n: c.total - c.found.length })) + '</span></div>';
+  el.setAttribute('data-coll', c.def.key); el.hidden = false;
+}
+document.getElementById('resColl').addEventListener('click', function(){ openColl(this.getAttribute('data-coll')); });
+// ─── CELEBRATION: an 8-second film of the collection, recorded as a real video to share ───
+var celeb = { blob: null, run: 0 };
+function loadImg(u) { return new Promise(function(ok){ if (!u) return ok(null); var i = new Image(); i.crossOrigin = 'anonymous'; i.onload = function(){ ok(i); }; i.onerror = function(){ ok(null); }; i.src = u; }); }
+async function celebrateColl(c) {
+  var ov = document.getElementById('celeb'), cv = document.getElementById('celebCv'), ctx = cv.getContext('2d'), run = ++celeb.run;
+  var byQ = journalByQid(), gold = c.gold, W = 720, H = 1280;
+  cv.width = W; cv.height = H;
+  document.getElementById('celebActs').hidden = true; document.getElementById('celebShare').hidden = true;
+  ov.hidden = false; ov.classList.toggle('gold', gold);
+  var imgs = (await Promise.all(c.found.slice(0, 8).map(function(m){ var r = byQ[m.q]; return loadImg(recPhoto(r) || r.thumb); }))).filter(Boolean);
+  if (navigator.vibrate) navigator.vibrate([30, 60, 30]);
+  // record what is drawn on the canvas, when the browser can
+  var rec = null, chunks = [], mime = '';
+  try {
+    if (cv.captureStream && window.MediaRecorder) {
+      mime = ['video/mp4', 'video/webm;codecs=vp9', 'video/webm'].filter(function(m){ return MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m); })[0] || '';
+      rec = new MediaRecorder(cv.captureStream(30), mime ? { mimeType: mime, videoBitsPerSecond: 4000000 } : undefined);
+      rec.ondataavailable = function(e){ if (e.data && e.data.size) chunks.push(e.data); };
+      rec.start(250);
+    }
+  } catch (e) { rec = null; }
+  var name = collName(c.def), per = imgs.length ? Math.min(900, 5200 / imgs.length) : 0, slides = per * imgs.length, total = slides + 3000;
+  var accent = gold ? '#F4C542' : '#FFFFFF', bgTop = gold ? '#2A1F05' : '#16346B', bgBot = gold ? '#0E0A02' : '#0B1B3A';
+  var sparks = []; for (var s = 0; s < 46; s++) sparks.push({ x: Math.random() * W, y: Math.random() * H, r: 2 + Math.random() * 5, d: Math.random() * 2400, v: 0.3 + Math.random() * 0.8 });
+  var t0 = performance.now();
+  await new Promise(function(done){
+    function cover(img, z, ox){ var s = Math.max(W / img.width, H / img.height) * z, w = img.width * s, h = img.height * s; ctx.drawImage(img, (W - w) / 2 + ox, (H - h) / 2, w, h); }
+    function frame(now){
+      if (run !== celeb.run) return done();
+      var el = Math.max(0, now - t0); ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+      if (el < slides) {
+        var i = Math.floor(el / per), p = (el % per) / per;
+        cover(imgs[i], 1.08 + 0.1 * p, (i % 2 ? -1 : 1) * 30 * p);
+        if (p < 0.25 && i > 0) { ctx.globalAlpha = 1 - p / 0.25; cover(imgs[i - 1], 1.18, (i % 2 ? 1 : -1) * 30); ctx.globalAlpha = 1; }
+        var g = ctx.createLinearGradient(0, H * 0.55, 0, H); g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.75)'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = accent; ctx.font = '600 30px "DM Sans", sans-serif'; ctx.textAlign = 'left'; ctx.fillText((i + 1) + ' / ' + c.total, 56, H - 150);
+        ctx.fillStyle = '#fff'; ctx.font = '46px "DM Serif Display", serif'; ctx.fillText(name.length > 26 ? name.slice(0, 25) + '…' : name, 56, H - 90);
+      } else {
+        var q = Math.min(1, (el - slides) / 700), bg = ctx.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, bgTop); bg.addColorStop(1, bgBot); ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+        sparks.forEach(function(k){ var a = Math.max(0, Math.sin(((el + k.d) / 600) * k.v * Math.PI)); ctx.fillStyle = 'rgba(244,197,66,' + (a * q).toFixed(2) + ')'; ctx.beginPath(); ctx.arc(k.x, (k.y - el * 0.04 * k.v + H) % H, k.r, 0, 7); ctx.fill(); });
+        var sc = 0.7 + 0.3 * (1 - Math.pow(1 - q, 3)); ctx.save(); ctx.translate(W / 2, H * 0.42); ctx.scale(sc, sc); ctx.globalAlpha = q;
+        ctx.fillStyle = '#F4C542'; ctx.beginPath(); ctx.arc(0, 0, 92, 0, 7); ctx.fill();
+        ctx.strokeStyle = '#16346B'; ctx.lineWidth = 16; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(-40, 2); ctx.lineTo(-10, 32); ctx.lineTo(44, -28); ctx.stroke(); ctx.restore();
+        ctx.globalAlpha = q; ctx.textAlign = 'center';
+        ctx.fillStyle = '#F4C542'; ctx.font = '700 30px "DM Sans", sans-serif'; ctx.fillText(t(gold ? 'GOLD COLLECTION' : 'COLLECTION COMPLETE').toUpperCase(), W / 2, H * 0.42 + 190);
+        ctx.fillStyle = '#fff'; ctx.font = '64px "DM Serif Display", serif'; var nm = name.length > 22 ? name.slice(0, 21) + '…' : name; ctx.fillText(nm, W / 2, H * 0.42 + 270);
+        ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.font = '400 30px "DM Sans", sans-serif'; ctx.fillText(t(gold ? '{n} pieces, all seen in person' : '{n} pieces found', { n: c.total }), W / 2, H * 0.42 + 325);
+        ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.font = '600 26px "DM Sans", sans-serif'; ctx.fillText('Strata', W / 2, H - 90);
+        ctx.globalAlpha = 1;
+      }
+      if (el < total) requestAnimationFrame(frame); else done();
+    }
+    requestAnimationFrame(frame);
+  });
+  if (run !== celeb.run) return;
+  document.getElementById('celebActs').hidden = false;
+  if (rec) {
+    await new Promise(function(ok){ rec.onstop = ok; try { rec.stop(); } catch (e) { ok(); } });
+    if (chunks.length) {
+      celeb.blob = new Blob(chunks, { type: mime || chunks[0].type || 'video/mp4' });
+      celeb.name = 'strata-' + name.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40) + (/mp4/.test(celeb.blob.type) ? '.mp4' : '.webm');
+      document.getElementById('celebShare').hidden = false;
+    }
+  }
+}
+document.getElementById('celebClose').addEventListener('click', function(){ celeb.run++; document.getElementById('celeb').hidden = true; });
+document.getElementById('celebShare').addEventListener('click', async function(){
+  if (!celeb.blob) return;
+  var file = new File([celeb.blob], celeb.name, { type: celeb.blob.type });
+  try {
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], text: t('My Strata collection is complete!') }); return; }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  var a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = celeb.name; document.body.appendChild(a); a.click(); a.remove();
+});
 
 // ─── QUIZ: three questions a day on what you scanned, with spaced repetition ─────
 // Daily quiz: 5 questions on one work (1 easy, 2 medium, 2 hard); the work comes back after 1, 7, 30, 90 days if you get 4/5 or more
@@ -3149,7 +3633,8 @@ function renderQuizCard() {
   var body = document.querySelector('#s-home .home-body'); if (!body) return;
   var el = document.getElementById('quizCard');
   if (!el) { el = document.createElement('div'); el.id = 'quizCard'; el.addEventListener('click', onQuizCard); }
-  var fav = favSection(); if (el.nextSibling !== fav) body.insertBefore(el, fav.parentNode === body ? fav : body.firstChild);
+  var fav = favSection(), anchor = collSec && collSec.parentNode === body ? collSec : fav;
+  if (el.nextSibling !== anchor) body.insertBefore(el, anchor.parentNode === body ? anchor : body.firstChild);
   var lang = getLang(), pool = quizPool(), eligible = journal.filter(quizEligible).length, st = quizStats(), s = qz.session;
   if (eligible > pool.length || journal.some(quizOld)) setTimeout(prepareQuizzes, 400);
   if (pool.length < QZ_MIN && !(s && !s.finished)) { el.hidden = true; return; }
@@ -4155,7 +4640,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.54';
+var APP_VERSION = '0.55';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -5115,6 +5600,7 @@ async function runMusic() {
     if (dup) { URL.revokeObjectURL(url); markSeen(dup); openScan(dup.id); toast(t('Already in your journal · first scanned {d}', { d: fmtDay(dup.created_at) })); return; }
     if (!d.lang) d.lang = getLang();
     d.loc_v = 2;
+    d.seen = typeof opts !== 'undefined' && opts && opts.text ? 'discovery' : (d.seen === 'reproduction' ? 'reproduction' : d.seen === 'original' ? 'original' : undefined);
     ARTS.live = toArt(d, url);
     saveScan(d, img).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; loadJournal().then(function(){ fillRarities(); if (currentArt === 'live') { renderTags(); updateMapBtn(); } }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
       .catch(function(){ toast(t('Could not save this scan on this device')); });
@@ -5206,6 +5692,41 @@ fr: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} scans n'ont pas de lieu d'original connu (reproductions, posters ou œuvres privées).",
   "The map could not load. Check your connection.": "La carte n'a pas pu se charger. Vérifie ta connexion.",
   "Browse by Date": "Parcourir par date",
+  "My collections": "Mes collections",
+  "My finds": "Tes trouvailles",
+  "{a} of {b}": "{a} sur {b}",
+  "Gold": "Or",
+  "Complete": "Complète",
+  "{a} in {c}": "{a} à {c}",
+  "Must-sees of {c}": "Incontournables de {c}",
+  "The best-known works of {a}": "Les œuvres les plus célèbres de {a}",
+  "The major buildings of {a}": "Les bâtiments majeurs de {a}",
+  "The essential books of {a}": "Les livres incontournables de {a}",
+  "The works of {a} in {c}": "Les œuvres de {a} à {c}",
+  "The best-known buildings, sculptures and paintings of {c}": "Les bâtiments, sculptures et tableaux les plus célèbres de {c}",
+  "Gold collection": "Collection en or",
+  "Complete collection": "Collection complète",
+  "Collection": "Collection",
+  "{n} seen in person": "{n} vues en vrai",
+  "Yours · {d}": "À toi · {d}",
+  "See the missing one on the map": "Voir la pièce manquante sur la carte",
+  "See the {n} missing on the map": "Voir les {n} manquantes sur la carte",
+  "Missing from your collection {a}": "Il manque à ta collection {a}",
+  "Collection {a} · {n}/{t}": "Collection {a} · {n}/{t}",
+  "{n} to find": "Encore {n} à trouver",
+  "GOLD COLLECTION": "COLLECTION EN OR",
+  "COLLECTION COMPLETE": "COLLECTION COMPLÈTE",
+  "{n} pieces, all seen in person": "{n} pièces, toutes vues en vrai",
+  "{n} pieces found": "{n} pièces trouvées",
+  "My Strata collection is complete!": "Ma collection Strata est complète !",
+  "Watch the video again": "Revoir la vidéo",
+  "Share the video": "Partager la vidéo",
+  "Seen in person": "Vu en vrai",
+  "Reproduction": "Reproduction",
+  "Discovered": "Découverte",
+  "Change: seen in person or a reproduction": "Changer : vu en vrai ou reproduction",
+  "Marked as seen in person": "Marqué comme vu en vrai",
+  "Marked as a reproduction": "Marqué comme reproduction",
   "Filter by rarity": "Filtrer par rareté",
   "Rare gems": "Pépites",
   "Finds": "Trouvailles",
@@ -5475,6 +5996,41 @@ es: {
   "{n} scans have no known original location (a reproduction, a poster, or a private work).": "{n} escaneos no tienen un lugar de original conocido (reproducciones, pósters u obras privadas).",
   "The map could not load. Check your connection.": "El mapa no se ha podido cargar. Revisa tu conexión.",
   "Browse by Date": "Explorar por fecha",
+  "My collections": "Mis colecciones",
+  "My finds": "Tus hallazgos",
+  "{a} of {b}": "{a} de {b}",
+  "Gold": "Oro",
+  "Complete": "Completa",
+  "{a} in {c}": "{a} en {c}",
+  "Must-sees of {c}": "Imprescindibles de {c}",
+  "The best-known works of {a}": "Las obras más famosas de {a}",
+  "The major buildings of {a}": "Los edificios principales de {a}",
+  "The essential books of {a}": "Los libros imprescindibles de {a}",
+  "The works of {a} in {c}": "Las obras de {a} en {c}",
+  "The best-known buildings, sculptures and paintings of {c}": "Los edificios, esculturas y cuadros más famosos de {c}",
+  "Gold collection": "Colección de oro",
+  "Complete collection": "Colección completa",
+  "Collection": "Colección",
+  "{n} seen in person": "{n} vistas en persona",
+  "Yours · {d}": "Tuya · {d}",
+  "See the missing one on the map": "Ver la pieza que falta en el mapa",
+  "See the {n} missing on the map": "Ver las {n} que faltan en el mapa",
+  "Missing from your collection {a}": "Falta en tu colección {a}",
+  "Collection {a} · {n}/{t}": "Colección {a} · {n}/{t}",
+  "{n} to find": "Faltan {n}",
+  "GOLD COLLECTION": "COLECCIÓN DE ORO",
+  "COLLECTION COMPLETE": "COLECCIÓN COMPLETA",
+  "{n} pieces, all seen in person": "{n} piezas, todas vistas en persona",
+  "{n} pieces found": "{n} piezas encontradas",
+  "My Strata collection is complete!": "¡Mi colección de Strata está completa!",
+  "Watch the video again": "Ver el vídeo otra vez",
+  "Share the video": "Compartir el vídeo",
+  "Seen in person": "Visto en persona",
+  "Reproduction": "Reproducción",
+  "Discovered": "Descubierta",
+  "Change: seen in person or a reproduction": "Cambiar: visto en persona o reproducción",
+  "Marked as seen in person": "Marcado como visto en persona",
+  "Marked as a reproduction": "Marcado como reproducción",
   "Filter by rarity": "Filtrar por rareza",
   "Rare gems": "Joyas",
   "Finds": "Hallazgos",
@@ -5765,7 +6321,7 @@ document.querySelector('.phone').classList.toggle('no-music', !MUSIC_ENABLED);
 initSections();
 captureI18n();
 applyLang();
-loadJournal().then(function(){ setTimeout(fillRarities, 2500); setTimeout(repairPhotos, 1200); if (getSession()) { syncNow(false); fetchMe().then(checkPendingScans); } translateJournal(getLang(), true); maybeWelcome(); renderInstallGuides(); });
+loadJournal().then(function(){ setTimeout(fillRarities, 2500); setTimeout(repairPhotos, 1200); setTimeout(fillSeen, 6000); if (getSession()) { syncNow(false); fetchMe().then(checkPendingScans); } translateJournal(getLang(), true); maybeWelcome(); renderInstallGuides(); });
 renderAdmin();
 
 // ─── INIT ─────────────────────────────────────

@@ -328,7 +328,9 @@ Deno.serve(async (req) => {
     if (!Array.isArray(payload.messages)) return json({ error: 'bad_request' }, 400);
     let res: Response | null = null, data: any = null, model = '';
     const t0 = Date.now();
-    for (const m of MODELS) {
+    // small tasks may ask for the cheaper model; anything else uses the main one
+    const models = b.model === 'claude-haiku-4-5-20251001' ? [b.model, ...MODELS] : MODELS;
+    for (const m of models) {
       model = m;
       res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
