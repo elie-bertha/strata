@@ -598,7 +598,11 @@ label.key-btn{text-align:center;display:block;}
 .cl-replay{background:var(--surface);color:var(--ink);border:1.5px solid var(--border);}
 .cl-map{height:280px;border-radius:16px;overflow:hidden;margin-top:12px;}
 .res-coll{display:flex;align-items:center;gap:10px;margin-top:12px;padding:8px 14px 8px 8px;border-radius:16px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);color:#fff;font:400 12px 'DM Sans',sans-serif;text-align:left;cursor:pointer;backdrop-filter:blur(12px);max-width:100%;}
-.res-coll b{display:block;font-size:13px;font-weight:600;}.res-coll span{opacity:.75;}
+.res-coll b{display:block;font-size:13px;font-weight:600;}
+.res-link{align-items:flex-start;margin-top:8px;}.res-link .rl-ic{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:#F4C542;color:#16346B;display:flex;align-items:center;justify-content:center;margin-top:1px;}
+.res-link .rl-th{flex-shrink:0;width:38px;height:38px;border-radius:10px;background:#2C2C2E center/cover;}
+.res-link span{opacity:.9;line-height:1.35;}
+.res-coll[hidden]{display:none;}.res-coll span{opacity:.75;}
 .celeb{position:absolute;inset:0;z-index:4000;background:#000;display:flex;align-items:center;justify-content:center;}
 .celeb canvas{width:100%;height:100%;object-fit:cover;}
 .celeb-x{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:16px;width:40px;height:40px;border-radius:50%;border:none;background:rgba(255,255,255,.18);color:#fff;font-size:24px;cursor:pointer;}
@@ -1444,7 +1448,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
     <button class="hero-btn" id="btn-share" aria-label="Share"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg></button>
   </div>
   <div style="flex:1 0 150px;"></div>
-  <div class="res-title"><div class="res-name" id="resName"></div><div class="res-meta" id="resMeta"></div><div class="res-where" id="resWhere" hidden></div><div class="res-tags" id="resTags" hidden></div><button class="res-coll" id="resColl" hidden></button><div class="res-rate-row"><div class="res-rar" id="resRar" hidden></div><div class="res-stars" id="resStars" hidden role="radiogroup" aria-label="Your rating"></div></div><button class="res-spot" id="resSpot" hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>I am still here: place it here</button></div>
+  <div class="res-title"><div class="res-name" id="resName"></div><div class="res-meta" id="resMeta"></div><div class="res-where" id="resWhere" hidden></div><div class="res-tags" id="resTags" hidden></div><button class="res-coll" id="resColl" hidden></button><button class="res-coll res-link" id="resLink" hidden></button><div class="res-rate-row"><div class="res-rar" id="resRar" hidden></div><div class="res-stars" id="resStars" hidden role="radiogroup" aria-label="Your rating"></div></div><button class="res-spot" id="resSpot" hidden><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>I am still here: place it here</button></div>
   <div class="res-sheet" style="height:auto;">
     <div class="sheet-handle"></div>
     <div class="car-header">
@@ -2995,7 +2999,7 @@ var TAG_LABEL = { painting: 'Paintings', arch: 'Architecture', sculpture: 'Sculp
 var PENCIL = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
 function currentRec() { var a = ARTS[currentArt]; return a && a.journalId ? journal.find(function(r){ return r.id === a.journalId; }) : null; }
 function renderTags() {
-  renderRarity(); renderResColl();
+  renderRarity(); renderResColl(); renderResLink();
   var el = document.getElementById('resTags'), r = currentRec();
   el.hidden = !r; if (!r) { document.getElementById('resStars').hidden = true; document.getElementById('resSpot').hidden = true; return; }
   el.innerHTML = seenChip(r) + scanCats(r).map(function(c){ return '<span class="res-tag">' + t(TAG_LABEL[c] || c) + '</span>'; }).join('') +
@@ -3481,6 +3485,53 @@ function renderResColl() {
   el.setAttribute('data-coll', c.def.key); el.hidden = false;
 }
 document.getElementById('resColl').addEventListener('click', function(){ openColl(this.getAttribute('data-coll')); });
+// ─── LINKS: a story that ties this find to another one of your journal ───
+// Found once per scan by Claude from the titles of the journal; shown on both scans (the older one gets the backlink).
+var LINK_IC = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+function linkable(r) { var d = r && r.data; return !!(d && r.identified && d.identified !== false && d.category); }
+function linkFact(r) { var v = rView(r), d = r.data || {}; return [rTitle(r), v.creator || d.creator, v.date || d.date, d.category].filter(Boolean).join(' | '); }
+function linkText(x) { return x && (x.tx[getLang()] || x.tx[Object.keys(x.tx)[0]]) || ''; }
+// the link to show on this scan: its own one, or else the most recent scan that points to it
+function linkOf(r) {
+  var own = r.data && r.data.link, other;
+  if (own && own.id) { other = journal.find(function(x){ return x.id === own.id; }); if (other) return { rec: other, text: linkText(own) }; }
+  var back = journal.filter(function(x){ var l = x.data && x.data.link; return x.id !== r.id && l && l.id === r.id; })
+    .sort(function(a, b){ return a.created_at < b.created_at ? 1 : -1; })[0];
+  return back ? { rec: back, text: linkText(back.data.link) } : null;
+}
+function renderResLink() {
+  var el = document.getElementById('resLink'), r = currentRec(); el.hidden = true;
+  if (!r) return;
+  var l = linkOf(r);
+  if (!l || !l.text) { var o = r.data && r.data.link; if (r.data && (!o || (o.none && journal.length >= (o.n || 0) + 10))) fillLink(r); return; }
+  el.innerHTML = (l.rec.thumb ? '<span class="rl-th" style="background-image:url(\'' + l.rec.thumb + '\')"></span>' : '<span class="rl-ic">' + LINK_IC + '</span>') +
+    '<div><b>' + esc(t('Link with your journal · {a}', { a: rTitle(l.rec) })) + '</b><span>' + esc(l.text) + '</span></div>';
+  el.setAttribute('data-scan', l.rec.id); el.hidden = false;
+}
+document.getElementById('resLink').addEventListener('click', function(){ var id = this.getAttribute('data-scan'); if (id) openScan(id); });
+var linkRun = {};
+async function fillLink(r) {
+  if (linkRun[r.id] || !hasAI() || !linkable(r)) return; linkRun[r.id] = 1;
+  var others = journal.filter(function(x){ return x.id !== r.id && linkable(x); })
+    .sort(function(a, b){ return a.created_at < b.created_at ? 1 : -1; }).slice(0, 80);
+  if (!others.length) return;   // nothing to link with yet: try again when the journal grows
+  var lang = getLang();
+  try {
+    var txt = await callClaude({ _f: 'link', max_tokens: 200, messages: [{ role: 'user', content:
+      'New find: ' + linkFact(r) + '\n\nThe user\'s journal (id | title | creator | date | category):\n' +
+      others.map(function(x){ return x.id + ' | ' + linkFact(x); }).join('\n') +
+      '\n\nFind the single most surprising TRUE connection between the new find and ONE item of the journal: an influence, a copy or homage, the same model or patron, one depicting or mentioning the other, a person or event tying them, a rivalry. ' +
+      'Only well-documented facts, never a guess. Not trivial ones: not "same creator", "same city", "same movement" or "same century" alone (collections already cover those). If nothing strong and true exists, answer no link. ' +
+      'Write one sentence of at most 28 words in ' + LANGS[lang] + ', warm and vivid, addressing the user as "tu" in French or "tú" in Spanish, that tells the connection and names the journal item. ' +
+      'Reply with only JSON: {"id": "<journal id>", "text": "..."} or {"id": null}' }] });
+    var j = parseJSON(txt) || {};
+    var hit = j.id && others.find(function(x){ return String(x.id) === String(j.id); });
+    var tx = {}; if (hit && j.text) tx[lang] = String(j.text).slice(0, 300);
+    r.data.link = hit && j.text ? { id: hit.id, tx: tx, n: journal.length } : { none: 1, n: journal.length };
+    await saveLocal(r).catch(function(){});
+    var cur = currentRec(); if (cur && document.getElementById('s-result').classList.contains('active')) renderResLink();
+  } catch (e) { /* no credit, offline…: try again next time */ delete linkRun[r.id]; }
+}
 // ─── CELEBRATION: an 8-second film of the collection, recorded as a real video to share ───
 var celeb = { blob: null, run: 0 };
 function loadImg(u) { return new Promise(function(ok){ if (!u) return ok(null); var i = new Image(); i.crossOrigin = 'anonymous'; i.onload = function(){ ok(i); }; i.onerror = function(){ ok(null); }; i.src = u; }); }
@@ -4680,7 +4731,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.60';
+var APP_VERSION = '0.61';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -5705,7 +5756,7 @@ document.getElementById('czNext').addEventListener('click', function(){ openZoom
 // Keys are the English interface text; French and Spanish below. Missing keys fall back to English.
 var I18N = {
 fr: {
-  "How you saw it": "Comment tu l'as vu", "Cities": "Villes", "Paintings & Sculptures": "Peintures & Sculptures", "Categories": "Catégories", "Tap to add or remove. Changes are saved right away.": "Touche pour ajouter ou retirer. Les changements sont enregistrés tout de suite.", "Done": "Terminé",
+  "How you saw it": "Comment tu l'as vu", "Link with your journal · {a}": "Lien avec ton journal · {a}", "Cities": "Villes", "Paintings & Sculptures": "Peintures & Sculptures", "Categories": "Catégories", "Tap to add or remove. Changes are saved right away.": "Touche pour ajouter ou retirer. Les changements sont enregistrés tout de suite.", "Done": "Terminé",
   "Settings": "Réglages", "Claude API key": "Clé API Claude",
   "Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.": "Strata interroge Claude sur chaque photo avec ta propre clé. Elle est enregistrée uniquement dans ce navigateur, sur ce téléphone.",
   "Save key": "Enregistrer la clé", "Try the demo": "Essayer la démo", "Remove key": "Supprimer la clé",
@@ -6009,7 +6060,7 @@ fr: {
   "Choose a photo from your library": "Choisir une photo dans ta photothèque", "Edit categories": "Modifier les catégories"
 },
 es: {
-  "How you saw it": "Cómo lo viste", "Cities": "Ciudades", "Paintings & Sculptures": "Pinturas y esculturas", "Categories": "Categorías", "Tap to add or remove. Changes are saved right away.": "Toca para añadir o quitar. Los cambios se guardan al momento.", "Done": "Listo",
+  "How you saw it": "Cómo lo viste", "Link with your journal · {a}": "Vínculo con tu diario · {a}", "Cities": "Ciudades", "Paintings & Sculptures": "Pinturas y esculturas", "Categories": "Categorías", "Tap to add or remove. Changes are saved right away.": "Toca para añadir o quitar. Los cambios se guardan al momento.", "Done": "Listo",
   "Settings": "Ajustes", "Claude API key": "Clave API de Claude",
   "Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.": "Strata consulta a Claude sobre cada foto con tu propia clave. Solo se guarda en este navegador, en este teléfono.",
   "Save key": "Guardar clave", "Try the demo": "Probar la demo", "Remove key": "Eliminar clave",
