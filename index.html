@@ -3115,7 +3115,7 @@ function seenChip(r) {
 function setSeen(r, v) {
   if (seenOf(r) === v) return;
   r.data.seen = v; r.data.seen_by = 'user';
-  saveLocal(r).catch(function(){}); renderTags(); renderJournal(); renderResColl(); collCheckDone();
+  saveLocal(r).catch(function(){}); renderTags(); renderJournal(); renderResColl(); collCheckDone(); fillCollections();
   toast(t(r.data.seen === 'original' ? 'Marked as seen in person' : 'Marked as a reproduction'));
 }
 var seenRun = { busy: false, tried: {} };
@@ -3302,13 +3302,20 @@ async function fillCollections() {
       var mem = await collMembers(def).catch(function(){ return null; });
       if (!mem) continue;
       if (mem.length < 5) { COLL[key] = { key: key, skip: 1, at: Date.now() }; collSave(); continue; }
-      // the user's own pieces of this creator or city always count, even beyond the best-known ones
-      journal.forEach(function(r){
-        var q = r.data && r.data.qid; if (!q || mem.some(function(m){ return m.q === q; })) return;
-        if (scanCollKeys(r).some(function(c){ return c.key === key; }) && (key.indexOf('city:') !== 0 || seenOf(r) === 'original')) mem.push({ q: q, label: rTitle(r), img: '', lat: null, lng: null, place: '', sl: 0 });
-      });
       def.members = mem; COLL[key] = def; collSave(); changed = true;
     }
+    // 3. the user's own pieces of this creator or city always count, even beyond the best-known ones (new scans too)
+    var added = false;
+    journal.forEach(function(r){
+      var q = r.data && r.data.qid; if (!q) return;
+      scanCollKeys(r).forEach(function(c){
+        var def = COLL[c.key]; if (!def || def.skip || !def.members) return;
+        if (c.key.indexOf('city:') === 0 && seenOf(r) !== 'original') return;
+        if (def.members.some(function(m){ return m.q === q; })) return;
+        def.members.push({ q: q, label: rTitle(r), img: '', lat: null, lng: null, place: '', sl: 0 }); added = true;
+      });
+    });
+    if (added) { collSave(); changed = true; }
   } finally {
     collRun.busy = false;
     if (changed) renderJournal();
@@ -4655,7 +4662,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.57';
+var APP_VERSION = '0.58';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
