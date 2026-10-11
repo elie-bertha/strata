@@ -2117,6 +2117,8 @@ async function runLiveScan(file, opts) {
     if (!d.lang) d.lang = getLang();
     d.loc_v = 2;
     d.seen = typeof opts !== 'undefined' && opts && opts.text ? 'discovery' : (d.seen === 'reproduction' ? 'reproduction' : d.seen === 'original' ? 'original' : undefined);
+    // discovered by name without a readable picture: the work's own picture, now that it is identified
+    if (opts.text && file && file.flat) { var better = await wikiPicture(d).catch(function(){ return null; }); if (better) { URL.revokeObjectURL(url); file = better; url = URL.createObjectURL(file); } }
     ARTS.live = toArt(d, url);
     var posP = opts.camera && isSeenCat(d) ? getPos().catch(function(){ return null; }) : null;
     saveScan(d, file).then(function(id){ ARTS.live.journalId = id; ARTS['j_' + id] = ARTS.live; photoURLs[id] = url; refreshPracticalCard(); loadJournal().then(function(){ fillRarities(); if (currentArt === 'live') { renderTags(); updateMapBtn(); } if (posP) posP.then(function(pos){ if (pos) setSpot(id, pos, false); }); }); var rb = document.getElementById('btnRemove'); if (currentArt === 'live') rb.hidden = false; toast(t('Saved to your journal')); })
@@ -2157,15 +2159,51 @@ document.getElementById('saScroll').addEventListener('click', function(e){
 });
 document.getElementById('mbClose').addEventListener('click', function(){ document.getElementById('mbSheet').hidden = true; });
 document.getElementById('mbSheet').addEventListener('click', function(e){ if (e.target.id === 'mbSheet') document.getElementById('mbSheet').hidden = true; });
-// Picture for a work discovered by name: its thumbnail if the browser may read it, else its colors
+// An image address as a file, when the browser may read it
+async function fetchImg(u) {
+  if (!u) return null;
+  try { var r = await fetch(u); if (r.ok) { var b = await r.blob(); if (/^image\//.test(b.type) && b.size > 1500) return new File([b], 'work.jpg', { type: b.type }); } } catch (e) {}
+  return null;
+}
+// Wikidata images are "Special:FilePath" links the app cannot read: their direct address on upload.wikimedia.org instead
+async function commonsDirect(u, w) {
+  var m = /Special:FilePath\/([^?#]+)/i.exec(u || ''); if (!m) return u;
+  var j = await jget('https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&prop=imageinfo&iiprop=url&iiurlwidth=' + (w || 1000) + '&titles=' + encodeURIComponent('File:' + decodeURIComponent(m[1])));
+  var pages = j && j.query && j.query.pages, pg = pages && pages[Object.keys(pages)[0]], ii = pg && pg.imageinfo && pg.imageinfo[0];
+  return ii ? (ii.thumburl || ii.url) : '';
+}
+// The picture of a find without photo (discovered by name): the lead image of its Wikipedia article, else its Wikidata image
+async function wikiPicture(d) {
+  if (!d) return null;
+  var r = { creator: d.creator, title: d.title, data: d };
+  var titles = [d.wiki, d.rarity && d.rarity.wiki].filter(function(x){ return x && titleOK(x, r); });
+  if (!titles.length && (d.title_en || d.title)) {
+    var s = await jget('https://en.wikipedia.org/w/api.php?action=query&list=search&srlimit=1&format=json&origin=*&srsearch=' + encodeURIComponent((d.title_en || d.title) + ' ' + (d.creator || '')));
+    var hit = s && s.query && s.query.search && s.query.search[0];
+    if (hit && titleOK(hit.title, r)) titles.push(hit.title);
+  }
+  for (var i = 0; i < titles.length; i++) {
+    var j = await jget('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=pageimages&piprop=thumbnail&pithumbsize=1000&pilicense=any&titles=' + encodeURIComponent(titles[i]));
+    var pages = j && j.query && j.query.pages, pg = pages && pages[Object.keys(pages)[0]];
+    var f = await fetchImg(pg && pg.thumbnail && pg.thumbnail.source);
+    if (f) return f;
+  }
+  if (d.qid) {
+    var c = await jget('https://www.wikidata.org/w/api.php?action=wbgetclaims&property=P18&format=json&origin=*&entity=' + d.qid);
+    var v = c && c.claims && c.claims.P18 && c.claims.P18[0] && c.claims.P18[0].mainsnak.datavalue;
+    if (v) return fetchImg(await commonsDirect('https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(v.value)));
+  }
+  return null;
+}
+// Picture for a work discovered by name: its thumbnail if the browser may read it, else its colors (marked flat, to be replaced once identified)
 async function workPicture(item) {
   var m = /url\(["']?([^"')]+)["']?\)/.exec(item.thumb || '');
-  if (m) { try { var r = await fetch(m[1]); if (r.ok) { var b = await r.blob(); if (/^image\//.test(b.type)) return new File([b], 'work.jpg', { type: b.type }); } } catch (e) {} }
+  if (m) { var f0 = await fetchImg(await commonsDirect(m[1]).catch(function(){ return ''; })); if (f0) return f0; }
   var cv = document.createElement('canvas'); cv.width = 720; cv.height = 900; var g = cv.getContext('2d');
   var cols = (item.colors.match(/#[0-9a-f]{3,8}/gi) || ['#D8D2C4', '#6B6B74', '#2B2B30']).reverse();
   var gr = g.createLinearGradient(0, 900, 0, 0); cols.forEach(function(c, i){ gr.addColorStop(i / Math.max(1, cols.length - 1), c); });
   g.fillStyle = gr; g.fillRect(0, 0, 720, 900);
-  return await new Promise(function(res){ cv.toBlob(function(b){ res(new File([b], 'work.jpg', { type: 'image/jpeg' })); }, 'image/jpeg', 0.85); });
+  return await new Promise(function(res){ cv.toBlob(function(b){ var f = new File([b], 'work.jpg', { type: 'image/jpeg' }); f.flat = true; res(f); }, 'image/jpeg', 0.85); });
 }
 document.getElementById('mbDiscover').addEventListener('click', async function(){
   if (!mbItem) return;
@@ -2374,7 +2412,7 @@ async function checkPendingScans() {
       if (!d.lang) d.lang = getLang();
       d.loc_v = 2;
       d.seen = j.kind === 'text' ? 'discovery' : (d.seen === 'reproduction' ? 'reproduction' : d.seen === 'original' ? 'original' : undefined);
-      var file = j.image ? b64ToFile(j.image) : await workPicture({ colors: '', thumb: '' });
+      var file = j.image ? b64ToFile(j.image) : (await wikiPicture(d).catch(function(){ return null; })) || await workPicture({ colors: '', thumb: '' });
       lastId = await saveScan(d, file).catch(function(){ return null; }); lastTitle = d.title;
     }
     if (lastId) {
@@ -3182,6 +3220,43 @@ async function fillRarities() {
 
 // ─── COLLECTIONS: series to complete, built from Wikidata (free) ───
 // Five kinds: by artist (paintings, sculptures), by architect, a creator in a city, by author (books), and a city's must-sees.
+// Finds discovered by name that kept a plain gradient instead of a picture (before v0.66): their real picture, once
+function flatPicture(src) {
+  return new Promise(function(ok){
+    if (!src) return ok(false);
+    var im = new Image();
+    im.onload = function(){
+      try {
+        var W = 24, H = 24, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+        var g = cv.getContext('2d'); g.drawImage(im, 0, 0, W, H); var px = g.getImageData(0, 0, W, H).data, tot = 0;
+        // a gradient is the same color across each row: real photos never are
+        for (var y = 0; y < H; y++) { var a = [], m = 0; for (var x = 0; x < W; x++) { var k = (y * W + x) * 4, l = px[k] * .3 + px[k + 1] * .59 + px[k + 2] * .11; a.push(l); m += l; } m /= W;
+          tot += Math.sqrt(a.reduce(function(v, l){ return v + (l - m) * (l - m); }, 0) / W); }
+        ok(tot / H < 2.5);
+      } catch (e) { ok(false); }
+    };
+    im.onerror = function(){ ok(false); }; im.src = src;
+  });
+}
+var picFix = { busy: false };
+async function fixFlatPictures() {
+  if (picFix.busy) return; picFix.busy = true;
+  var changed = false;
+  try {
+    for (var i = 0; i < journal.length; i++) {
+      var r = journal[i], d = r.data;
+      if (!d || d.pic_v || !r.identified || !(await flatPicture(r.thumb))) continue;
+      var f = await wikiPicture(d).catch(function(){ return null; });
+      d.pic_v = 1;
+      if (f) {
+        r.photo = await resizeBlob(f, 1280, 0.82, false); r.thumb = await resizeBlob(f, 360, 0.75, true); r.photo_path = null;
+        if (photoURLs[r.id]) { URL.revokeObjectURL(photoURLs[r.id]); delete photoURLs[r.id]; } delete ARTS['j_' + r.id];
+        changed = true;
+      }
+      await saveLocal(r).catch(function(){});
+    }
+  } finally { picFix.busy = false; if (changed) renderJournal(); }
+}
 // A piece counts when the scan is that exact work (same Wikidata id). Complete with any scan; gold when every piece was seen in person.
 var COLL_KEY = 'strata.coll.v1', COLL_DONE = 'strata.collDone';
 var COLL = (function(){ try { var o = JSON.parse(localStorage.getItem(COLL_KEY) || '{}'); Object.keys(o).forEach(function(k){ if (k.indexOf('cc:') === 0) delete o[k]; }); return o; } catch (e) { return {}; } })();
@@ -3383,6 +3458,7 @@ async function fillCollections() {
     collRun.busy = false;
     if (changed) renderJournal();
     collCheckDone();
+    fixFlatPictures();
   }
 }
 // A collection just completed (or turned gold): celebrate it once
@@ -4788,7 +4864,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.65';
+var APP_VERSION = '0.66';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
