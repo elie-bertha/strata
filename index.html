@@ -452,6 +452,23 @@ label.key-btn{text-align:center;display:block;}
 .cz-btn{width:48px;height:40px;border-radius:12px;border:1px solid var(--s3);background:var(--surface);font-size:22px;color:var(--ink);cursor:pointer;}
 .cz-btn:disabled{opacity:.3;cursor:default;}
 
+
+/* Discovery of the day */
+#dailyCard .dly{background:var(--surface);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;}
+.dly-img{height:210px;border:0;background:#2C2C2E center/cover no-repeat;position:relative;cursor:pointer;display:block;width:100%;}
+.dly-k{position:absolute;left:12px;top:12px;font:600 11px 'DM Sans',sans-serif;letter-spacing:1px;text-transform:uppercase;color:var(--night);background:var(--sun);border-radius:100px;padding:6px 10px;}
+.dly-tx{padding:14px 16px 16px;display:flex;flex-direction:column;gap:4px;}
+.dly-t{font-family:'DM Serif Display',serif;font-size:21px;line-height:1.2;color:var(--ink);}
+.dly-c{font-size:13px;color:var(--muted);}
+.dly-w{font-size:13px;line-height:1.45;color:var(--ink);margin-top:4px;}
+.dly-acts{display:flex;gap:8px;margin-top:10px;}
+.dly-go{flex:1;height:44px;border:0;border-radius:14px;background:var(--night);color:#fff;font:600 15px 'DM Sans',sans-serif;cursor:pointer;}
+.dly-again{height:44px;padding:0 14px;border:1.5px solid var(--s3);border-radius:14px;background:var(--surface);color:var(--ink);font:500 14px 'DM Sans',sans-serif;cursor:pointer;}
+.dly-past{padding:0 16px 14px;display:flex;flex-direction:column;gap:6px;}
+.dly-past span{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.dly-past div{display:flex;gap:6px;}
+.dly-past button{width:40px;height:40px;border-radius:10px;border:0;background:#2C2C2E center/cover;cursor:pointer;}
+#dailyCard[hidden]{display:none;}
 /* Quiz */
 #quizCard .qzc{background:var(--night);border-radius:20px;padding:18px;color:#fff;display:flex;flex-direction:column;gap:12px;}
 .qzc-head{display:flex;justify-content:space-between;align-items:center;}
@@ -3861,6 +3878,149 @@ function weekDots(days) {
   }
   return out;
 }
+
+// ─── DISCOVERY OF THE DAY: one work a day picked from what you loved (free: Wikidata, no Claude) ───
+// Seeds: the scans rated 4 or 5 stars (else every identified scan). Three ways to pick, by day:
+// same world (a related artist: same movement, master, pupil, influence) ~50%, an artist you love ~30%, a step aside (same genre) ~20%.
+// Never a work already in the journal or proposed in the last 30 days; always with a picture; famous enough to have a story.
+var DAILY_KEY = 'strata.daily';
+function dailyState() { try { return JSON.parse(localStorage.getItem(DAILY_KEY) || '{}'); } catch (e) { return {}; } }
+function dailySave(st) { try { localStorage.setItem(DAILY_KEY, JSON.stringify(st)); } catch (e) {} }
+function hashStr(x) { var h = 2166136261; for (var i = 0; i < x.length; i++) { h ^= x.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+function dailySeeds() {
+  var withQ = journal.filter(function(r){ var f = r.data && r.data.wd; return r.data && r.data.qid && f && (f.cr || f.ar); });
+  var loved = withQ.filter(function(r){ return rating(r) >= 4; });
+  return (loved.length ? loved : withQ).slice(0, 40);
+}
+function dailySeen() {
+  var st = dailyState(), out = {};
+  journal.forEach(function(r){ if (r.data && r.data.qid) out[r.data.qid] = 1; });
+  (st.hist || []).forEach(function(h){ out[h.item.q] = 1; });
+  return out;
+}
+async function dailyUniverse(seed, rnd, seen) {
+  var f = seed.data.wd, cr = f.cr || f.ar, arch = !f.cr;
+  var rows = await sparql('SELECT ?a ?aLabel ?rel ?mLabel WHERE { ' +
+    '{ wd:' + cr.q + ' wdt:P135 ?m . ?a wdt:P135 ?m . BIND("mv" AS ?rel) } UNION { wd:' + cr.q + ' wdt:P737 ?a . BIND("inf" AS ?rel) } UNION { ?a wdt:P737 wd:' + cr.q + ' . BIND("infd" AS ?rel) } ' +
+    'UNION { wd:' + cr.q + ' wdt:P802 ?a . BIND("stu" AS ?rel) } UNION { wd:' + cr.q + ' wdt:P1066 ?a . BIND("tea" AS ?rel) } ' +
+    '?a wdt:P31 wd:Q5 ; wikibase:sitelinks ?asl . FILTER(?asl > 40 && ?a != wd:' + cr.q + ') ' + LBL() + '} LIMIT 200');
+  if (!rows || !rows.length) return null;
+  var by = {}; rows.forEach(function(b){ var q = qidOf(b.a.value); if (!by[q] || b.rel.value !== 'mv') by[q] = { q: q, l: b.aLabel.value, rel: b.rel.value, m: (b.mLabel || {}).value || '' }; });
+  var arts = Object.keys(by).map(function(k){ return by[k]; }).filter(function(a){ return !/^Q\d+$/.test(a.l); });
+  // a direct tie (master, pupil, influence) first when there is one
+  var direct = arts.filter(function(a){ return a.rel !== 'mv'; }), pool = direct.length && rnd() < 0.6 ? direct : arts;
+  for (var tries = 0; tries < 3 && pool.length; tries++) {
+    var a = pool.splice(Math.floor(rnd() * pool.length), 1)[0];
+    var mem = await collMembers({ key: (arch ? 'architect:' : 'artist:') + a.q });
+    var cand = (mem || []).filter(function(m){ return m.img && !seen[m.q]; });
+    if (cand.length) { var m = cand[Math.floor(rnd() * Math.min(cand.length, 6))]; return { item: m, creator: a.l, why: { k: a.rel, a: a.l, c: cr.l, w: rTitle(seed), m: a.m } }; }
+  }
+  return null;
+}
+function dailyArtist(seed, rnd, seen) {
+  var f = seed.data.wd, cr = f.cr || f.ar, def = COLL[(f.cr ? 'artist:' : 'architect:') + cr.q];
+  var cand = def && def.members ? def.members.filter(function(m){ return m.img && !seen[m.q]; }) : [];
+  if (!cand.length) return null;
+  return { item: cand[Math.floor(rnd() * Math.min(cand.length, 8))], creator: cr.l, why: { k: 'artist', c: cr.l, w: rTitle(seed) } };
+}
+async function dailyAside(seed, rnd, seen) {
+  var f = seed.data.wd, cr = f.cr || f.ar;
+  var rows = await sparql('SELECT ?w ?wLabel ?img ?co ?plLabel ?sl ?crLabel ?gLabel WHERE { wd:' + seed.data.qid + ' wdt:P136 ?g . ?w wdt:P136 ?g ; wdt:P18 ?img ; wdt:P170 ?cr ; wikibase:sitelinks ?sl . ' +
+    'FILTER(?sl > 25 && ?cr != wd:' + cr.q + ') OPTIONAL { ?w wdt:P625 ?co } OPTIONAL { ?w wdt:P195 ?pl } ' + LBL() + '} LIMIT 60');
+  var list = memberRows(rows).filter(function(m){ return m.img && !seen[m.q]; });
+  if (!list.length) return null;
+  var m = list[Math.floor(rnd() * Math.min(list.length, 10))], b = (rows || []).find(function(x){ return qidOf(x.w.value) === m.q; }) || {};
+  return { item: m, creator: (b.crLabel || {}).value || '', why: { k: 'aside', w: rTitle(seed), g: (b.gLabel || {}).value || '' } };
+}
+async function dailyClassic(rnd, seen) {
+  var rows = await sparql('SELECT ?w ?wLabel ?img ?co ?plLabel ?sl ?crLabel WHERE { VALUES ?t { wd:Q3305213 wd:Q860861 } ?w wdt:P31 ?t ; wdt:P18 ?img ; wdt:P170 ?cr ; wikibase:sitelinks ?sl . FILTER(?sl > 70) ' +
+    'OPTIONAL { ?w wdt:P625 ?co } OPTIONAL { ?w wdt:P195 ?pl } ' + LBL() + '} LIMIT 150');
+  var list = memberRows(rows).filter(function(m){ return m.img && !seen[m.q]; });
+  if (!list.length) return null;
+  var m = list[Math.floor(rnd() * list.length)], b = (rows || []).find(function(x){ return qidOf(x.w.value) === m.q; }) || {};
+  return { item: m, creator: (b.crLabel || {}).value || '', why: { k: 'classic' } };
+}
+async function dailyPick(salt) {
+  var day = dayKey(new Date()), h = hashStr(day + '|' + salt), x = h;
+  var rnd = function(){ x = (Math.imul(x ^ (x >>> 15), 2246822507) + 0x9e3779b9) >>> 0; return (x % 100000) / 100000; };
+  var seeds = dailySeeds(), seen = dailySeen(), r = null, mode = h % 10;
+  if (seeds.length) {
+    var seed = seeds[Math.floor(rnd() * seeds.length)];
+    var order = mode < 5 ? ['u', 'a', 's'] : mode < 8 ? ['a', 'u', 's'] : ['s', 'u', 'a'];
+    for (var i = 0; i < order.length && !r; i++) {
+      r = await Promise.resolve().then(function(){ return order[i] === 'u' ? dailyUniverse(seed, rnd, seen) : order[i] === 'a' ? dailyArtist(seed, rnd, seen) : dailyAside(seed, rnd, seen); }).catch(function(){ return null; });
+    }
+  }
+  if (!r) r = await dailyClassic(rnd, seen).catch(function(){ return null; });
+  if (!r) return null;
+  var m = r.item;
+  return { q: m.q, label: m.label, img: m.img, place: m.place, lat: m.lat, lng: m.lng, creator: r.creator, why: r.why };
+}
+function dailyWhy(w) {
+  if (!w) return '';
+  return t({ mv: 'Because you loved {w}: another artist of {m}', inf: '{a} inspired {c}, whose {w} you loved', infd: '{a} admired {c}, whose {w} you loved',
+    stu: '{a} was a pupil of {c}, whose {w} you loved', tea: '{a} was the master of {c}, whose {w} you loved', artist: 'Another masterpiece by {c}, whose {w} you loved',
+    aside: 'Because you loved {w}: another eye on the same theme', classic: 'A great classic to discover' }[w.k] || 'A great classic to discover',
+    { a: w.a || '', c: w.c || '', w: w.w || '', m: w.m || '' });
+}
+var dailyRun = { busy: false };
+async function ensureDaily(reroll) {
+  var st = dailyState(), day = dayKey(new Date());
+  if (st.day === day && st.item && !reroll) return;
+  if (dailyRun.busy) return; dailyRun.busy = true;
+  try {
+    var it = await dailyPick(reroll ? 'again' : 'first');
+    if (!it) return;
+    st = dailyState();
+    var hist = (st.hist || []).filter(function(h){ return h.day !== day; });
+    if (st.item && st.day !== day) hist.unshift({ day: st.day, iso: st.iso, item: st.item });
+    st = { day: day, iso: new Date().toISOString(), item: it, rerolled: !!reroll || (st.day === day && st.rerolled), hist: hist.slice(0, 30) };
+    dailySave(st); renderDaily();
+  } finally { dailyRun.busy = false; }
+}
+function dailyRec(it) { return it && journal.find(function(r){ return r.data && r.data.qid === it.q; }); }
+function renderDaily() {
+  var body = document.querySelector('#s-home .home-body'), quiz = document.getElementById('quizCard'); if (!body) return;
+  var el = document.getElementById('dailyCard');
+  if (!el) { el = document.createElement('div'); el.id = 'dailyCard'; el.addEventListener('click', onDailyCard); }
+  var anchor = quiz && quiz.parentNode === body ? quiz : body.firstChild;
+  if (el.nextSibling !== anchor) body.insertBefore(el, anchor);
+  var st = dailyState(), day = dayKey(new Date());
+  if (st.day !== day || !st.item) { setTimeout(function(){ ensureDaily(false); }, 300); }
+  var it = st.day === day ? st.item : null;
+  if (!it) { el.hidden = true; return; }
+  el.hidden = false;
+  var rec = dailyRec(it), past = (st.hist || []).slice(0, 7);
+  el.innerHTML = '<div class="dly">' +
+    '<button class="dly-img" data-dl="open" style="background-image:url(\'' + cImg(it.img, 900) + '\')"><span class="dly-k">' + t('Discovery of the day') + '</span></button>' +
+    '<div class="dly-tx"><div class="dly-t">' + esc(it.label) + '</div>' +
+    '<div class="dly-c">' + esc([it.creator, it.place].filter(Boolean).join(' · ')) + '</div>' +
+    '<div class="dly-w">' + esc(dailyWhy(it.why)) + '</div>' +
+    '<div class="dly-acts"><button class="dly-go" data-dl="open">' + t(rec ? 'In your journal' : 'Discover') + '</button>' +
+    (st.rerolled || rec ? '' : '<button class="dly-again" data-dl="again">' + t('Another one') + '</button>') + '</div></div>' +
+    (past.length ? '<div class="dly-past"><span>' + t('Last days') + '</span><div>' + past.map(function(h, i){ return '<button data-dl="past" data-i="' + i + '" style="background-image:url(\'' + cImg(h.item.img, 160) + '\')"' + ' aria-label="' + esc(h.item.label) + '"></button>'; }).join('') + '</div></div>' : '') +
+    '</div>';
+}
+function openDailyItem(it, hook) {
+  var rec = dailyRec(it); if (rec) { openScan(rec.id); return; }
+  mbItem = { title: it.label, year: '', where: it.place || '', creator: it.creator || '', book: false, nature: false, colors: '', thumb: it.img ? 'url("' + cImg(it.img, 600) + '")' : '', qid: it.q };
+  document.getElementById('mbTitle').textContent = it.label;
+  document.getElementById('mbYear').textContent = [it.creator, it.place].filter(Boolean).join(' · ');
+  document.getElementById('mbHook').textContent = hook;
+  document.getElementById('mbThumb').setAttribute('style', it.img ? 'background:#2C2C2E url(\'' + cImg(it.img, 360) + '\') center/cover' : '');
+  var links = it.lat !== null && it.lat !== undefined ? mapLinks(it.place || it.label, '', it.lat, it.lng) : (it.place ? mapLinks(it.place, '') : '');
+  document.getElementById('mbLinks').innerHTML = links; document.getElementById('mbLinks').hidden = !links;
+  var can = hasAI();
+  document.getElementById('mbDiscover').hidden = !can; document.getElementById('mbCost').hidden = !can || !strataMe;
+  document.getElementById('mbSheet').hidden = false;
+}
+function onDailyCard(e) {
+  var b = e.target.closest('[data-dl]'); if (!b) return;
+  var a = b.getAttribute('data-dl'), st = dailyState();
+  if (a === 'open' && st.item) openDailyItem(st.item, dailyWhy(st.item.why));
+  else if (a === 'again') { b.disabled = true; b.textContent = t('Looking…'); ensureDaily(true); }
+  else if (a === 'past') { var h = (st.hist || [])[+b.getAttribute('data-i')]; if (h) openDailyItem(h.item, h.iso ? t('Discovery of {d}', { d: fmtDay(h.iso) }) : ''); }
+}
 function renderQuizCard() {
   var body = document.querySelector('#s-home .home-body'); if (!body) return;
   var el = document.getElementById('quizCard');
@@ -3886,6 +4046,8 @@ function renderQuizCard() {
     '<div class="qzc-week">' + weekDots(st.days) + '</div>' +
     '<button class="qzc-go" data-qz="start">' + t('Start') + '</button></div>';
 }
+var _rqc = renderQuizCard;
+renderQuizCard = function(){ _rqc(); renderDaily(); };
 function onQuizCard(e) {
   var b = e.target.closest('[data-qz]'); if (!b) return;
   var a = b.getAttribute('data-qz');
@@ -4883,7 +5045,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.67';
+var APP_VERSION = '0.68';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -5908,7 +6070,7 @@ document.getElementById('czNext').addEventListener('click', function(){ openZoom
 // Keys are the English interface text; French and Spanish below. Missing keys fall back to English.
 var I18N = {
 fr: {
-  "How you saw it": "Comment tu l'as vu", "Link with your journal · {a}": "Lien avec ton journal · {a}", "Cities": "Villes", "Paintings & Sculptures": "Peintures & Sculptures", "Categories": "Catégories", "Tap to add or remove. Changes are saved right away.": "Touche pour ajouter ou retirer. Les changements sont enregistrés tout de suite.", "Done": "Terminé",
+  "How you saw it": "Comment tu l'as vu", "Discovery of the day": "Découverte du jour", "Discover": "Découvrir", "Another one": "Une autre", "Last days": "Les derniers jours", "Looking…": "Je cherche…", "Discovery of {d}": "Découverte du {d}", "Because you loved {w}: another artist of {m}": "Parce que tu as aimé {w} : un autre artiste du mouvement {m}", "{a} inspired {c}, whose {w} you loved": "{a} a inspiré {c}, dont tu as aimé {w}", "{a} admired {c}, whose {w} you loved": "{a} admirait {c}, dont tu as aimé {w}", "{a} was a pupil of {c}, whose {w} you loved": "{a} fut l'élève de {c}, dont tu as aimé {w}", "{a} was the master of {c}, whose {w} you loved": "{a} fut le maître de {c}, dont tu as aimé {w}", "Another masterpiece by {c}, whose {w} you loved": "Un autre chef-d'œuvre de {c}, dont tu as aimé {w}", "Because you loved {w}: another eye on the same theme": "Parce que tu as aimé {w} : un autre regard sur le même thème", "A great classic to discover": "Un grand classique à découvrir", "Link with your journal · {a}": "Lien avec ton journal · {a}", "Cities": "Villes", "Paintings & Sculptures": "Peintures & Sculptures", "Categories": "Catégories", "Tap to add or remove. Changes are saved right away.": "Touche pour ajouter ou retirer. Les changements sont enregistrés tout de suite.", "Done": "Terminé",
   "Settings": "Réglages", "Claude API key": "Clé API Claude",
   "Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.": "Strata interroge Claude sur chaque photo avec ta propre clé. Elle est enregistrée uniquement dans ce navigateur, sur ce téléphone.",
   "Save key": "Enregistrer la clé", "Try the demo": "Essayer la démo", "Remove key": "Supprimer la clé",
@@ -6212,7 +6374,7 @@ fr: {
   "Choose a photo from your library": "Choisir une photo dans ta photothèque", "Edit categories": "Modifier les catégories"
 },
 es: {
-  "How you saw it": "Cómo lo viste", "Link with your journal · {a}": "Vínculo con tu diario · {a}", "Cities": "Ciudades", "Paintings & Sculptures": "Pinturas y esculturas", "Categories": "Categorías", "Tap to add or remove. Changes are saved right away.": "Toca para añadir o quitar. Los cambios se guardan al momento.", "Done": "Listo",
+  "How you saw it": "Cómo lo viste", "Discovery of the day": "Descubrimiento del día", "Discover": "Descubrir", "Another one": "Otra", "Last days": "Últimos días", "Looking…": "Buscando…", "Discovery of {d}": "Descubrimiento del {d}", "Because you loved {w}: another artist of {m}": "Porque te encantó {w}: otro artista del movimiento {m}", "{a} inspired {c}, whose {w} you loved": "{a} inspiró a {c}, de quien te encantó {w}", "{a} admired {c}, whose {w} you loved": "{a} admiraba a {c}, de quien te encantó {w}", "{a} was a pupil of {c}, whose {w} you loved": "{a} fue alumno de {c}, de quien te encantó {w}", "{a} was the master of {c}, whose {w} you loved": "{a} fue el maestro de {c}, de quien te encantó {w}", "Another masterpiece by {c}, whose {w} you loved": "Otra obra maestra de {c}, de quien te encantó {w}", "Because you loved {w}: another eye on the same theme": "Porque te encantó {w}: otra mirada sobre el mismo tema", "A great classic to discover": "Un gran clásico por descubrir", "Link with your journal · {a}": "Vínculo con tu diario · {a}", "Cities": "Ciudades", "Paintings & Sculptures": "Pinturas y esculturas", "Categories": "Categorías", "Tap to add or remove. Changes are saved right away.": "Toca para añadir o quitar. Los cambios se guardan al momento.", "Done": "Listo",
   "Settings": "Ajustes", "Claude API key": "Clave API de Claude",
   "Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.": "Strata consulta a Claude sobre cada foto con tu propia clave. Solo se guarda en este navegador, en este teléfono.",
   "Save key": "Guardar clave", "Try the demo": "Probar la demo", "Remove key": "Eliminar clave",
