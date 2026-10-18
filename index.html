@@ -3976,7 +3976,7 @@ function maybeAskTastes() {
   var st = tasteState(); if (st.done || st.later) return;
   if (!document.getElementById('s-home').classList.contains('active')) return;
   var wl = document.getElementById('welcome'); if (wl && !wl.hidden && wl.offsetParent !== null) return;
-  tasteAsked = true; setTimeout(openTastes, 600);
+  tasteAsked = true; setTimeout(function(){ if (!journal.length && document.getElementById('s-home').classList.contains('active')) openTastes(); }, 600);
 }
 // The picks as stand-in favourites (until 5 real ones)
 function tasteSeeds() {
