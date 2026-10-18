@@ -453,6 +453,17 @@ label.key-btn{text-align:center;display:block;}
 .cz-btn:disabled{opacity:.3;cursor:default;}
 
 
+
+/* Taste picker (first open) */
+.tst-card{max-height:92vh;overflow-y:auto;}
+.tst-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.tst-it{position:relative;aspect-ratio:3/4;border-radius:14px;border:0;padding:0;background:#2C2C2E center/cover no-repeat;cursor:pointer;overflow:hidden;color:#fff;text-align:left;}
+.tst-it span{position:absolute;left:0;right:0;bottom:0;padding:18px 7px 6px;font:600 11px/1.25 'DM Sans',sans-serif;background:linear-gradient(transparent,rgba(0,0,0,.75));}
+.tst-it i{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.35);border:2px solid #fff;display:flex;align-items:center;justify-content:center;}
+.tst-it.on{box-shadow:0 0 0 3px var(--sun);}
+.tst-it.on i{background:var(--sun);border-color:var(--sun);color:var(--night);}
+.tst-card .key-btn:disabled{opacity:.45;}
+.cl-card.await .cl-mos{opacity:.55;filter:grayscale(.4);}
 /* Discovery of the day */
 #dailyCard .dly{background:var(--surface);border-radius:20px;overflow:hidden;display:flex;flex-direction:column;}
 .dly-img{height:210px;border:0;background:#2C2C2E center/cover no-repeat;position:relative;cursor:pointer;display:block;width:100%;}
@@ -1112,6 +1123,15 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
   <button class="wl-link mute ig-later" id="installLater" type="button" hidden>Maybe later</button>
 </div></div>
 <div class="ig-arrow" id="igArrow" hidden aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="20"/><polyline points="5 13 12 20 19 13"/></svg></div>
+<div class="tag-sheet" id="tasteSheet" hidden>
+  <div class="ts-card tst-card" role="dialog" aria-labelledby="tstTitle">
+    <div class="ts-top"><div class="ts-title" id="tstTitle">What speaks to you?</div><button class="cz-x" id="tstClose" aria-label="Close">×</button></div>
+    <p class="ts-p" id="tstSub">Pick 3 to 6 works you like: your first discoveries and collections will follow your taste.</p>
+    <div class="tst-grid" id="tstGrid"></div>
+    <button class="key-btn pri" id="tstDone" disabled>Done</button>
+    <button class="wl-link mute" id="tstLater" type="button">Maybe later</button>
+  </div>
+</div>
 <div class="tag-sheet" id="tagSheet" hidden>
   <div class="ts-card" role="dialog" aria-labelledby="tsTitle">
     <div class="ts-top"><div class="ts-title" id="tsTitle">Edit</div><button class="cz-x" id="tsClose" aria-label="Close">×</button></div>
@@ -1298,6 +1318,7 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
     <button class="menu-prof" id="menuProf" aria-label="Edit Profile"><div class="menu-avatar" id="menuAv"></div><div class="menu-uname" id="menuName"></div><div class="menu-email" id="menuEmail"></div></button>
     <div class="menu-list">
       <div class="menu-item" id="btn-profile"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span class="m-lbl">Edit Profile</span><span class="m-val" id="langVal"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="menu-item" id="btn-tastes"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><span class="m-lbl">My tastes</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item" id="btn-invite"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span class="m-lbl">Share with friends</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item" id="btn-friends" hidden><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg></div><span class="m-lbl">Friends &amp; credit</span><span class="m-val" id="friendsVal"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item" id="btn-dash" hidden><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><span class="m-lbl">Dashboard</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
@@ -2990,6 +3011,7 @@ function renderJournal() {
   renderCal();
   document.querySelectorAll('.j-none[data-for]').forEach(function(e){ e.hidden = !!n; });
   renderQuizCard();
+  maybeAskTastes();
 }
 
 (function(){
@@ -3431,14 +3453,14 @@ function scanCollKeys(r) {
 function journalByQid() { var m = {}; journal.forEach(function(r){ var q = r.data && r.data.qid; if (q && (!m[q] || (seenOf(r) === 'original' && seenOf(m[q]) !== 'original'))) m[q] = r; }); return m; }
 // The scan that unlocks a piece: for a city, only a piece seen in person counts
 function collRec(def, byQ, q) { var r = byQ[q]; return r && (def.key.indexOf('city:') !== 0 || seenOf(r) === 'original') ? r : null; }
-function collWanted() { var w = {}; journal.forEach(function(r){ scanCollKeys(r).forEach(function(c){ w[c.key] = 1; }); }); return w; }
+function collWanted() { var w = {}; journal.forEach(function(r){ scanCollKeys(r).forEach(function(c){ w[c.key] = 1; }); }); Object.keys(tasteCollKeys()).forEach(function(k){ w[k] = 2; }); return w; }
 // Progress of every collection with at least one piece
 function collList() {
   var byQ = journalByQid(), done = collDone(), want = collWanted(), out = [];
   Object.keys(COLL).forEach(function(k){
     var def = COLL[k]; if (!def || def.skip || !def.members || !want[k]) return;
     var found = def.members.filter(function(m){ return collRec(def, byQ, m.q); });
-    if (!found.length) return;
+    if (!found.length && want[k] !== 2) return;   // from the taste picks: shown empty, as a goal
     var seen = found.filter(function(m){ return seenOf(byQ[m.q]) === 'original'; }).length;
     var last = found.reduce(function(x, m){ var c = byQ[m.q].created_at; return c > x ? c : x; }, '');
     out.push({ def: def, found: found, total: def.members.length, complete: found.length === def.members.length, gold: found.length === def.members.length && seen === found.length, seen: seen, last: last, done: done[k] });
@@ -3466,6 +3488,7 @@ async function fillCollections() {
     // 2. Members of each collection (cached a month)
     var want = {};
     journal.forEach(function(r){ scanCollKeys(r).forEach(function(c){ if (!want[c.key]) want[c.key] = c; }); });
+    var tk = tasteCollKeys(); Object.keys(tk).forEach(function(k){ if (!want[k]) want[k] = tk[k]; });
     var keys = Object.keys(want), month = 30 * 86400000;
     for (var k = 0; k < keys.length; k++) {
       var key = keys[k], old = COLL[key];
@@ -3510,9 +3533,10 @@ function collCheckDone() {
 // ─── HOME: my collections ───
 function collCardHTML(c) {
   var byQ = journalByQid(), pics = c.found.slice(0, 4).map(function(m){ return byQ[m.q].thumb; });
+  if (!c.found.length) pics = c.def.members.filter(function(m){ return m.img; }).slice(0, 4).map(function(m){ return m.img; });
   while (pics.length < 4) pics.push('');
   var pct = Math.round(c.found.length / c.total * 100);
-  return '<button class="cl-card' + (c.gold ? ' gold' : c.complete ? ' done' : '') + '" data-coll="' + esc(c.def.key) + '">' +
+  return '<button class="cl-card' + (c.gold ? ' gold' : c.complete ? ' done' : !c.found.length ? ' await' : '') + '" data-coll="' + esc(c.def.key) + '">' +
     '<div class="cl-mos">' + pics.map(function(u){ return '<div' + (u ? ' style="background-image:url(\'' + u + '\')"' : '') + '></div>'; }).join('') +
     (c.complete ? '<span class="cl-badge">' + (c.gold ? t('Gold') : t('Complete')) + '</span>' : '') + '</div>' +
     '<div class="cl-tg">' + esc(t(COLL_TAG[collKind(c)] || '')) + '</div><div class="cl-n">' + esc(collName(c.def)) + '</div><div class="cl-bar"><i style="width:' + pct + '%"></i></div>' +
@@ -3879,6 +3903,89 @@ function weekDots(days) {
   return out;
 }
 
+// ─── TASTES: 3 to 6 works picked on first open, so the first discoveries and collections already follow the user's taste ───
+// Used until the user has 5 real favourites (4-5 stars). Works resolved from their English Wikipedia article (id, picture), free.
+var TASTE_KEY = 'strata.tastes', TASTE_CAT = 'strata.tasteCat';
+var TASTE_WORKS = [
+  ['The Birth of Venus', 'painting'], ['Impression, Sunrise', 'painting'], ['The Starry Night', 'painting'], ['The Great Wave off Kanagawa', 'painting'],
+  ['The Kiss (Klimt)', 'painting'], ['The Persistence of Memory', 'painting'], ['The Thinker', 'sculpture'], ['Notre-Dame de Paris', 'architecture'],
+  ['Sagrada Família', 'architecture'], ['Villa Savoye', 'architecture'], ['Girl with Balloon', 'painting'], ['The Scream', 'painting']
+];
+function tasteState() { try { return JSON.parse(localStorage.getItem(TASTE_KEY) || '{}'); } catch (e) { return {}; } }
+function tasteSave(st) { try { localStorage.setItem(TASTE_KEY, JSON.stringify(st)); } catch (e) {} }
+async function tasteCatalog() {
+  var lang = getLang(), cache; try { cache = JSON.parse(localStorage.getItem(TASTE_CAT) || 'null'); } catch (e) { cache = null; }
+  if (cache && cache.lang === lang && cache.items && cache.items.length === TASTE_WORKS.length) return cache.items;
+  var titles = TASTE_WORKS.map(function(w){ return w[0]; });
+  var j = await jget('https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=pageprops|pageimages&ppprop=wikibase_item&piprop=thumbnail&pithumbsize=500&pilicense=any&titles=' + encodeURIComponent(titles.join('|')));
+  if (!j || !j.query) return null;
+  var back = {}; titles.forEach(function(x){ back[x] = x; });
+  (j.query.normalized || []).forEach(function(n){ back[n.to] = back[n.from] || n.from; });
+  (j.query.redirects || []).forEach(function(n){ back[n.to] = back[n.from] || n.from; });
+  var by = {};
+  Object.keys(j.query.pages || {}).forEach(function(k){ var pg = j.query.pages[k], o = back[pg.title]; if (o) by[o] = { q: pg.pageprops && pg.pageprops.wikibase_item, img: pg.thumbnail && pg.thumbnail.source, en: pg.title }; });
+  var ids = Object.keys(by).map(function(k){ return by[k].q; }).filter(Boolean), labels = {};
+  if (ids.length) {
+    var e = await jget('https://www.wikidata.org/w/api.php?action=wbgetentities&props=labels&format=json&origin=*&languages=' + lang + '|en&ids=' + ids.join('|'));
+    Object.keys((e && e.entities) || {}).forEach(function(q){ var lb = e.entities[q].labels || {}; labels[q] = (lb[lang] || lb.en || {}).value; });
+  }
+  var items = TASTE_WORKS.map(function(w){ var b = by[w[0]] || {}; return { t: w[0], cat: w[1], q: b.q || '', img: b.img || '', label: labels[b.q] || b.en || w[0] }; });
+  try { localStorage.setItem(TASTE_CAT, JSON.stringify({ lang: lang, items: items })); } catch (e) {}
+  return items;
+}
+var tasteSel = {};
+async function openTastes() {
+  var sh = document.getElementById('tasteSheet'), grid = document.getElementById('tstGrid');
+  var st = tasteState(); tasteSel = {}; (st.picks || []).forEach(function(p){ tasteSel[p.t] = 1; });
+  grid.innerHTML = TASTE_WORKS.map(function(w){ return '<button class="tst-it" data-t="' + esc(w[0]) + '"><span>' + esc(w[0]) + '</span><i></i></button>'; }).join('');
+  tasteUpd(); sh.hidden = false;
+  var items = await tasteCatalog().catch(function(){ return null; });
+  if (!items) return;
+  grid.innerHTML = items.map(function(it){ return '<button class="tst-it' + (tasteSel[it.t] ? ' on' : '') + '" data-t="' + esc(it.t) + '"' + (it.img ? ' style="background-image:url(\'' + it.img + '\')"' : '') + '><span>' + esc(it.label) + '</span><i>' + (tasteSel[it.t] ? CHECK : '') + '</i></button>'; }).join('');
+}
+function tasteUpd() {
+  var n = Object.keys(tasteSel).length, b = document.getElementById('tstDone');
+  b.disabled = n < 3; b.textContent = n < 3 ? t('Pick {n} more', { n: 3 - n }) : t('Done');
+}
+document.getElementById('tstGrid').addEventListener('click', function(e){
+  var b = e.target.closest('.tst-it'); if (!b) return;
+  var k = b.getAttribute('data-t');
+  if (tasteSel[k]) delete tasteSel[k]; else { if (Object.keys(tasteSel).length >= 6) { toast(t('Up to 6 works')); return; } tasteSel[k] = 1; }
+  b.classList.toggle('on', !!tasteSel[k]); b.querySelector('i').innerHTML = tasteSel[k] ? CHECK : '';
+  tasteUpd();
+});
+document.getElementById('tstDone').addEventListener('click', async function(){
+  var btn = this; btn.disabled = true; btn.textContent = t('One moment…');
+  var items = await tasteCatalog().catch(function(){ return null; }) || [];
+  var picks = items.filter(function(it){ return tasteSel[it.t] && it.q; });
+  for (var i = 0; i < picks.length; i++) { var f = await scanFacts(picks[i].q).catch(function(){ return null; }); if (f) picks[i].wd = f; }
+  tasteSave({ done: 1, picks: picks, at: new Date().toISOString() });
+  document.getElementById('tasteSheet').hidden = true;
+  toast(t('Got it: your discoveries will follow your taste'));
+  var d = dailyState(); if (d.day && !journal.length) { d.day = ''; dailySave(d); }   // the first discovery follows the new taste
+  renderJournal(); fillCollections();
+});
+function tasteLater() { var st = tasteState(); st.later = 1; tasteSave(st); document.getElementById('tasteSheet').hidden = true; }
+document.getElementById('tstLater').addEventListener('click', tasteLater);
+document.getElementById('tstClose').addEventListener('click', tasteLater);
+document.getElementById('btn-tastes').addEventListener('click', openTastes);
+// shown once, on a first open with an empty journal
+var tasteAsked = false;
+function maybeAskTastes() {
+  if (tasteAsked || journal.length) return;
+  var st = tasteState(); if (st.done || st.later) return;
+  if (!document.getElementById('s-home').classList.contains('active')) return;
+  var wl = document.getElementById('welcome'); if (wl && !wl.hidden && wl.offsetParent !== null) return;
+  tasteAsked = true; setTimeout(openTastes, 600);
+}
+// The picks as stand-in favourites (until 5 real ones)
+function tasteSeeds() {
+  return (tasteState().picks || []).filter(function(p){ return p.q && p.wd; }).map(function(p, i){
+    return { id: 'taste' + i, title: p.label, creator: '', identified: true, created_at: '', thumb: p.img, data: { qid: p.q, wd: p.wd, category: p.cat, title: p.label, rating: 5 } };
+  });
+}
+function tasteCollKeys() { var w = {}; tasteSeeds().forEach(function(r){ scanCollKeys(r).forEach(function(c){ w[c.key] = c; }); }); return w; }
+
 // ─── DISCOVERY OF THE DAY: one work a day picked from what you loved (free: Wikidata, no Claude) ───
 // Seeds: the scans rated 4 or 5 stars (else every identified scan). Three ways to pick, by day:
 // same world (a related artist: same movement, master, pupil, influence) ~50%, an artist you love ~30%, a step aside (same genre) ~20%.
@@ -3890,7 +3997,9 @@ function hashStr(x) { var h = 2166136261; for (var i = 0; i < x.length; i++) { h
 function dailySeeds() {
   var withQ = journal.filter(function(r){ var f = r.data && r.data.wd; return r.data && r.data.qid && f && (f.cr || f.ar); });
   var loved = withQ.filter(function(r){ return rating(r) >= 4; });
-  return (loved.length ? loved : withQ).slice(0, 40);
+  var base = loved.length ? loved : withQ;
+  if (loved.length < 5) base = base.concat(tasteSeeds());
+  return base.slice(0, 40);
 }
 function dailySeen() {
   var st = dailyState(), out = {};
@@ -5045,7 +5154,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.68';
+var APP_VERSION = '0.69';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -6070,7 +6179,7 @@ document.getElementById('czNext').addEventListener('click', function(){ openZoom
 // Keys are the English interface text; French and Spanish below. Missing keys fall back to English.
 var I18N = {
 fr: {
-  "How you saw it": "Comment tu l'as vu", "Discovery of the day": "Découverte du jour", "Discover": "Découvrir", "Another one": "Une autre", "Last days": "Les derniers jours", "Looking…": "Je cherche…", "Discovery of {d}": "Découverte du {d}", "Because you loved {w}: another artist of {m}": "Parce que tu as aimé {w} : un autre artiste du mouvement {m}", "{a} inspired {c}, whose {w} you loved": "{a} a inspiré {c}, dont tu as aimé {w}", "{a} admired {c}, whose {w} you loved": "{a} admirait {c}, dont tu as aimé {w}", "{a} was a pupil of {c}, whose {w} you loved": "{a} fut l'élève de {c}, dont tu as aimé {w}", "{a} was the master of {c}, whose {w} you loved": "{a} fut le maître de {c}, dont tu as aimé {w}", "Another masterpiece by {c}, whose {w} you loved": "Un autre chef-d'œuvre de {c}, dont tu as aimé {w}", "Because you loved {w}: another eye on the same theme": "Parce que tu as aimé {w} : un autre regard sur le même thème", "A great classic to discover": "Un grand classique à découvrir", "Link with your journal · {a}": "Lien avec ton journal · {a}", "Cities": "Villes", "Paintings & Sculptures": "Peintures & Sculptures", "Categories": "Catégories", "Tap to add or remove. Changes are saved right away.": "Touche pour ajouter ou retirer. Les changements sont enregistrés tout de suite.", "Done": "Terminé",
+  "How you saw it": "Comment tu l'as vu", "Discovery of the day": "Découverte du jour", "What speaks to you?": "Qu'est-ce qui te parle ?", "Pick 3 to 6 works you like: your first discoveries and collections will follow your taste.": "Choisis 3 à 6 œuvres qui te plaisent : tes premières découvertes et collections suivront tes goûts.", "Pick {n} more": "Encore {n} à choisir", "Up to 6 works": "6 œuvres maximum", "One moment…": "Un instant…", "Got it: your discoveries will follow your taste": "C'est noté : tes découvertes suivront tes goûts", "My tastes": "Mes goûts", "Discover": "Découvrir", "Another one": "Une autre", "Last days": "Les derniers jours", "Looking…": "Je cherche…", "Discovery of {d}": "Découverte du {d}", "Because you loved {w}: another artist of {m}": "Parce que tu as aimé {w} : un autre artiste du mouvement {m}", "{a} inspired {c}, whose {w} you loved": "{a} a inspiré {c}, dont tu as aimé {w}", "{a} admired {c}, whose {w} you loved": "{a} admirait {c}, dont tu as aimé {w}", "{a} was a pupil of {c}, whose {w} you loved": "{a} fut l'élève de {c}, dont tu as aimé {w}", "{a} was the master of {c}, whose {w} you loved": "{a} fut le maître de {c}, dont tu as aimé {w}", "Another masterpiece by {c}, whose {w} you loved": "Un autre chef-d'œuvre de {c}, dont tu as aimé {w}", "Because you loved {w}: another eye on the same theme": "Parce que tu as aimé {w} : un autre regard sur le même thème", "A great classic to discover": "Un grand classique à découvrir", "Link with your journal · {a}": "Lien avec ton journal · {a}", "Cities": "Villes", "Paintings & Sculptures": "Peintures & Sculptures", "Categories": "Catégories", "Tap to add or remove. Changes are saved right away.": "Touche pour ajouter ou retirer. Les changements sont enregistrés tout de suite.", "Done": "Terminé",
   "Settings": "Réglages", "Claude API key": "Clé API Claude",
   "Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.": "Strata interroge Claude sur chaque photo avec ta propre clé. Elle est enregistrée uniquement dans ce navigateur, sur ce téléphone.",
   "Save key": "Enregistrer la clé", "Try the demo": "Essayer la démo", "Remove key": "Supprimer la clé",
@@ -6374,7 +6483,7 @@ fr: {
   "Choose a photo from your library": "Choisir une photo dans ta photothèque", "Edit categories": "Modifier les catégories"
 },
 es: {
-  "How you saw it": "Cómo lo viste", "Discovery of the day": "Descubrimiento del día", "Discover": "Descubrir", "Another one": "Otra", "Last days": "Últimos días", "Looking…": "Buscando…", "Discovery of {d}": "Descubrimiento del {d}", "Because you loved {w}: another artist of {m}": "Porque te encantó {w}: otro artista del movimiento {m}", "{a} inspired {c}, whose {w} you loved": "{a} inspiró a {c}, de quien te encantó {w}", "{a} admired {c}, whose {w} you loved": "{a} admiraba a {c}, de quien te encantó {w}", "{a} was a pupil of {c}, whose {w} you loved": "{a} fue alumno de {c}, de quien te encantó {w}", "{a} was the master of {c}, whose {w} you loved": "{a} fue el maestro de {c}, de quien te encantó {w}", "Another masterpiece by {c}, whose {w} you loved": "Otra obra maestra de {c}, de quien te encantó {w}", "Because you loved {w}: another eye on the same theme": "Porque te encantó {w}: otra mirada sobre el mismo tema", "A great classic to discover": "Un gran clásico por descubrir", "Link with your journal · {a}": "Vínculo con tu diario · {a}", "Cities": "Ciudades", "Paintings & Sculptures": "Pinturas y esculturas", "Categories": "Categorías", "Tap to add or remove. Changes are saved right away.": "Toca para añadir o quitar. Los cambios se guardan al momento.", "Done": "Listo",
+  "How you saw it": "Cómo lo viste", "Discovery of the day": "Descubrimiento del día", "What speaks to you?": "¿Qué te inspira?", "Pick 3 to 6 works you like: your first discoveries and collections will follow your taste.": "Elige de 3 a 6 obras que te gusten: tus primeros descubrimientos y colecciones seguirán tus gustos.", "Pick {n} more": "Elige {n} más", "Up to 6 works": "6 obras como máximo", "One moment…": "Un momento…", "Got it: your discoveries will follow your taste": "Anotado: tus descubrimientos seguirán tus gustos", "My tastes": "Mis gustos", "Discover": "Descubrir", "Another one": "Otra", "Last days": "Últimos días", "Looking…": "Buscando…", "Discovery of {d}": "Descubrimiento del {d}", "Because you loved {w}: another artist of {m}": "Porque te encantó {w}: otro artista del movimiento {m}", "{a} inspired {c}, whose {w} you loved": "{a} inspiró a {c}, de quien te encantó {w}", "{a} admired {c}, whose {w} you loved": "{a} admiraba a {c}, de quien te encantó {w}", "{a} was a pupil of {c}, whose {w} you loved": "{a} fue alumno de {c}, de quien te encantó {w}", "{a} was the master of {c}, whose {w} you loved": "{a} fue el maestro de {c}, de quien te encantó {w}", "Another masterpiece by {c}, whose {w} you loved": "Otra obra maestra de {c}, de quien te encantó {w}", "Because you loved {w}: another eye on the same theme": "Porque te encantó {w}: otra mirada sobre el mismo tema", "A great classic to discover": "Un gran clásico por descubrir", "Link with your journal · {a}": "Vínculo con tu diario · {a}", "Cities": "Ciudades", "Paintings & Sculptures": "Pinturas y esculturas", "Categories": "Categorías", "Tap to add or remove. Changes are saved right away.": "Toca para añadir o quitar. Los cambios se guardan al momento.", "Done": "Listo",
   "Settings": "Ajustes", "Claude API key": "Clave API de Claude",
   "Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.": "Strata consulta a Claude sobre cada foto con tu propia clave. Solo se guarda en este navegador, en este teléfono.",
   "Save key": "Guardar clave", "Try the demo": "Probar la demo", "Remove key": "Eliminar clave",
