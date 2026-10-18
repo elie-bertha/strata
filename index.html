@@ -454,6 +454,30 @@ label.key-btn{text-align:center;display:block;}
 
 
 
+
+/* Histories (quizzes, discoveries of the day) */
+.hs-card{max-height:92vh;overflow-y:auto;}
+.hs-stats{display:flex;gap:8px;}
+.hs-stat{flex:1;background:var(--bg);border-radius:14px;padding:10px;text-align:center;}
+.hs-stat b{display:block;font-family:'DM Serif Display',serif;font-size:22px;color:var(--ink);}
+.hs-stat span{font-size:11px;color:var(--muted);}
+.hs-h{font:600 12px 'DM Sans',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;}
+.hs-chart{display:flex;align-items:flex-end;gap:2px;height:90px;padding-bottom:16px;position:relative;}
+.hs-bar{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%;position:relative;}
+.hs-bar i{display:block;width:100%;border-radius:3px 3px 0 0;background:var(--night);min-height:0;}
+.hs-bar i.done{background:var(--s3);height:6px;}
+.hs-bar i.good{background:var(--sun);}
+.hs-bar em{position:absolute;bottom:-15px;font-style:normal;font-size:9px;color:var(--muted);}
+.hs-row{display:flex;align-items:center;gap:12px;width:100%;padding:10px 0;border:0;border-bottom:1px solid var(--s2);background:none;text-align:left;cursor:pointer;font:inherit;color:var(--ink);}
+.hs-th{width:48px;height:48px;border-radius:10px;background:#2C2C2E center/cover;flex-shrink:0;}
+.hs-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.hs-tx b{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hs-tx span{font-size:12px;color:var(--muted);}
+.hs-tx small{font-size:12px;color:var(--ink);opacity:.8;line-height:1.35;}
+.hs-sc{font:600 14px 'DM Sans',sans-serif;padding:5px 9px;border-radius:100px;background:var(--bg);color:var(--ink);flex-shrink:0;}
+.hs-sc.good{background:var(--sun);color:var(--night);}
+.hs-tag{font-size:11px;font-weight:600;color:var(--night);background:var(--sun);border-radius:100px;padding:3px 8px;flex-shrink:0;}
+.hs-empty{font-size:14px;color:var(--muted);padding:20px 0;text-align:center;}
 /* Taste picker (first open) */
 .tst-card{max-height:92vh;overflow-y:auto;}
 .tst-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
@@ -1123,6 +1147,18 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
   <button class="wl-link mute ig-later" id="installLater" type="button" hidden>Maybe later</button>
 </div></div>
 <div class="ig-arrow" id="igArrow" hidden aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#16346B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="4" x2="12" y2="20"/><polyline points="5 13 12 20 19 13"/></svg></div>
+<div class="tag-sheet" id="qhSheet" hidden>
+  <div class="ts-card hs-card" role="dialog" aria-labelledby="qhTitle">
+    <div class="ts-top"><div class="ts-title" id="qhTitle">My quizzes</div><button class="cz-x" data-close="qhSheet" aria-label="Close">×</button></div>
+    <div id="qhBody"></div>
+  </div>
+</div>
+<div class="tag-sheet" id="dhSheet" hidden>
+  <div class="ts-card hs-card" role="dialog" aria-labelledby="dhTitle">
+    <div class="ts-top"><div class="ts-title" id="dhTitle">Discoveries of the day</div><button class="cz-x" data-close="dhSheet" aria-label="Close">×</button></div>
+    <div id="dhBody"></div>
+  </div>
+</div>
 <div class="tag-sheet" id="tasteSheet" hidden>
   <div class="ts-card tst-card" role="dialog" aria-labelledby="tstTitle">
     <div class="ts-top"><div class="ts-title" id="tstTitle">What speaks to you?</div><button class="cz-x" id="tstClose" aria-label="Close">×</button></div>
@@ -1319,6 +1355,8 @@ a.key-btn{text-align:center;text-decoration:none;display:block;}
     <div class="menu-list">
       <div class="menu-item" id="btn-profile"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><span class="m-lbl">Edit Profile</span><span class="m-val" id="langVal"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item" id="btn-tastes"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div><span class="m-lbl">My tastes</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="menu-item" id="btn-quizzes"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/><circle cx="12" cy="12" r="10"/></svg></div><span class="m-lbl">My quizzes</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+      <div class="menu-item" id="btn-dailies"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><span class="m-lbl">Discoveries of the day</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item" id="btn-invite"><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><span class="m-lbl">Share with friends</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item" id="btn-friends" hidden><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg></div><span class="m-lbl">Friends &amp; credit</span><span class="m-val" id="friendsVal"></span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
       <div class="menu-item" id="btn-dash" hidden><div class="m-ico"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><span class="m-lbl">Dashboard</span><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></div>
@@ -3903,6 +3941,88 @@ function weekDots(days) {
   return out;
 }
 
+// ─── HISTORIES (menu): my quizzes day by day, and the past discoveries of the day ───
+function quizAttempts() {
+  var out = [];
+  journal.forEach(function(r){
+    var q = r.data && r.data.qz; if (!q) return;
+    var h = q.h || (q.last && q.score ? [{ d: q.last, s: q.score }] : []);
+    h.forEach(function(a){ var m = /^(\d+)\/(\d+)$/.exec(a.s || ''); if (m) out.push({ d: a.d, ok: +m[1], n: +m[2], r: r }); });
+  });
+  return out.sort(function(a, b){ return a.d < b.d ? 1 : a.d > b.d ? -1 : 0; });
+}
+function openQuizHistory() {
+  var at = quizAttempts(), st = quizStats(), pr = getProfile(), q = pr.quiz || {}, today = dayStr();
+  var byDay = {}; at.forEach(function(a){ var x = byDay[a.d] || (byDay[a.d] = []); x.push(a.ok / a.n * 5); });
+  var done = {}; (q.days || []).forEach(function(d){ done[d] = 1; });
+  var avg = at.length ? (at.reduce(function(x, a){ return x + a.ok / a.n * 5; }, 0) / at.length) : 0;
+  var bars = [];
+  for (var i = 29; i >= 0; i--) {
+    var d = addDays(today, -i), v = byDay[d], best = v ? Math.max.apply(null, v) : null;
+    var lbl = (i % 7 === 0) ? '<em>' + (+d.slice(8)) + '/' + (+d.slice(5, 7)) + '</em>' : '';
+    bars.push('<div class="hs-bar" title="' + d + (best !== null ? ' · ' + best.toFixed(1) + '/5' : '') + '">' + (best !== null ? '<i class="' + (best >= 4 ? 'good' : '') + '" style="height:' + Math.max(6, best / 5 * 100) + '%"></i>' : done[d] ? '<i class="done"></i>' : '') + lbl + '</div>');
+  }
+  document.getElementById('qhBody').innerHTML =
+    '<div class="hs-stats"><div class="hs-stat"><b>' + (st.streak || 0) + '</b><span>' + t('Current streak') + '</span></div><div class="hs-stat"><b>' + (q.best || st.streak || 0) + '</b><span>' + t('Best streak') + '</span></div><div class="hs-stat"><b>' + (at.length ? avg.toLocaleString(LOCALES[getLang()], { maximumFractionDigits: 1 }) : '–') + '</b><span>' + t('Average /5') + '</span></div></div>' +
+    '<div class="hs-h">' + t('Last 30 days') + '</div><div class="hs-chart">' + bars.join('') + '</div>' +
+    '<div class="hs-h">' + t('All quizzes') + '</div>' +
+    (at.length ? at.map(function(a, k){ var good = a.ok >= Math.ceil(a.n * QZ_PASS);
+      return '<button class="hs-row" data-qh="' + a.r.id + '"><span class="hs-th" style="background-image:url(\'' + (a.r.thumb || '') + '\')"></span><span class="hs-tx"><b>' + esc(rTitle(a.r)) + '</b><span>' + esc(fmtDay(a.d + 'T12:00:00')) + ' · ' + t('Tap to play again') + '</span></span><span class="hs-sc' + (good ? ' good' : '') + '">' + a.ok + '/' + a.n + '</span></button>'; }).join('')
+      : '<div class="hs-empty">' + t('No quiz yet: the daily quiz is on the home screen.') + '</div>');
+  document.getElementById('qhSheet').hidden = false;
+}
+document.getElementById('qhBody').addEventListener('click', function(e){
+  var b = e.target.closest('[data-qh]'); if (!b) return;
+  var r = journal.find(function(x){ return x.id === b.getAttribute('data-qh'); }); if (!r) return;
+  document.getElementById('qhSheet').hidden = true; startQuiz(false, r);
+});
+function openDailyHistory() {
+  var st = dailyState(), list = [];
+  if (st.item) list.push({ day: st.day, iso: st.iso, item: st.item, today: st.day === dayKey(new Date()) });
+  (st.hist || []).forEach(function(h){ list.push(h); });
+  document.getElementById('dhBody').innerHTML = list.length ? list.map(function(h, k){
+    var it = h.item, rec = dailyRec(it);
+    return '<button class="hs-row" data-dh="' + k + '"><span class="hs-th" style="background-image:url(\'' + cImg(it.img, 200) + '\')"></span><span class="hs-tx"><b>' + esc(it.label) + '</b><span>' +
+      esc([h.today ? t('Today') : (h.iso ? fmtDay(h.iso) : ''), it.creator].filter(Boolean).join(' · ')) + '</span><small>' + esc(dailyWhy(it.why)) + '</small></span>' +
+      (rec ? '<span class="hs-tag">' + t(seenOf(rec) === 'original' ? 'Seen in person' : 'Discovered') + '</span>' : '') + '</button>';
+  }).join('') : '<div class="hs-empty">' + t('Your discoveries of the day will appear here.') + '</div>';
+  document.getElementById('dhBody')._list = list;
+  document.getElementById('dhSheet').hidden = false;
+}
+document.getElementById('dhBody').addEventListener('click', function(e){
+  var b = e.target.closest('[data-dh]'); if (!b) return;
+  var h = (this._list || [])[+b.getAttribute('data-dh')]; if (!h) return;
+  document.getElementById('dhSheet').hidden = true;
+  openDailyItem(h.item, h.today ? dailyWhy(h.item.why) : (h.iso ? t('Discovery of {d}', { d: fmtDay(h.iso) }) : ''));
+});
+['qhSheet', 'dhSheet'].forEach(function(id){ var el = document.getElementById(id); el.addEventListener('click', function(e){ if (e.target === el || e.target.getAttribute('data-close') === id) el.hidden = true; }); });
+document.getElementById('btn-quizzes').addEventListener('click', openQuizHistory);
+document.getElementById('btn-dailies').addEventListener('click', openDailyHistory);
+// The discoveries of the day follow the account: a small file next to the photos, merged day by day
+var dailyPushT = null;
+function dailyPushSoon() { if (!getSession()) return; clearTimeout(dailyPushT); dailyPushT = setTimeout(function(){
+  var s = getSession(); if (!s) return;
+  sb('/storage/v1/object/photos/' + s.user.id + '/daily.json', { method: 'POST', headers: { 'content-type': 'application/json', 'x-upsert': 'true' }, body: JSON.stringify(dailyState()) }).catch(function(){});
+}, 1500); }
+async function dailyPull() {
+  var s = getSession(); if (!s) return;
+  var res = await sb('/storage/v1/object/authenticated/photos/' + s.user.id + '/daily.json').catch(function(){ return null; });
+  if (!res) { if (dailyState().item) dailyPushSoon(); return; }
+  var rm = await res.json().catch(function(){ return null; }); if (!rm) return;
+  var st = dailyState(), all = {}, today = dayKey(new Date());
+  // every past day from both sides (this phone wins on a day both have)
+  (rm.hist || []).concat(rm.item && rm.day !== today ? [{ day: rm.day, iso: rm.iso, item: rm.item }] : []).forEach(function(h){ if (h && h.day) all[h.day] = h; });
+  (st.hist || []).forEach(function(h){ if (h && h.day) all[h.day] = h; });
+  if (st.item && st.day !== today) all[st.day] = { day: st.day, iso: st.iso, item: st.item };
+  var hist = Object.keys(all).map(function(k){ return all[k]; }).filter(function(h){ return h.day !== today; })
+    .sort(function(a, b){ return (b.iso || '') < (a.iso || '') ? -1 : 1; }).slice(0, 365);
+  var next = { day: st.day, iso: st.iso, item: st.item, rerolled: st.rerolled, hist: hist };
+  if (st.day !== today && rm.day === today && rm.item) { next.day = rm.day; next.iso = rm.iso; next.item = rm.item; next.rerolled = rm.rerolled; }   // today's pick made on another phone
+  if (next.day !== today) { next.day = ''; next.item = null; }
+  try { localStorage.setItem(DAILY_KEY, JSON.stringify(next)); } catch (e) {}
+  renderDaily(); dailyPushSoon();
+}
+
 // ─── TASTES: 3 to 6 works picked on first open, so the first discoveries and collections already follow the user's taste ───
 // Used until the user has 5 real favourites (4-5 stars). Works resolved from their English Wikipedia article (id, picture), free.
 var TASTE_KEY = 'strata.tastes', TASTE_CAT = 'strata.tasteCat';
@@ -3992,7 +4112,7 @@ function tasteCollKeys() { var w = {}; tasteSeeds().forEach(function(r){ scanCol
 // Never a work already in the journal or proposed in the last 30 days; always with a picture; famous enough to have a story.
 var DAILY_KEY = 'strata.daily';
 function dailyState() { try { return JSON.parse(localStorage.getItem(DAILY_KEY) || '{}'); } catch (e) { return {}; } }
-function dailySave(st) { try { localStorage.setItem(DAILY_KEY, JSON.stringify(st)); } catch (e) {} }
+function dailySave(st) { try { localStorage.setItem(DAILY_KEY, JSON.stringify(st)); } catch (e) {} if (typeof dailyPushSoon === 'function') dailyPushSoon(); }
 function hashStr(x) { var h = 2166136261; for (var i = 0; i < x.length; i++) { h ^= x.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
 function dailySeeds() {
   var withQ = journal.filter(function(r){ var f = r.data && r.data.wd; return r.data && r.data.qid && f && (f.cr || f.ar); });
@@ -4083,7 +4203,7 @@ async function ensureDaily(reroll) {
     st = dailyState();
     var hist = (st.hist || []).filter(function(h){ return h.day !== day; });
     if (st.item && st.day !== day) hist.unshift({ day: st.day, iso: st.iso, item: st.item });
-    st = { day: day, iso: new Date().toISOString(), item: it, rerolled: !!reroll || (st.day === day && st.rerolled), hist: hist.slice(0, 30) };
+    st = { day: day, iso: new Date().toISOString(), item: it, rerolled: !!reroll || (st.day === day && st.rerolled), hist: hist.slice(0, 365) };
     dailySave(st); renderDaily();
   } finally { dailyRun.busy = false; }
 }
@@ -4165,8 +4285,8 @@ function onQuizCard(e) {
 }
 function shuffled(n) { var o = []; for (var i = 0; i < n; i++) o.push(i); for (var j = n - 1; j > 0; j--) { var k = Math.floor(Math.random() * (j + 1)), x = o[j]; o[j] = o[k]; o[k] = x; } return o; }
 function quizFull(r) { var q = quizFor(r); return !!(q && q.length >= QZ_LEN && q[0].level); }
-async function startQuiz(extra) {
-  var pool = quizPool(extra ? qz.last : null);
+async function startQuiz(extra, only) {
+  var pool = only ? [only] : quizPool(extra ? qz.last : null);
   if (!pool.length) pool = quizPool();
   if (!pool.length) { toast(t('Scan a few works first: the quiz is made from them.')); return; }
   var r = pool[0];
@@ -4234,8 +4354,10 @@ function finishQuiz() {
   var r = journal.find(function(x){ return x.id === s.id; });
   if (r) {
     var st = Object.assign({}, qzState(r)), today = dayStr(), ok = s.score >= Math.ceil(s.items.length * QZ_PASS);
+    var hist = st.h ? st.h.slice() : (st.last && st.score ? [{ d: st.last, s: st.score }] : []);
     if (ok) { st.box = Math.min((st.last ? (st.box || 0) + 1 : 0), QZ_GAPS.length - 1); st.wrong = false; } else { st.box = 0; st.wrong = true; }
     st.due = addDays(today, QZ_GAPS[st.box]); st.last = today; st.n = (st.n || 0) + 1; st.score = s.score + '/' + s.items.length;
+    hist.push({ d: today, s: st.score }); st.h = hist.slice(-50);
     r.data.qz = st; s.due = st.due; saveLocal(r).catch(function(){});
   }
   markQuizDay(); renderQuiz(); renderQuizCard();
@@ -5154,7 +5276,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.69';
+var APP_VERSION = '0.70';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -5289,6 +5411,7 @@ async function pullProfile() {
   }
   if (md.quiz && md.quiz.last && (!pr.quiz || !pr.quiz.last || md.quiz.last > pr.quiz.last)) { pr.quiz = md.quiz; changed = true; }
   if (changed) { setProfile(pr); renderProfile(); if (typeof renderQuizCard === 'function') renderQuizCard(); }
+  dailyPull().catch(function(){});
 }
 document.getElementById('profGoSync').addEventListener('click', function(){ document.getElementById('profSheet').hidden = true; openDataSheet(); });
 
@@ -6179,7 +6302,7 @@ document.getElementById('czNext').addEventListener('click', function(){ openZoom
 // Keys are the English interface text; French and Spanish below. Missing keys fall back to English.
 var I18N = {
 fr: {
-  "How you saw it": "Comment tu l'as vu", "Discovery of the day": "Découverte du jour", "What speaks to you?": "Qu'est-ce qui te parle ?", "Pick 3 to 6 works you like: your first discoveries and collections will follow your taste.": "Choisis 3 à 6 œuvres qui te plaisent : tes premières découvertes et collections suivront tes goûts.", "Pick {n} more": "Encore {n} à choisir", "Up to 6 works": "6 œuvres maximum", "One moment…": "Un instant…", "Got it: your discoveries will follow your taste": "C'est noté : tes découvertes suivront tes goûts", "My tastes": "Mes goûts", "Discover": "Découvrir", "Another one": "Une autre", "Last days": "Les derniers jours", "Looking…": "Je cherche…", "Discovery of {d}": "Découverte du {d}", "Because you loved {w}: another artist of {m}": "Parce que tu as aimé {w} : un autre artiste du mouvement {m}", "{a} inspired {c}, whose {w} you loved": "{a} a inspiré {c}, dont tu as aimé {w}", "{a} admired {c}, whose {w} you loved": "{a} admirait {c}, dont tu as aimé {w}", "{a} was a pupil of {c}, whose {w} you loved": "{a} fut l'élève de {c}, dont tu as aimé {w}", "{a} was the master of {c}, whose {w} you loved": "{a} fut le maître de {c}, dont tu as aimé {w}", "Another masterpiece by {c}, whose {w} you loved": "Un autre chef-d'œuvre de {c}, dont tu as aimé {w}", "Because you loved {w}: another eye on the same theme": "Parce que tu as aimé {w} : un autre regard sur le même thème", "A great classic to discover": "Un grand classique à découvrir", "Link with your journal · {a}": "Lien avec ton journal · {a}", "Cities": "Villes", "Paintings & Sculptures": "Peintures & Sculptures", "Categories": "Catégories", "Tap to add or remove. Changes are saved right away.": "Touche pour ajouter ou retirer. Les changements sont enregistrés tout de suite.", "Done": "Terminé",
+  "How you saw it": "Comment tu l'as vu", "Discovery of the day": "Découverte du jour", "My quizzes": "Mes quiz", "Discoveries of the day": "Découvertes du jour", "Current streak": "Série en cours", "Best streak": "Meilleure série", "Average /5": "Moyenne /5", "Last 30 days": "30 derniers jours", "All quizzes": "Tous les quiz", "Tap to play again": "Touche pour rejouer", "No quiz yet: the daily quiz is on the home screen.": "Pas encore de quiz : le quiz du jour est sur l'accueil.", "Your discoveries of the day will appear here.": "Tes découvertes du jour apparaîtront ici.", "Today": "Aujourd'hui", "What speaks to you?": "Qu'est-ce qui te parle ?", "Pick 3 to 6 works you like: your first discoveries and collections will follow your taste.": "Choisis 3 à 6 œuvres qui te plaisent : tes premières découvertes et collections suivront tes goûts.", "Pick {n} more": "Encore {n} à choisir", "Up to 6 works": "6 œuvres maximum", "One moment…": "Un instant…", "Got it: your discoveries will follow your taste": "C'est noté : tes découvertes suivront tes goûts", "My tastes": "Mes goûts", "Discover": "Découvrir", "Another one": "Une autre", "Last days": "Les derniers jours", "Looking…": "Je cherche…", "Discovery of {d}": "Découverte du {d}", "Because you loved {w}: another artist of {m}": "Parce que tu as aimé {w} : un autre artiste du mouvement {m}", "{a} inspired {c}, whose {w} you loved": "{a} a inspiré {c}, dont tu as aimé {w}", "{a} admired {c}, whose {w} you loved": "{a} admirait {c}, dont tu as aimé {w}", "{a} was a pupil of {c}, whose {w} you loved": "{a} fut l'élève de {c}, dont tu as aimé {w}", "{a} was the master of {c}, whose {w} you loved": "{a} fut le maître de {c}, dont tu as aimé {w}", "Another masterpiece by {c}, whose {w} you loved": "Un autre chef-d'œuvre de {c}, dont tu as aimé {w}", "Because you loved {w}: another eye on the same theme": "Parce que tu as aimé {w} : un autre regard sur le même thème", "A great classic to discover": "Un grand classique à découvrir", "Link with your journal · {a}": "Lien avec ton journal · {a}", "Cities": "Villes", "Paintings & Sculptures": "Peintures & Sculptures", "Categories": "Catégories", "Tap to add or remove. Changes are saved right away.": "Touche pour ajouter ou retirer. Les changements sont enregistrés tout de suite.", "Done": "Terminé",
   "Settings": "Réglages", "Claude API key": "Clé API Claude",
   "Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.": "Strata interroge Claude sur chaque photo avec ta propre clé. Elle est enregistrée uniquement dans ce navigateur, sur ce téléphone.",
   "Save key": "Enregistrer la clé", "Try the demo": "Essayer la démo", "Remove key": "Supprimer la clé",
@@ -6483,7 +6606,7 @@ fr: {
   "Choose a photo from your library": "Choisir une photo dans ta photothèque", "Edit categories": "Modifier les catégories"
 },
 es: {
-  "How you saw it": "Cómo lo viste", "Discovery of the day": "Descubrimiento del día", "What speaks to you?": "¿Qué te inspira?", "Pick 3 to 6 works you like: your first discoveries and collections will follow your taste.": "Elige de 3 a 6 obras que te gusten: tus primeros descubrimientos y colecciones seguirán tus gustos.", "Pick {n} more": "Elige {n} más", "Up to 6 works": "6 obras como máximo", "One moment…": "Un momento…", "Got it: your discoveries will follow your taste": "Anotado: tus descubrimientos seguirán tus gustos", "My tastes": "Mis gustos", "Discover": "Descubrir", "Another one": "Otra", "Last days": "Últimos días", "Looking…": "Buscando…", "Discovery of {d}": "Descubrimiento del {d}", "Because you loved {w}: another artist of {m}": "Porque te encantó {w}: otro artista del movimiento {m}", "{a} inspired {c}, whose {w} you loved": "{a} inspiró a {c}, de quien te encantó {w}", "{a} admired {c}, whose {w} you loved": "{a} admiraba a {c}, de quien te encantó {w}", "{a} was a pupil of {c}, whose {w} you loved": "{a} fue alumno de {c}, de quien te encantó {w}", "{a} was the master of {c}, whose {w} you loved": "{a} fue el maestro de {c}, de quien te encantó {w}", "Another masterpiece by {c}, whose {w} you loved": "Otra obra maestra de {c}, de quien te encantó {w}", "Because you loved {w}: another eye on the same theme": "Porque te encantó {w}: otra mirada sobre el mismo tema", "A great classic to discover": "Un gran clásico por descubrir", "Link with your journal · {a}": "Vínculo con tu diario · {a}", "Cities": "Ciudades", "Paintings & Sculptures": "Pinturas y esculturas", "Categories": "Categorías", "Tap to add or remove. Changes are saved right away.": "Toca para añadir o quitar. Los cambios se guardan al momento.", "Done": "Listo",
+  "How you saw it": "Cómo lo viste", "Discovery of the day": "Descubrimiento del día", "My quizzes": "Mis cuestionarios", "Discoveries of the day": "Descubrimientos del día", "Current streak": "Racha actual", "Best streak": "Mejor racha", "Average /5": "Media /5", "Last 30 days": "Últimos 30 días", "All quizzes": "Todos los cuestionarios", "Tap to play again": "Toca para volver a jugar", "No quiz yet: the daily quiz is on the home screen.": "Aún no hay cuestionarios: el del día está en la portada.", "Your discoveries of the day will appear here.": "Tus descubrimientos del día aparecerán aquí.", "Today": "Hoy", "What speaks to you?": "¿Qué te inspira?", "Pick 3 to 6 works you like: your first discoveries and collections will follow your taste.": "Elige de 3 a 6 obras que te gusten: tus primeros descubrimientos y colecciones seguirán tus gustos.", "Pick {n} more": "Elige {n} más", "Up to 6 works": "6 obras como máximo", "One moment…": "Un momento…", "Got it: your discoveries will follow your taste": "Anotado: tus descubrimientos seguirán tus gustos", "My tastes": "Mis gustos", "Discover": "Descubrir", "Another one": "Otra", "Last days": "Últimos días", "Looking…": "Buscando…", "Discovery of {d}": "Descubrimiento del {d}", "Because you loved {w}: another artist of {m}": "Porque te encantó {w}: otro artista del movimiento {m}", "{a} inspired {c}, whose {w} you loved": "{a} inspiró a {c}, de quien te encantó {w}", "{a} admired {c}, whose {w} you loved": "{a} admiraba a {c}, de quien te encantó {w}", "{a} was a pupil of {c}, whose {w} you loved": "{a} fue alumno de {c}, de quien te encantó {w}", "{a} was the master of {c}, whose {w} you loved": "{a} fue el maestro de {c}, de quien te encantó {w}", "Another masterpiece by {c}, whose {w} you loved": "Otra obra maestra de {c}, de quien te encantó {w}", "Because you loved {w}: another eye on the same theme": "Porque te encantó {w}: otra mirada sobre el mismo tema", "A great classic to discover": "Un gran clásico por descubrir", "Link with your journal · {a}": "Vínculo con tu diario · {a}", "Cities": "Ciudades", "Paintings & Sculptures": "Pinturas y esculturas", "Categories": "Categorías", "Tap to add or remove. Changes are saved right away.": "Toca para añadir o quitar. Los cambios se guardan al momento.", "Done": "Listo",
   "Settings": "Ajustes", "Claude API key": "Clave API de Claude",
   "Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.": "Strata consulta a Claude sobre cada foto con tu propia clave. Solo se guarda en este navegador, en este teléfono.",
   "Save key": "Guardar clave", "Try the demo": "Probar la demo", "Remove key": "Eliminar clave",
