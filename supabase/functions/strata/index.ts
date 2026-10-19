@@ -379,7 +379,19 @@ Deno.serve(async (req) => {
         cost_micro: { avg: scans.length ? Math.round(sum(cost) / scans.length) : null, min: cost.length ? Math.min(...cost) : null, max: cost.length ? Math.max(...cost) : null, p90: pct(cost, 0.9) } };
     };
     const users: Record<string, any> = {}, scansBy: Record<string, any> = {};
+    // discovery of the day: which way each pick was found (daily_u, daily_a, daily_s, daily_c, a reroll daily_r…), or daily_fail
+    const daily: any = { total: {}, users: {} };
     for (const r of rows || []) {
+      if (!/^daily_/.test(r.feature || '')) continue;
+      const k = (r.feature as string).slice(6).replace(/^r(?=[uasc]$)/, '');
+      daily.total[k] = (daily.total[k] || 0) + 1;
+      const du = daily.users[r.user_id] || (daily.users[r.user_id] = { name: names[r.user_id] || '—', ok: 0, fail: 0, last: '', last_at: '' });
+      if (k === 'fail') du.fail++; else du.ok++;
+      if (r.at > du.last_at) { du.last_at = r.at; du.last = k; }
+    }
+    daily.users = Object.values(daily.users).sort((a: any, b: any) => (b.last_at > a.last_at ? 1 : -1));
+    for (const r of rows || []) {
+      if (/^daily_/.test(r.feature || '')) continue;
       const u = users[r.user_id] || (users[r.user_id] = { id: r.user_id, name: names[r.user_id] || '—', credit_micro: 0, calls: 0 });
       const k = r.user_id + '|' + r.scan_id;
       if (r.feature === 'scan_total') { if (scansBy[k]) scansBy[k].real = Number(r.ms) || 0; continue; }
@@ -393,8 +405,8 @@ Deno.serve(async (req) => {
     const all = Object.values(scansBy);
     const list = Object.values(users).map((u: any) => ({ ...u, ...summary(all.filter((x: any) => x.user === u.id)) }))
       .sort((a: any, b: any) => b.scans - a.scans || b.credit_micro - a.credit_micro);
-    const total = { name: 'Total', credit_micro: sum(list.map((u: any) => u.credit_micro)), calls: (rows || []).filter((r: any) => r.feature !== 'scan_total').length, ...summary(all) };
-    return json({ days, total, users: list });
+    const total = { name: 'Total', credit_micro: sum(list.map((u: any) => u.credit_micro)), calls: (rows || []).filter((r: any) => r.feature !== 'scan_total' && !/^daily_/.test(r.feature || '')).length, ...summary(all) };
+    return json({ days, total, users: list, daily });
   }
 
   if (action === 'invite') {

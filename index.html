@@ -2746,7 +2746,7 @@ setMode(hasAI());
 
 // ─── JOURNAL (scans saved on this device, IndexedDB) ─────────────
 // Record shape mirrors the future Supabase table: id, created_at, title, creator, category, identified, data (Claude JSON), photo, thumb
-var DB_NAME = 'strata', DB_STORE = 'scans', dbp = null, journal = [], photoURLs = {};
+var DB_NAME = 'strata', DB_STORE = 'scans', dbp = null, journal = [], photoURLs = {}, journalReady = false;
 var CAT_MAP = { music: 'music', painting: 'painting', print: 'painting', architecture: 'arch', sculpture: 'sculpture', book: 'book', plant: 'plants', sky: 'stars', mountain: 'mountains' };
 var CAT_LABEL = { music: 'Song', painting: 'Painting', arch: 'Architecture', sculpture: 'Sculpture', book: 'Book', plants: 'Plant', stars: 'Sky', mountains: 'Mountain' };
 
@@ -2815,10 +2815,10 @@ async function saveScan(d, file) {
 }
 function loadJournal() {
   return tx('readonly', function(s){ return s.getAll(); }).then(function(all){
-    journal = (all || []).sort(function(a, b){ return a.created_at < b.created_at ? 1 : -1; });
+    journal = (all || []).sort(function(a, b){ return a.created_at < b.created_at ? 1 : -1; }); journalReady = true;
     journal.forEach(function(r){ if (typeof r.photo === 'string') r.photo = dataURLToBlob(r.photo) || new Blob([], { type: 'image/jpeg' }); });
     renderJournal();
-  }).catch(function(){ journal = []; renderJournal(); });
+  }).catch(function(){ journal = []; journalReady = true; renderJournal(); });
 }
 function deleteScan(id) {
   queueRemoteDelete(journal.find(function(r){ return r.id === id; }));
@@ -4083,6 +4083,7 @@ document.getElementById('tstDone').addEventListener('click', async function(){
   document.getElementById('tasteSheet').hidden = true;
   toast(t('Got it: your discoveries will follow your taste'));
   var d = dailyState(); if (d.day && !journal.length) { d.day = ''; dailySave(d); }   // the first discovery follows the new taste
+  dailyRun.failAt = 0;
   renderJournal(); fillCollections();
 });
 function tasteLater() { var st = tasteState(); st.later = 1; tasteSave(st); document.getElementById('tasteSheet').hidden = true; }
@@ -4172,18 +4173,21 @@ async function dailyClassic(rnd, seen) {
 async function dailyPick(salt) {
   var day = dayKey(new Date()), h = hashStr(day + '|' + salt), x = h;
   var rnd = function(){ x = (Math.imul(x ^ (x >>> 15), 2246822507) + 0x9e3779b9) >>> 0; return (x % 100000) / 100000; };
-  var seeds = dailySeeds(), seen = dailySeen(), r = null, mode = h % 10;
-  if (seeds.length) {
-    var seed = seeds[Math.floor(rnd() * seeds.length)];
-    var order = mode < 5 ? ['u', 'a', 's'] : mode < 8 ? ['a', 'u', 's'] : ['s', 'u', 'a'];
+  var seeds = dailySeeds(), seen = dailySeen(), r = null, mode = h % 10, how = '';
+  var order = mode < 5 ? ['u', 'a', 's'] : mode < 8 ? ['a', 'u', 's'] : ['s', 'u', 'a'];
+  // up to 4 different favourites, each tried the three ways, before the great classics
+  var pool = seeds.slice();
+  for (var n = 0; n < 4 && pool.length && !r; n++) {
+    var seed = pool.splice(Math.floor(rnd() * pool.length), 1)[0];
     for (var i = 0; i < order.length && !r; i++) {
       r = await Promise.resolve().then(function(){ return order[i] === 'u' ? dailyUniverse(seed, rnd, seen) : order[i] === 'a' ? dailyArtist(seed, rnd, seen) : dailyAside(seed, rnd, seen); }).catch(function(){ return null; });
+      if (r) how = order[i];
     }
   }
-  if (!r) r = await dailyClassic(rnd, seen).catch(function(){ return null; });
+  if (!r) { r = await dailyClassic(rnd, seen).catch(function(){ return null; }); if (r) how = 'c'; }
   if (!r) return null;
   var m = r.item;
-  return { q: m.q, label: m.label, img: m.img, place: m.place, lat: m.lat, lng: m.lng, creator: r.creator, why: r.why };
+  return { q: m.q, label: m.label, img: m.img, place: m.place, lat: m.lat, lng: m.lng, creator: r.creator, why: r.why, how: how, tries: n };
 }
 function dailyWhy(w) {
   if (!w) return '';
@@ -4192,14 +4196,18 @@ function dailyWhy(w) {
     aside: 'Because you loved {w}: another eye on the same theme', classic: 'A great classic to discover' }[w.k] || 'A great classic to discover',
     { a: w.a || '', c: w.c || '', w: w.w || '', m: w.m || '' });
 }
-var dailyRun = { busy: false };
+var dailyRun = { busy: false, failAt: 0 };
+// Each pick is noted on the dashboard (which way found it, or a failure), free
+function dailyLog(kind, ms) { if (getSession()) relay('log', { feature: 'daily_' + kind, model: '', usage: {}, ms: ms }, true).catch(function(){}); }
 async function ensureDaily(reroll) {
   var st = dailyState(), day = dayKey(new Date());
   if (st.day === day && st.item && !reroll) return;
-  if (dailyRun.busy) return; dailyRun.busy = true;
+  if (dailyRun.busy || (!reroll && Date.now() - dailyRun.failAt < 120000)) return; dailyRun.busy = true;
+  var t0 = Date.now();
   try {
     var it = await dailyPick(reroll ? 'again' : 'first');
-    if (!it) return;
+    if (!it) { dailyRun.failAt = Date.now(); dailyLog('fail', Date.now() - t0); return; }
+    dailyLog((reroll ? 'r' : '') + it.how, Date.now() - t0);
     st = dailyState();
     var hist = (st.hist || []).filter(function(h){ return h.day !== day; });
     if (st.item && st.day !== day) hist.unshift({ day: st.day, iso: st.iso, item: st.item });
@@ -4215,7 +4223,8 @@ function renderDaily() {
   var anchor = quiz && quiz.parentNode === body ? quiz : body.firstChild;
   if (el.nextSibling !== anchor) body.insertBefore(el, anchor);
   var st = dailyState(), day = dayKey(new Date());
-  if (st.day !== day || !st.item) { setTimeout(function(){ ensureDaily(false); }, 300); }
+  // picked once the journal is read (an empty journal at start-up would skip the favourites)
+  if ((st.day !== day || !st.item) && journalReady) { setTimeout(function(){ ensureDaily(false); }, 300); }
   var it = st.day === day ? st.item : null;
   if (!it) { el.hidden = true; return; }
   el.hidden = false;
@@ -5276,7 +5285,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.70';
+var APP_VERSION = '0.71';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
@@ -5867,7 +5876,19 @@ async function openDash() {
   var r = await relay('stats', { days: dashDays }, true).catch(function(){ return { ok: false, data: {} }; });
   if (!r.ok) { body.innerHTML = '<p class="key-msg">' + t('Could not load the dashboard.') + '</p>'; return; }
   var d = r.data;
-  body.innerHTML = dsCard(d.total, d.days, true) + (d.users || []).map(function(u){ return dsCard(u, d.days, false); }).join('');
+  body.innerHTML = dsCard(d.total, d.days, true) + dsDaily(d.daily) + (d.users || []).map(function(u){ return dsCard(u, d.days, false); }).join('');
+}
+// Discovery of the day: how each pick was found, and the failures, per person
+var DS_HOW = [['u', 'Same world'], ['a', 'An artist you love'], ['s', 'A step aside'], ['c', 'Great classic'], ['fail', 'Failed']];
+function dsDaily(dd) {
+  if (!dd || !dd.users || !dd.users.length) return '';
+  var tot = dd.total || {}, n = DS_HOW.reduce(function(x, h){ return x + (tot[h[0]] || 0); }, 0) || 1;
+  var fmt = function(iso){ return new Date(iso).toLocaleDateString(LOCALES[getLang()] || 'en', { day: 'numeric', month: 'short' }); };
+  return '<div class="ds-card"><div class="ds-head"><div class="ds-name">' + t('Discovery of the day') + '</div><div class="ds-credit">' + (tot.fail ? t('{n} failed', { n: tot.fail }) : '✓') + '</div></div>' +
+    '<div class="ds-mix">' + DS_HOW.map(function(h, i){ return tot[h[0]] ? '<i style="width:' + (tot[h[0]] / n * 100) + '%;background:' + ['var(--night)', 'var(--sun)', '#7A8CC2', '#B9B9C0', '#D9534F'][i] + '"></i>' : ''; }).join('') + '</div>' +
+    '<div class="ds-legend">' + DS_HOW.map(function(h, i){ return '<span><b style="background:' + ['var(--night)', 'var(--sun)', '#7A8CC2', '#B9B9C0', '#D9534F'][i] + '"></b>' + t(h[1]) + ' ' + (tot[h[0]] || 0) + '</span>'; }).join('') + '</div>' +
+    '<table class="ds-tbl"><tr><th></th><th>' + t('Last pick') + '</th><th>' + t('Picks') + '</th><th>' + t('Failed') + '</th></tr>' +
+    dd.users.map(function(u){ return '<tr><td>' + esc(u.name) + '</td><td>' + esc(fmt(u.last_at) + ' · ' + (u.last === 'fail' ? t('Failed') : t((DS_HOW.find(function(h){ return h[0] === u.last; }) || ['', 'Great classic'])[1]))) + '</td><td>' + u.ok + '</td><td>' + u.fail + '</td></tr>'; }).join('') + '</table></div>';
 }
 document.getElementById('btn-dash').addEventListener('click', openDash);
 document.getElementById('dashBody').addEventListener('click', function(e){
@@ -6302,7 +6323,7 @@ document.getElementById('czNext').addEventListener('click', function(){ openZoom
 // Keys are the English interface text; French and Spanish below. Missing keys fall back to English.
 var I18N = {
 fr: {
-  "How you saw it": "Comment tu l'as vu", "Discovery of the day": "Découverte du jour", "My quizzes": "Mes quiz", "Discoveries of the day": "Découvertes du jour", "Current streak": "Série en cours", "Best streak": "Meilleure série", "Average /5": "Moyenne /5", "Last 30 days": "30 derniers jours", "All quizzes": "Tous les quiz", "Tap to play again": "Touche pour rejouer", "No quiz yet: the daily quiz is on the home screen.": "Pas encore de quiz : le quiz du jour est sur l'accueil.", "Your discoveries of the day will appear here.": "Tes découvertes du jour apparaîtront ici.", "Today": "Aujourd'hui", "What speaks to you?": "Qu'est-ce qui te parle ?", "Pick 3 to 6 works you like: your first discoveries and collections will follow your taste.": "Choisis 3 à 6 œuvres qui te plaisent : tes premières découvertes et collections suivront tes goûts.", "Pick {n} more": "Encore {n} à choisir", "Up to 6 works": "6 œuvres maximum", "One moment…": "Un instant…", "Got it: your discoveries will follow your taste": "C'est noté : tes découvertes suivront tes goûts", "My tastes": "Mes goûts", "Discover": "Découvrir", "Another one": "Une autre", "Last days": "Les derniers jours", "Looking…": "Je cherche…", "Discovery of {d}": "Découverte du {d}", "Because you loved {w}: another artist of {m}": "Parce que tu as aimé {w} : un autre artiste du mouvement {m}", "{a} inspired {c}, whose {w} you loved": "{a} a inspiré {c}, dont tu as aimé {w}", "{a} admired {c}, whose {w} you loved": "{a} admirait {c}, dont tu as aimé {w}", "{a} was a pupil of {c}, whose {w} you loved": "{a} fut l'élève de {c}, dont tu as aimé {w}", "{a} was the master of {c}, whose {w} you loved": "{a} fut le maître de {c}, dont tu as aimé {w}", "Another masterpiece by {c}, whose {w} you loved": "Un autre chef-d'œuvre de {c}, dont tu as aimé {w}", "Because you loved {w}: another eye on the same theme": "Parce que tu as aimé {w} : un autre regard sur le même thème", "A great classic to discover": "Un grand classique à découvrir", "Link with your journal · {a}": "Lien avec ton journal · {a}", "Cities": "Villes", "Paintings & Sculptures": "Peintures & Sculptures", "Categories": "Catégories", "Tap to add or remove. Changes are saved right away.": "Touche pour ajouter ou retirer. Les changements sont enregistrés tout de suite.", "Done": "Terminé",
+  "How you saw it": "Comment tu l'as vu", "Discovery of the day": "Découverte du jour", "Same world": "Même univers", "An artist you love": "Un artiste aimé", "A step aside": "Pas de côté", "Great classic": "Grand classique", "Failed": "Échec", "{n} failed": "{n} échecs", "Last pick": "Dernier choix", "Picks": "Choix", "My quizzes": "Mes quiz", "Discoveries of the day": "Découvertes du jour", "Current streak": "Série en cours", "Best streak": "Meilleure série", "Average /5": "Moyenne /5", "Last 30 days": "30 derniers jours", "All quizzes": "Tous les quiz", "Tap to play again": "Touche pour rejouer", "No quiz yet: the daily quiz is on the home screen.": "Pas encore de quiz : le quiz du jour est sur l'accueil.", "Your discoveries of the day will appear here.": "Tes découvertes du jour apparaîtront ici.", "Today": "Aujourd'hui", "What speaks to you?": "Qu'est-ce qui te parle ?", "Pick 3 to 6 works you like: your first discoveries and collections will follow your taste.": "Choisis 3 à 6 œuvres qui te plaisent : tes premières découvertes et collections suivront tes goûts.", "Pick {n} more": "Encore {n} à choisir", "Up to 6 works": "6 œuvres maximum", "One moment…": "Un instant…", "Got it: your discoveries will follow your taste": "C'est noté : tes découvertes suivront tes goûts", "My tastes": "Mes goûts", "Discover": "Découvrir", "Another one": "Une autre", "Last days": "Les derniers jours", "Looking…": "Je cherche…", "Discovery of {d}": "Découverte du {d}", "Because you loved {w}: another artist of {m}": "Parce que tu as aimé {w} : un autre artiste du mouvement {m}", "{a} inspired {c}, whose {w} you loved": "{a} a inspiré {c}, dont tu as aimé {w}", "{a} admired {c}, whose {w} you loved": "{a} admirait {c}, dont tu as aimé {w}", "{a} was a pupil of {c}, whose {w} you loved": "{a} fut l'élève de {c}, dont tu as aimé {w}", "{a} was the master of {c}, whose {w} you loved": "{a} fut le maître de {c}, dont tu as aimé {w}", "Another masterpiece by {c}, whose {w} you loved": "Un autre chef-d'œuvre de {c}, dont tu as aimé {w}", "Because you loved {w}: another eye on the same theme": "Parce que tu as aimé {w} : un autre regard sur le même thème", "A great classic to discover": "Un grand classique à découvrir", "Link with your journal · {a}": "Lien avec ton journal · {a}", "Cities": "Villes", "Paintings & Sculptures": "Peintures & Sculptures", "Categories": "Catégories", "Tap to add or remove. Changes are saved right away.": "Touche pour ajouter ou retirer. Les changements sont enregistrés tout de suite.", "Done": "Terminé",
   "Settings": "Réglages", "Claude API key": "Clé API Claude",
   "Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.": "Strata interroge Claude sur chaque photo avec ta propre clé. Elle est enregistrée uniquement dans ce navigateur, sur ce téléphone.",
   "Save key": "Enregistrer la clé", "Try the demo": "Essayer la démo", "Remove key": "Supprimer la clé",
@@ -6606,7 +6627,7 @@ fr: {
   "Choose a photo from your library": "Choisir une photo dans ta photothèque", "Edit categories": "Modifier les catégories"
 },
 es: {
-  "How you saw it": "Cómo lo viste", "Discovery of the day": "Descubrimiento del día", "My quizzes": "Mis cuestionarios", "Discoveries of the day": "Descubrimientos del día", "Current streak": "Racha actual", "Best streak": "Mejor racha", "Average /5": "Media /5", "Last 30 days": "Últimos 30 días", "All quizzes": "Todos los cuestionarios", "Tap to play again": "Toca para volver a jugar", "No quiz yet: the daily quiz is on the home screen.": "Aún no hay cuestionarios: el del día está en la portada.", "Your discoveries of the day will appear here.": "Tus descubrimientos del día aparecerán aquí.", "Today": "Hoy", "What speaks to you?": "¿Qué te inspira?", "Pick 3 to 6 works you like: your first discoveries and collections will follow your taste.": "Elige de 3 a 6 obras que te gusten: tus primeros descubrimientos y colecciones seguirán tus gustos.", "Pick {n} more": "Elige {n} más", "Up to 6 works": "6 obras como máximo", "One moment…": "Un momento…", "Got it: your discoveries will follow your taste": "Anotado: tus descubrimientos seguirán tus gustos", "My tastes": "Mis gustos", "Discover": "Descubrir", "Another one": "Otra", "Last days": "Últimos días", "Looking…": "Buscando…", "Discovery of {d}": "Descubrimiento del {d}", "Because you loved {w}: another artist of {m}": "Porque te encantó {w}: otro artista del movimiento {m}", "{a} inspired {c}, whose {w} you loved": "{a} inspiró a {c}, de quien te encantó {w}", "{a} admired {c}, whose {w} you loved": "{a} admiraba a {c}, de quien te encantó {w}", "{a} was a pupil of {c}, whose {w} you loved": "{a} fue alumno de {c}, de quien te encantó {w}", "{a} was the master of {c}, whose {w} you loved": "{a} fue el maestro de {c}, de quien te encantó {w}", "Another masterpiece by {c}, whose {w} you loved": "Otra obra maestra de {c}, de quien te encantó {w}", "Because you loved {w}: another eye on the same theme": "Porque te encantó {w}: otra mirada sobre el mismo tema", "A great classic to discover": "Un gran clásico por descubrir", "Link with your journal · {a}": "Vínculo con tu diario · {a}", "Cities": "Ciudades", "Paintings & Sculptures": "Pinturas y esculturas", "Categories": "Categorías", "Tap to add or remove. Changes are saved right away.": "Toca para añadir o quitar. Los cambios se guardan al momento.", "Done": "Listo",
+  "How you saw it": "Cómo lo viste", "Discovery of the day": "Descubrimiento del día", "Same world": "Mismo universo", "An artist you love": "Un artista querido", "A step aside": "Un paso al lado", "Great classic": "Gran clásico", "Failed": "Fallo", "{n} failed": "{n} fallos", "Last pick": "Última elección", "Picks": "Elecciones", "My quizzes": "Mis cuestionarios", "Discoveries of the day": "Descubrimientos del día", "Current streak": "Racha actual", "Best streak": "Mejor racha", "Average /5": "Media /5", "Last 30 days": "Últimos 30 días", "All quizzes": "Todos los cuestionarios", "Tap to play again": "Toca para volver a jugar", "No quiz yet: the daily quiz is on the home screen.": "Aún no hay cuestionarios: el del día está en la portada.", "Your discoveries of the day will appear here.": "Tus descubrimientos del día aparecerán aquí.", "Today": "Hoy", "What speaks to you?": "¿Qué te inspira?", "Pick 3 to 6 works you like: your first discoveries and collections will follow your taste.": "Elige de 3 a 6 obras que te gusten: tus primeros descubrimientos y colecciones seguirán tus gustos.", "Pick {n} more": "Elige {n} más", "Up to 6 works": "6 obras como máximo", "One moment…": "Un momento…", "Got it: your discoveries will follow your taste": "Anotado: tus descubrimientos seguirán tus gustos", "My tastes": "Mis gustos", "Discover": "Descubrir", "Another one": "Otra", "Last days": "Últimos días", "Looking…": "Buscando…", "Discovery of {d}": "Descubrimiento del {d}", "Because you loved {w}: another artist of {m}": "Porque te encantó {w}: otro artista del movimiento {m}", "{a} inspired {c}, whose {w} you loved": "{a} inspiró a {c}, de quien te encantó {w}", "{a} admired {c}, whose {w} you loved": "{a} admiraba a {c}, de quien te encantó {w}", "{a} was a pupil of {c}, whose {w} you loved": "{a} fue alumno de {c}, de quien te encantó {w}", "{a} was the master of {c}, whose {w} you loved": "{a} fue el maestro de {c}, de quien te encantó {w}", "Another masterpiece by {c}, whose {w} you loved": "Otra obra maestra de {c}, de quien te encantó {w}", "Because you loved {w}: another eye on the same theme": "Porque te encantó {w}: otra mirada sobre el mismo tema", "A great classic to discover": "Un gran clásico por descubrir", "Link with your journal · {a}": "Vínculo con tu diario · {a}", "Cities": "Ciudades", "Paintings & Sculptures": "Pinturas y esculturas", "Categories": "Categorías", "Tap to add or remove. Changes are saved right away.": "Toca para añadir o quitar. Los cambios se guardan al momento.", "Done": "Listo",
   "Settings": "Ajustes", "Claude API key": "Clave API de Claude",
   "Strata asks Claude about each photo with your own key. It is stored only in this browser, on this phone.": "Strata consulta a Claude sobre cada foto con tu propia clave. Solo se guarda en este navegador, en este teléfono.",
   "Save key": "Guardar clave", "Try the demo": "Probar la demo", "Remove key": "Eliminar clave",
