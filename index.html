@@ -3823,6 +3823,14 @@ async function fillLink(r) {
 // and one or two authentic quotes picked once by Claude. Music made on the fly (Web Audio, no rights): festive for cities and
 // architects, soft for painters and the rest. Starts on a tap, so the phone lets the sound play.
 var celeb = { blob: null, run: 0, c: null, muted: false };
+// a short silent sound: playing it from the tap puts the iPhone in "playback" mode, so the music plays even with the silent switch on
+var SILENT_WAV = (function(){   // half a second of silence, 8 kHz 8-bit mono
+  var n = 4000, b = new ArrayBuffer(44 + n), v = new DataView(b), w = function(o, str){ for (var i = 0; i < str.length; i++) v.setUint8(o + i, str.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + n, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, 8000, true); v.setUint32(28, 8000, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true); w(36, 'data'); v.setUint32(40, n, true);
+  for (var i = 0; i < n; i++) v.setUint8(44 + i, 128);
+  try { return URL.createObjectURL(new Blob([b], { type: 'audio/wav' })); } catch (e) { return ''; }
+})();
 function loadImg(u) { return new Promise(function(ok){ if (!u) return ok(null); var i = new Image(); i.crossOrigin = 'anonymous'; i.onload = function(){ ok(i); }; i.onerror = function(){ ok(null); }; i.src = u; }); }
 function celebStyle(c) { var k = c.def.key.split(':')[0]; return k === 'city' || k === 'architect' ? 'festive' : 'soft'; }
 async function collQuotes(c) {
@@ -3866,7 +3874,7 @@ function celebMusic(style, dur, ac) {
       [0, 1, 2, 1].forEach(function(k, i){ tone('square', f(ch[k] + 12), t + i * beat / 4, beat / 4 * 0.9, 0.05); });
     } else {
       if (b % 4 === 0) ch.forEach(function(n){ tone('sine', f(n - 12), t, beat * 4, 0.06, 0.6); });
-      [0, 1, 2, 1].forEach(function(k, i){ tone('triangle', f(ch[k] + 12), t + i * beat / 2 * (i < 2 ? 1 : 1), beat * 1.6, 0.12, 0.005); });
+      [0, 1, 2, 1].forEach(function(k, i){ tone('triangle', f(ch[k] + 12), t + i * beat / 4, beat * 1.2, 0.12, 0.005); });
       if (b % 2 === 0) tone('sine', f(ch[2] + 24), t + beat / 2, beat * 1.2, 0.04, 0.01);
     }
   }
@@ -3903,6 +3911,8 @@ async function playCelebration() {
   var byQ = journalByQid(), pieces = c.found.slice(0, 8).map(function(m){ return byQ[m.q]; }).filter(Boolean);
   var music = null, style = celebStyle(c), festive = style === 'festive', ac = null;
   // the sound is unlocked now, during the tap (phones refuse it later)
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+  try { if (!celeb.unlock) { celeb.unlock = new Audio(SILENT_WAV); celeb.unlock.loop = true; celeb.unlock.setAttribute('playsinline', ''); } celeb.unlock.play().catch(function(){}); } catch (e) {}
   try { var AC = window.AudioContext || window.webkitAudioContext; if (AC) { ac = new AC(); if (ac.resume) ac.resume(); } } catch (e) { ac = null; }
   var beat = festive ? 480 : 800;
   // official picture first, the user's photo otherwise
@@ -3914,7 +3924,7 @@ async function playCelebration() {
   }
   var quotes = await Promise.race([celeb.quotesP || Promise.resolve([]), new Promise(function(ok){ setTimeout(function(){ ok([]); }, 2500); })]) || [];
   if (run !== celeb.run) { try { ac && ac.close(); } catch (e) {} return; }
-  var per = beat * (festive ? 5 : 3), intro = beat * (festive ? 6 : 4), outro = 5200, slides = per * imgs.length, total = intro + slides + outro;
+  var per = beat * (festive ? 8 : 5), intro = beat * (festive ? 12 : 8), outro = 8200, slides = per * imgs.length, total = intro + slides + outro;
   try { music = celebMusic(style, total + 600, ac); if (music) music.spk.gain.value = celeb.muted ? 0 : 1; } catch (e) { music = null; }
   celeb.music = music;
   // record the canvas and the music together, when the browser can
@@ -3977,7 +3987,7 @@ async function playCelebration() {
         if (quotes[0]) quoteAt(quotes[0], H * 0.62, ease((q - 0.45) * 3));
         else { ctx.globalAlpha = ease((q - 0.45) * 3); ctx.fillStyle = 'rgba(255,255,255,.8)'; ctx.font = '400 32px "DM Sans", sans-serif'; ctx.fillText(t('{n} pieces found', { n: c.total }), W / 2, H * 0.62); ctx.globalAlpha = 1; }
       } else if (el < intro + slides) {
-        var e2 = el - intro, i = Math.floor(e2 / per), p = (e2 % per) / per, tr = Math.min(1, (e2 % per) / 520), te = ease(tr), kind = i % 5;
+        var e2 = el - intro, i = Math.floor(e2 / per), p = (e2 % per) / per, tr = Math.min(1, (e2 % per) / 900), te = ease(tr), kind = i % 5;
         if (i === 0 || tr >= 1) drawPiece(i, p);
         else if (kind === 0) { drawPiece(i - 1, 1); drawPiece(i, p, te); }                                           // cross-fade
         else if (kind === 1) { drawPiece(i - 1, 1); ctx.save(); ctx.beginPath(); var x = -H + te * (W + H * 1.2); ctx.moveTo(x, 0); ctx.lineTo(x + H, H); ctx.lineTo(-H, H); ctx.lineTo(-H, 0); ctx.closePath(); ctx.clip(); drawPiece(i, p); ctx.restore(); }   // diagonal wipe
@@ -3988,11 +3998,11 @@ async function playCelebration() {
         textBlock(i, p);
       } else {   // the mosaic gathers, then the badge, the last quote and confetti
         var e3 = el - intro - slides, q3 = e3 / outro, bg3 = ctx.createLinearGradient(0, 0, 0, H); bg3.addColorStop(0, bgTop); bg3.addColorStop(1, bgBot); ctx.fillStyle = bg3; ctx.fillRect(0, 0, W, H);
-        var n = imgs.length, cols = n <= 4 ? 2 : 3, sz = Math.min((W - 120) / cols - 12, 220), gather = ease(e3 / 900), fadeM = 1 - ease((e3 - 1700) / 600);
+        var n = imgs.length, cols = n <= 4 ? 2 : 3, sz = Math.min((W - 120) / cols - 12, 220), gather = ease(e3 / 1400), fadeM = 1 - ease((e3 - 2600) / 900);
         imgs.forEach(function(it, k){ var cx = (W - cols * (sz + 12) + 12) / 2 + (k % cols) * (sz + 12), cy = 120 + Math.floor(k / cols) * (sz + 12), im = it.img;
           var fx = W / 2 - sz / 2 + Math.cos(k * 1.7) * 500, fy = H / 2 + Math.sin(k * 2.3) * 700, x = fx + (cx - fx) * gather, y = fy + (cy - fy) * gather;
           var s = Math.max(sz / im.width, sz / im.height); ctx.save(); ctx.globalAlpha = fadeM * 0.95 + 0.05; ctx.beginPath(); ctx.rect(x, y, sz, sz); ctx.clip(); ctx.drawImage(im, x + (sz - im.width * s) / 2, y + (sz - im.height * s) / 2, im.width * s, im.height * s); ctx.restore(); });
-        var qb = ease((e3 - 1500) / 700), sc = 0.6 + 0.4 * qb + (festive ? pulse * 0.04 : 0);
+        var qb = ease((e3 - 2300) / 900), sc = 0.6 + 0.4 * qb + (festive ? pulse * 0.04 : 0);
         ctx.save(); ctx.translate(W / 2, H * 0.27); ctx.scale(sc, sc); ctx.globalAlpha = qb;
         ctx.fillStyle = '#F4C542'; ctx.beginPath(); ctx.arc(0, 0, 92, 0, 7); ctx.fill();
         ctx.strokeStyle = '#16346B'; ctx.lineWidth = 16; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.beginPath(); ctx.moveTo(-40, 2); ctx.lineTo(-10, 32); ctx.lineTo(44, -28); ctx.stroke(); ctx.restore();
@@ -4001,9 +4011,9 @@ async function playCelebration() {
         ctx.fillStyle = '#fff'; ctx.font = '62px "DM Serif Display", serif'; var nl = wrapLines(ctx, name, W - 100, 2); nl.forEach(function(l, k){ ctx.fillText(l, W / 2, H * 0.27 + 250 + k * 70); });
         ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.font = '400 30px "DM Sans", sans-serif'; ctx.fillText(t(gold ? '{n} pieces, all seen in person' : '{n} pieces found', { n: c.total }), W / 2, H * 0.27 + 260 + nl.length * 70);
         ctx.globalAlpha = 1;
-        if (quotes[1]) quoteAt(quotes[1], H * 0.58, ease((e3 - 2600) / 700));
+        if (quotes[1]) quoteAt(quotes[1], H * 0.58, ease((e3 - 3800) / 900));
         ctx.globalAlpha = qb; ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.font = '600 26px "DM Sans", sans-serif'; ctx.fillText('Strata', W / 2, H - 80); ctx.globalAlpha = 1;
-        if (e3 > 1500) conf.forEach(function(k){ k.y += k.v; k.r += k.vr; if (k.y > H + 40) k.y = -20; ctx.save(); ctx.translate(k.x + Math.sin((k.y + k.x) / 60) * 12, k.y); ctx.rotate(k.r); ctx.fillStyle = k.c; ctx.fillRect(-k.w / 2, -k.h / 2, k.w, k.h); ctx.restore(); });
+        if (e3 > 2300) conf.forEach(function(k){ k.y += k.v; k.r += k.vr; if (k.y > H + 40) k.y = -20; ctx.save(); ctx.translate(k.x + Math.sin((k.y + k.x) / 60) * 12, k.y); ctx.rotate(k.r); ctx.fillStyle = k.c; ctx.fillRect(-k.w / 2, -k.h / 2, k.w, k.h); ctx.restore(); });
       }
       if (el < total) requestAnimationFrame(frame); else done();
     }
@@ -4019,7 +4029,7 @@ async function playCelebration() {
       document.getElementById('celebShare').hidden = false;
     }
   }
-  if (music) setTimeout(function(){ music.stop(); }, 800);
+  if (music) setTimeout(function(){ music.stop(); if (celeb.unlock) celeb.unlock.pause(); }, 800);
 }
 document.getElementById('celebStart').addEventListener('click', playCelebration);
 document.getElementById('celebReplay').addEventListener('click', playCelebration);
@@ -4028,7 +4038,7 @@ document.getElementById('celebMute').addEventListener('click', function(){
   if (celeb.music) try { celeb.music.spk.gain.value = celeb.muted ? 0 : 1; } catch (e) {}
   this.setAttribute('aria-label', t(celeb.muted ? 'Sound off' : 'Sound on'));
 });
-document.getElementById('celebClose').addEventListener('click', function(){ celeb.run++; if (celeb.music) celeb.music.stop(); document.getElementById('celeb').hidden = true; });
+document.getElementById('celebClose').addEventListener('click', function(){ celeb.run++; if (celeb.music) celeb.music.stop(); if (celeb.unlock) celeb.unlock.pause(); document.getElementById('celeb').hidden = true; });
 document.getElementById('celebShare').addEventListener('click', async function(){
   if (!celeb.blob) return;
   var file = new File([celeb.blob], celeb.name, { type: celeb.blob.type });
@@ -5599,7 +5609,7 @@ document.addEventListener('visibilitychange', function(){ if (document.visibilit
 
 
 // ─── PROFILE, ABOUT, LOGO ──────────────────────
-var APP_VERSION = '0.73';
+var APP_VERSION = '0.74';
 var LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" fill="#102A5C"/><g fill="none" stroke="#24508F" stroke-width="1.6" stroke-linecap="round" opacity=".9"><path d="M6 27 Q14 21 22 27 T38 27"/><path d="M86 14 Q90 10 94 14"/></g><path d="M0 50 Q25 43 50 50 T100 50 V100 H0 Z" fill="#1E4F99"/><path d="M0 62 Q25 68 50 62 T100 62 V100 H0 Z" fill="#2F6FBF"/><path d="M0 73 Q25 67 50 73 T100 73 V100 H0 Z" fill="#6FA8DC"/><path d="M0 84 Q25 89 50 84 T100 84 V100 H0 Z" fill="#BFD8EF"/><g fill="none" stroke="#F4C542" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17 30 V17 H30"/><path d="M70 17 H83 V30"/><path d="M17 70 V83 H30"/><path d="M70 83 H83 V70"/></g><text x="50" y="73" text-anchor="middle" font-family="\'DM Serif Display\', Georgia, serif" font-size="72" fill="#F4C542" stroke="#102A5C" stroke-width="1.2" paint-order="stroke">S</text><path d="M71 26.5 Q71 31 75.5 31 Q71 31 71 35.5 Q71 31 66.5 31 Q71 31 71 26.5 Z" fill="#F8E08E"/></svg>';
 function paintLogos() { document.querySelectorAll('[data-logo]').forEach(function(e){ if (!e.firstChild) e.innerHTML = LOGO_SVG; }); }
 
